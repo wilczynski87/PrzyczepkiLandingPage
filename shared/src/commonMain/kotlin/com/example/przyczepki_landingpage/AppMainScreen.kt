@@ -1,0 +1,157 @@
+package com.example.przyczepki_landingpage
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
+import com.example.przyczepki_landingpage.data.CurrentScreen
+import com.example.przyczepki_landingpage.ui.BottomInfo
+import com.example.przyczepki_landingpage.ui.FrontInfoText
+import com.example.przyczepki_landingpage.ui.MainScreen
+import com.example.przyczepki_landingpage.ui.MyTopAppBar
+import com.example.przyczepki_landingpage.ui.Trailer
+import com.example.przyczepki_landingpage.ui.TrailerTable
+import org.jetbrains.compose.resources.painterResource
+import przyczepkilandingpage.shared.generated.resources.Res
+import przyczepkilandingpage.shared.generated.resources.przyczepka1
+import przyczepkilandingpage.shared.generated.resources.vesta1
+import przyczepkilandingpage.shared.generated.resources.zaslaw1
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@Composable
+fun AppMainScreen() {
+    // 1. Calculate window size class
+    val windowSizeClass = calculateWindowSizeClass()
+    // 2. Extract width size class (Compact, Medium, Expanded)
+    val widthSizeClass: WindowWidthSizeClass = windowSizeClass.widthSizeClass
+    val viewModel = AppViewModel()
+    val currentState by viewModel.appState.collectAsState()
+
+
+
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        MyTopAppBar()
+
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .padding(4.dp)
+                .fillMaxWidth()
+        ) {
+            Image(
+                painter = painterResource(Res.drawable.przyczepka1),
+                contentDescription = "logo",
+                contentScale = ContentScale.Fit,
+                alpha = 0.3f,
+                modifier = Modifier
+//                    .padding(4.dp)
+                    .align(Alignment.TopCenter),
+            )
+
+            when (currentState.currentScreen) {
+                CurrentScreen.LANDING -> {
+                    MainScreen(widthSizeClass, viewModel)
+                }
+
+                CurrentScreen.RESERVATION -> {
+
+                }
+
+                else -> {}
+            }
+        }
+    }
+}
+
+
+val trailers = listOf(
+    Trailer(
+        name = "Przyczepka lekka 750kg",
+        size = "201 x 130 cm",
+        purpose = "Towarowa",
+        axles = 1,
+        price = 60.00,
+        image = Res.drawable.vesta1
+    ),
+    Trailer(
+        name = "Przyczepka dłużycowa",
+        size = "300 x 150 cm",
+        purpose = "Towarowa",
+        axles = 1,
+        price = 70.00,
+        image = Res.drawable.zaslaw1
+    ),
+    Trailer(
+        name = "Przyczepa podłodziowa",
+        size = "Do łodzi 4–5m",
+        purpose = "Towarowa",
+        axles = 1,
+        price = 50.00,
+        image = null
+    ),
+
+    Trailer(
+        name = "Przyczepa podłodziowa",
+        size = "Do łodzi 4–5m",
+        purpose = "Towarowa",
+        axles = 1,
+        price = 0.00,
+        image = null
+    ),
+    Trailer(
+        name = "Przyczepa podłodziowa",
+        size = "Do łodzi 4–5m",
+        purpose = "Towarowa",
+        axles = 1,
+        image = null
+    ),
+    Trailer(
+        name = "Przyczepa podłodziowa",
+        size = "Do łodzi 4–5m",
+        purpose = "Towarowa",
+        axles = 1,
+        image = null
+    ),
+    Trailer(
+        name = "Przyczepa podłodziowa",
+        size = "Do łodzi 4–5m",
+        purpose = "Towarowa",
+        axles = 1,
+        price = 0.00,
+        image = null
+    ),
+    Trailer(
+        name = "Przyczepa podłodziowa",
+        size = "Do łodzi 4–5m",
+        purpose = "Towarowa",
+        axles = 1,
+        price = 0.00,
+        image = null
+    ),
+    Trailer(
+        name = "Przyczepa podłodziowa",
+        size = "Do łodzi 4–5m",
+        purpose = "Towarowa",
+        axles = 1,
+        price = 0.00,
+        image = null
+    )
+)
