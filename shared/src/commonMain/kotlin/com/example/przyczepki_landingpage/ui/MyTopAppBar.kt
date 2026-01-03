@@ -17,10 +17,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.size
+import com.example.przyczepki_landingpage.AppViewModel
+import com.example.przyczepki_landingpage.data.CurrentScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyTopAppBar() {
+fun MyTopAppBar(viewModel: AppViewModel) {
     var expanded by remember { mutableStateOf(false) }
 
     TopAppBar(
@@ -40,11 +42,17 @@ fun MyTopAppBar() {
             ) {
                 DropdownMenuItem(
                     text = { Text("Strona główna") },
-                    onClick = { expanded = false }
+                    onClick = {
+                        expanded = false
+                        viewModel.navigateTo(CurrentScreen.LANDING)
+                    }
                 )
                 DropdownMenuItem(
                     text = { Text("Rezerwacja") },
-                    onClick = { expanded = false }
+                    onClick = {
+                        expanded = false
+                        viewModel.navigateTo(CurrentScreen.RESERVATION)
+                    }
                 )
             }
         }

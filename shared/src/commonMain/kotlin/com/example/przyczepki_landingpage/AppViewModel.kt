@@ -9,4 +9,15 @@ class AppViewModel {
     private val _appState = MutableStateFlow(AppState())
     val appState: StateFlow<AppState> = _appState.asStateFlow()
 
+    fun navigateTo(destination: CurrentScreen) {
+        _appState.value = appState.value.copy(currentScreen = destination)
+    }
+
+    fun updateDateRangePicker(start: Long?, end: Long?) {
+        _appState.value = appState.value.copy(
+            dateRangePickerStart = start,
+            dateRangePickerEnd = end
+        )
+    }
+
 }

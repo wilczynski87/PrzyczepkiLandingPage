@@ -1,33 +1,27 @@
 package com.example.przyczepki_landingpage
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.data.CurrentScreen
-import com.example.przyczepki_landingpage.ui.BottomInfo
-import com.example.przyczepki_landingpage.ui.FrontInfoText
+import com.example.przyczepki_landingpage.model.Trailer
 import com.example.przyczepki_landingpage.ui.MainScreen
 import com.example.przyczepki_landingpage.ui.MyTopAppBar
-import com.example.przyczepki_landingpage.ui.Trailer
-import com.example.przyczepki_landingpage.ui.TrailerTable
+import com.example.przyczepki_landingpage.ui.ReservationPage
 import org.jetbrains.compose.resources.painterResource
 import przyczepkilandingpage.shared.generated.resources.Res
 import przyczepkilandingpage.shared.generated.resources.przyczepka1
@@ -41,20 +35,21 @@ fun AppMainScreen() {
     val windowSizeClass = calculateWindowSizeClass()
     // 2. Extract width size class (Compact, Medium, Expanded)
     val widthSizeClass: WindowWidthSizeClass = windowSizeClass.widthSizeClass
-    val viewModel = AppViewModel()
+    val viewModel = remember { AppViewModel() }
     val currentState by viewModel.appState.collectAsState()
 
 
 
 
     Column(modifier = Modifier.fillMaxSize()) {
-        MyTopAppBar()
+        MyTopAppBar(viewModel)
 
         Box(
             modifier = Modifier
                 .weight(1f)
                 .padding(4.dp)
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            contentAlignment = Alignment.TopCenter
         ) {
             Image(
                 painter = painterResource(Res.drawable.przyczepka1),
@@ -72,7 +67,7 @@ fun AppMainScreen() {
                 }
 
                 CurrentScreen.RESERVATION -> {
-
+                    ReservationPage(widthSizeClass, viewModel)
                 }
 
                 else -> {}

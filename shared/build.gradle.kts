@@ -27,17 +27,17 @@ kotlin {
     sourceSets {
         val commonMain by getting
         
-        // Definiujemy webMain i ustawiamy zależność od commonMain
+//         Definiujemy webMain i ustawiamy zależność od commonMain
         val webMain by creating {
-            dependsOn(commonMain)
+//            dependsOn(commonMain)
         }
-        
+
         val jsMain by getting {
-            dependsOn(webMain)
+//            dependsOn(webMain)
         }
-        
+
         val wasmJsMain by getting {
-            dependsOn(webMain)
+//            dependsOn(webMain)
         }
         webMain.dependencies {
             implementation(compose.components.resources)
@@ -49,6 +49,8 @@ kotlin {
             implementation(libs.compose.material3.icons.extended)
             implementation(compose.components.resources)
             implementation(libs.compose.material3.window.size)
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.compose.material)
         }
 
         commonTest.dependencies {

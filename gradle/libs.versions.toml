@@ -8,6 +8,8 @@ logback = "1.5.22"
 material3 = "1.9.0"
 compose-icons = "1.7.3"
 adaptive-ver = "1.2.0"
+hideoo-kalendar = "1.4.0"
+kotlinx-datetime-ver = "0.7.1"
 
 
 [libraries]
@@ -24,6 +26,10 @@ compose-material3 = { module = "org.jetbrains.compose.material3:material3", vers
 compose-material3-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "compose-icons" }
 compose-material3-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "compose-icons" }
 compose-material3-window-size = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "compose-icons" }
+#io-github-hideoo-kalendar = { module = "io.github.hideoo:kalendar", version = "hideoo-kalendar" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime-ver" }
+compose-material = { module = "org.jetbrains.compose.material:material", version.ref = "composeMultiplatform" }
+
 
 [plugins]
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }

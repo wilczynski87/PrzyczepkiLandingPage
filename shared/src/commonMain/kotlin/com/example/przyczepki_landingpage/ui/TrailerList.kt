@@ -24,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import com.example.przyczepki_landingpage.model.Trailer
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import przyczepkilandingpage.shared.generated.resources.Res
@@ -59,14 +60,6 @@ val trailersExample = listOf(
     )
 )
 
-data class Trailer(
-    val name: String? = null,
-    val size: String? = null,
-    val purpose: String? = null,
-    val axles: Int? = null,
-    val price: Double? = null,
-    val image: DrawableResource? = null,
-)
 
 @Composable
 fun TrailerTable(
