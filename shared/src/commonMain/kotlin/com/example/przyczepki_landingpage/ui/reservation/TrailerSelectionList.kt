@@ -1,5 +1,7 @@
 package com.example.przyczepki_landingpage.ui.reservation
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -7,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,23 +25,35 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import com.example.przyczepki_landingpage.AppViewModel
 import org.jetbrains.compose.resources.painterResource
 import com.example.przyczepki_landingpage.model.Trailer
 
 @Composable
 fun TrailerSelectionList(
-    trailers: List<Trailer>,
-    selectedTrailer: Trailer? = null,
-    onSelect: (Trailer) -> Unit
+    viewModel: AppViewModel
 ) {
+    val state by viewModel.appState.collectAsState()
+    val trailers: List<Trailer> = state.trailers
+    val selectedTrailer: Trailer? = state.selectedTrailer
+    val onSelect: (Trailer) -> Unit = { viewModel.onTrailerSelected(it) }
+
+
     LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(bottom = 16.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(
+                min = 300.dp,   // ⬅️ MIN: 3 karty
+                max = 420.dp    // ⬅️ MAX: nie zdominuje ekranu
+            )
+        , contentPadding = PaddingValues(bottom = 16.dp)
     ) {
         items(trailers) {
             TrailerCard(
@@ -63,6 +78,13 @@ fun TrailerCard(
         else
             MaterialTheme.colorScheme.surface
     )
+    val elevation by animateDpAsState(
+        targetValue = if (selected) 10.dp else 2.dp,
+        label = "cardElevation"
+    )
+    val borderStroke = if (selected) {
+        BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+    } else null
 
     Card(
         modifier = modifier
@@ -71,8 +93,10 @@ fun TrailerCard(
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(20.dp),
         colors = colors,
+        border = borderStroke,
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (selected) 4.dp else 1.dp
+//            defaultElevation = if (selected) 4.dp else 1.dp
+            elevation
         )
     ) {
         Row(

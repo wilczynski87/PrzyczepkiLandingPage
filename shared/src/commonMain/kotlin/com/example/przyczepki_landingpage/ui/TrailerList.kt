@@ -67,21 +67,6 @@ fun TrailerTable(
     widthSizeClass: WindowWidthSizeClass = WindowWidthSizeClass.Compact,
     modifier: Modifier = Modifier
 ) {
-//    LazyColumn(
-//        modifier = Modifier.padding(16.dp),
-//        verticalArrangement = Arrangement.spacedBy(16.dp)
-//    ) {
-//        items(trailers) { trailer ->
-//            if (widthSizeClass != WindowWidthSizeClass.Compact) {
-//                TrailerCardBig(trailer)
-//            } else {
-//                TrailerCardSmall(trailer)
-//            }
-//        }
-//        item {
-//            Spacer(Modifier.height(4.dp))
-//        }
-//    }
     Column(
         modifier = modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)

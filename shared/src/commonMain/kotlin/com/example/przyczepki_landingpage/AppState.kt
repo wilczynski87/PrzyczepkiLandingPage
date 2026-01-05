@@ -9,6 +9,7 @@ data class AppState(
     val dateRangePickerStart: Long? = null,
     val dateRangePickerEnd: Long? = null,
 
-    val trailers: List<Trailer> = emptyList(),
-    val selectedTrailer: Trailer? = null
+//    val trailers: List<Trailer> = emptyList(),
+    val trailers: List<Trailer> = com.example.przyczepki_landingpage.trailers,
+    val selectedTrailer: Trailer? = null,
 )

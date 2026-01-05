@@ -41,12 +41,11 @@ fun AppMainScreen() {
 
 
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         MyTopAppBar(viewModel)
 
         Box(
             modifier = Modifier
-                .weight(1f)
                 .padding(4.dp)
                 .fillMaxWidth(),
             contentAlignment = Alignment.TopCenter
