@@ -36,6 +36,7 @@ fun MyTopAppBar(viewModel: AppViewModel) {
                 )
             }
 
+            // Prawe MENU
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
@@ -52,6 +53,13 @@ fun MyTopAppBar(viewModel: AppViewModel) {
                     onClick = {
                         expanded = false
                         viewModel.navigateTo(CurrentScreen.RESERVATION)
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Kontakt") },
+                    onClick = {
+                        expanded = false
+                        viewModel.navigateTo(CurrentScreen.CONTACT)
                     }
                 )
             }

@@ -3,7 +3,6 @@ package com.example.przyczepki_landingpage
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
@@ -19,9 +18,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.data.CurrentScreen
 import com.example.przyczepki_landingpage.model.Trailer
+import com.example.przyczepki_landingpage.ui.ContactPage
 import com.example.przyczepki_landingpage.ui.MainScreen
 import com.example.przyczepki_landingpage.ui.MyTopAppBar
 import com.example.przyczepki_landingpage.ui.ReservationPage
+import com.example.przyczepki_landingpage.ui.modal.AppModals
 import org.jetbrains.compose.resources.painterResource
 import przyczepkilandingpage.shared.generated.resources.Res
 import przyczepkilandingpage.shared.generated.resources.przyczepka1
@@ -37,9 +38,6 @@ fun AppMainScreen() {
     val widthSizeClass: WindowWidthSizeClass = windowSizeClass.widthSizeClass
     val viewModel = remember { AppViewModel() }
     val currentState by viewModel.appState.collectAsState()
-
-
-
 
     Column(modifier = Modifier.fillMaxWidth()) {
         MyTopAppBar(viewModel)
@@ -69,10 +67,29 @@ fun AppMainScreen() {
                     ReservationPage(widthSizeClass, viewModel)
                 }
 
-                else -> {}
+                CurrentScreen.PRICES -> {
+
+                }
+
+                CurrentScreen.CONTACT -> {
+                    ContactPage(widthSizeClass, viewModel)
+                }
+
+                CurrentScreen.TERMS_AND_CONDITIONS -> {
+
+                }
+
+                CurrentScreen.LOGIN -> {
+
+                }
+
+                CurrentScreen.SIGN_UP -> {
+
+                }
             }
         }
     }
+    AppModals(viewModel)
 }
 
 

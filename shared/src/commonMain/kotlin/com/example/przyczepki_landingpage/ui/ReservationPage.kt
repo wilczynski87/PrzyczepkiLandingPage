@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,7 +17,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Today
+import androidx.compose.material3.Button
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.DateRangePickerState
@@ -32,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -41,8 +45,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
+import com.example.przyczepki_landingpage.data.formatDatePl
 import com.example.przyczepki_landingpage.data.todayUtcMillis
 import com.example.przyczepki_landingpage.model.Trailer
+import com.example.przyczepki_landingpage.ui.modal.ConfirmReservationSheet
 import com.example.przyczepki_landingpage.ui.reservation.TrailerSelectionList
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -248,8 +254,53 @@ fun ReservationCalendar(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
             )
+            Order(viewModel)
         }
 
     }
 }
 
+@Composable
+fun Order(
+    viewModel: AppViewModel
+) {
+    val state by viewModel.appState.collectAsState()
+    val trailer: Trailer? = state.selectedTrailer
+    val startDate: Long? = state.dateRangePickerStart
+    val endDate: Long? = state.dateRangePickerEnd
+
+    val showModal = remember { mutableStateOf(false) }
+
+    val canReserve =
+        trailer != null &&
+        startDate != null &&
+        endDate != null
+
+//    Button(
+//        onClick = { viewModel.reserve() },
+//        enabled = canReserve,
+//        modifier = Modifier.fillMaxWidth()
+//    ) {
+//        Icon(Icons.Default.Check, contentDescription = null)
+//        Spacer(Modifier.width(8.dp))
+//        Text("Rezerwuj")
+//    }
+    Button(
+        onClick = { showModal.value = true },
+        enabled = canReserve,
+        modifier = Modifier.fillMaxWidth().padding(4.dp)
+    ) {
+        Text("Rezerwuj")
+    }
+
+    if (showModal.value) {
+        ConfirmReservationSheet(
+            viewModel,
+            onCancel = { viewModel.closeModal() },
+            onConfirm = {
+                viewModel.reserve()
+                viewModel.closeModal()
+            },
+        )
+    }
+}

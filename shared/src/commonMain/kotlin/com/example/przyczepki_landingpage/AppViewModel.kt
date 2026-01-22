@@ -1,6 +1,7 @@
 package com.example.przyczepki_landingpage
 
 import com.example.przyczepki_landingpage.data.CurrentScreen
+import com.example.przyczepki_landingpage.data.ModalType
 import com.example.przyczepki_landingpage.model.Trailer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +27,18 @@ class AppViewModel {
         _appState.update {
             it.copy(selectedTrailer = trailer)
         }
+    }
+
+    fun reserve() {
+        // TODO
+    }
+
+    fun openModal(type: ModalType) {
+        _appState.update { it.copy(modal = type) }
+    }
+
+    fun closeModal() {
+        _appState.update { it.copy(modal = ModalType.NONE) }
     }
 
 
