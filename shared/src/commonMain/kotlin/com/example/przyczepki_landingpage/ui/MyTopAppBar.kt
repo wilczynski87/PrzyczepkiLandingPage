@@ -48,13 +48,13 @@ fun MyTopAppBar(viewModel: AppViewModel) {
                         viewModel.navigateTo(CurrentScreen.LANDING)
                     }
                 )
-                DropdownMenuItem(
-                    text = { Text("Rezerwacja") },
-                    onClick = {
-                        expanded = false
-                        viewModel.navigateTo(CurrentScreen.RESERVATION)
-                    }
-                )
+//                DropdownMenuItem(
+//                    text = { Text("Rezerwacja") },
+//                    onClick = {
+//                        expanded = false
+//                        viewModel.navigateTo(CurrentScreen.RESERVATION)
+//                    }
+//                )
                 DropdownMenuItem(
                     text = { Text("Kontakt") },
                     onClick = {

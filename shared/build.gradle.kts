@@ -29,15 +29,15 @@ kotlin {
         
 //         Definiujemy webMain i ustawiamy zależność od commonMain
         val webMain by creating {
-//            dependsOn(commonMain)
+            dependsOn(commonMain)
         }
 
         val jsMain by getting {
-//            dependsOn(webMain)
+            dependsOn(webMain)
         }
 
         val wasmJsMain by getting {
-//            dependsOn(webMain)
+            dependsOn(webMain)
         }
         webMain.dependencies {
             implementation(compose.components.resources)
