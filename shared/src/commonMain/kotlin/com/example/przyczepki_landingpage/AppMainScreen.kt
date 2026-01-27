@@ -1,5 +1,10 @@
 package com.example.przyczepki_landingpage
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.data.CurrentScreen
+import com.example.przyczepki_landingpage.model.Prices
 import com.example.przyczepki_landingpage.model.Trailer
 import com.example.przyczepki_landingpage.ui.ContactPage
 import com.example.przyczepki_landingpage.ui.MainScreen
@@ -57,36 +63,45 @@ fun AppMainScreen() {
 //                    .padding(4.dp)
                     .align(Alignment.TopCenter),
             )
+            AnimatedContent(
+                targetState = currentState.currentScreen,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(220)) togetherWith
+                            fadeOut(animationSpec = tween(220))
+                },
+                label = "screen-fade"
+            ) { screen ->
+                when (screen) {
+                    CurrentScreen.LANDING -> {
+                        MainScreen(widthSizeClass, viewModel)
+                    }
 
-            when (currentState.currentScreen) {
-                CurrentScreen.LANDING -> {
-                    MainScreen(widthSizeClass, viewModel)
-                }
+                    CurrentScreen.RESERVATION -> {
+                        ReservationPage(widthSizeClass, viewModel)
+                    }
 
-                CurrentScreen.RESERVATION -> {
-                    ReservationPage(widthSizeClass, viewModel)
-                }
+                    CurrentScreen.PRICES -> {
+//                        PricesPage(widthSizeClass, viewModel)
+                    }
 
-                CurrentScreen.PRICES -> {
+                    CurrentScreen.CONTACT -> {
+                        ContactPage(widthSizeClass, viewModel)
+                    }
 
-                }
+                    CurrentScreen.TERMS_AND_CONDITIONS -> {
+//                        TermsPage(widthSizeClass)
+                    }
 
-                CurrentScreen.CONTACT -> {
-                    ContactPage(widthSizeClass, viewModel)
-                }
+                    CurrentScreen.LOGIN -> {
+//                        LoginPage(viewModel)
+                    }
 
-                CurrentScreen.TERMS_AND_CONDITIONS -> {
-
-                }
-
-                CurrentScreen.LOGIN -> {
-
-                }
-
-                CurrentScreen.SIGN_UP -> {
-
+                    CurrentScreen.SIGN_UP -> {
+//                        SignUpPage(viewModel)
+                    }
                 }
             }
+
         }
     }
     AppModals(viewModel)
@@ -99,7 +114,7 @@ val trailers = listOf(
         size = "201 x 130 cm",
         purpose = "Towarowa",
         axles = 1,
-        price = 60.00,
+        prices = Prices(1,1, 60.00, 50.00, 40.00, 40.00),
         image = Res.drawable.vesta1
     ),
     Trailer(
@@ -107,62 +122,8 @@ val trailers = listOf(
         size = "300 x 150 cm",
         purpose = "Towarowa",
         axles = 1,
-        price = 70.00,
+        prices = Prices(2,2, 70.00, 60.00, 50.00, 50.00),
         image = Res.drawable.zaslaw1
     ),
-    Trailer(
-        name = "Przyczepa podłodziowa",
-        size = "Do łodzi 4–5m",
-        purpose = "Towarowa",
-        axles = 1,
-        price = 50.00,
-        image = null
-    ),
 
-    Trailer(
-        name = "Przyczepa podłodziowa",
-        size = "Do łodzi 4–5m",
-        purpose = "Towarowa",
-        axles = 1,
-        price = 0.00,
-        image = null
-    ),
-    Trailer(
-        name = "Przyczepa podłodziowa",
-        size = "Do łodzi 4–5m",
-        purpose = "Towarowa",
-        axles = 1,
-        image = null
-    ),
-    Trailer(
-        name = "Przyczepa podłodziowa",
-        size = "Do łodzi 4–5m",
-        purpose = "Towarowa",
-        axles = 1,
-        image = null
-    ),
-    Trailer(
-        name = "Przyczepa podłodziowa",
-        size = "Do łodzi 4–5m",
-        purpose = "Towarowa",
-        axles = 1,
-        price = 0.00,
-        image = null
-    ),
-    Trailer(
-        name = "Przyczepa podłodziowa",
-        size = "Do łodzi 4–5m",
-        purpose = "Towarowa",
-        axles = 1,
-        price = 0.00,
-        image = null
-    ),
-    Trailer(
-        name = "Przyczepa podłodziowa",
-        size = "Do łodzi 4–5m",
-        purpose = "Towarowa",
-        axles = 1,
-        price = 0.00,
-        image = null
-    )
 )

@@ -1,46 +1,32 @@
-version: '3.8'
+version: "3.9"
 
 services:
+  npm:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-proxy-manager
+    ports:
+      - "80:80"
+      - "81:81"    # panel admina
+      - "443:443"
+    volumes:
+      - ./npm/data:/data
+      - ./npm/letsencrypt:/etc/letsencrypt
+    networks:
+      - przyczepki-network
+    restart: unless-stopped
+
   przyczepki-web:
+    container_name: przyczepki-landing-page
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - BUILD_TYPE=production
-    image: wilczynski87/przyczepkiweb:${TAG:-latest}
-    container_name: przyczepki-landing-page
-    hostname: przyczepki-web
-    ports:
-      - "${HOST_PORT:-80}:80"
+    image: przyczepki-web:local
     environment:
-      - NGINX_HOST=localhost
-      - NGINX_PORT=80
       - TZ=Europe/Warsaw
-    volumes:
-      # Montuj katalog z logami (opcjonalnie)
-      - przyczepki-logs:/var/log/nginx
-      # Jeśli chcesz mountować statyczne pliki (opcjonalnie)
-      # - ./static-files:/usr/share/nginx/html/static:ro
-    restart: unless-stopped
     networks:
       - przyczepki-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    restart: unless-stopped
 
 networks:
   przyczepki-network:
     driver: bridge
-    name: przyczepki-network
-
-volumes:
-  przyczepki-logs:
-    driver: local

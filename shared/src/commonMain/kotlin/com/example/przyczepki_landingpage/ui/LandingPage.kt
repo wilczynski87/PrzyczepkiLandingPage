@@ -32,7 +32,7 @@ fun MainScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 FrontInfoText()
-                TrailerTable(trailers, widthSizeClass)
+                TrailerTable(trailers, widthSizeClass, viewModel)
             }
         }
 

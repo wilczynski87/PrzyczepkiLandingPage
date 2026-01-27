@@ -1,9 +1,14 @@
 package com.example.przyczepki_landingpage.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -16,55 +21,31 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
+import com.example.przyczepki_landingpage.AppViewModel
+import com.example.przyczepki_landingpage.data.asPrice
+import com.example.przyczepki_landingpage.model.Prices
 import com.example.przyczepki_landingpage.model.Trailer
-import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-import przyczepkilandingpage.shared.generated.resources.Res
-import przyczepkilandingpage.shared.generated.resources.przyczepka1
-import przyczepkilandingpage.shared.generated.resources.przyczepka3
-
-@Composable
-fun TrilerList() {
-
-}
-
-val trailersExample = listOf(
-    Trailer(
-        name = "Przyczepka lekka 750kg",
-        size = "210 x 130 cm",
-        purpose = "Transport sprzętu ogrodowego, materiałów budowlanych",
-        axles = 1,
-        image = Res.drawable.przyczepka1
-    ),
-    Trailer(
-        name = "Przyczepka dłużycowa",
-        size = "300 x 150 cm",
-        purpose = "Długie elementy, deski, rury",
-        axles = 1,
-        image = Res.drawable.przyczepka3
-    ),
-    Trailer(
-        name = "Przyczepa podłodziowa",
-        size = "Do łodzi 4–5m",
-        purpose = "Transport łodzi",
-        axles = 1,
-        image = null
-    )
-)
-
 
 @Composable
 fun TrailerTable(
     trailers: List<Trailer> = emptyList(),
     widthSizeClass: WindowWidthSizeClass = WindowWidthSizeClass.Compact,
+    appViewModel: AppViewModel,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -73,9 +54,9 @@ fun TrailerTable(
     ) {
         trailers.forEach { trailer ->
             if (widthSizeClass != WindowWidthSizeClass.Compact) {
-                TrailerCardBig(trailer)
+                TrailerCardBig(trailer) { appViewModel.reservationButtonClick(trailer) }
             } else {
-                TrailerCardSmall(trailer)
+                TrailerCardSmall(trailer) { appViewModel.reservationButtonClick(trailer) }
             }
         }
         Spacer(Modifier.height(4.dp))
@@ -83,7 +64,7 @@ fun TrailerTable(
 }
 
 @Composable
-fun TrailerCardBig(trailer: Trailer) {
+fun TrailerCardBig(trailer: Trailer, rezerwuj: () -> Unit = {}) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
@@ -92,55 +73,54 @@ fun TrailerCardBig(trailer: Trailer) {
         ),
         elevation = CardDefaults.cardElevation(6.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if(trailer.image == null) {
-                Icon(Icons.Default.BrokenImage, "brak zdjęcia")
-            }
-            else {
-                Image(
-                    painter = painterResource(trailer.image),
-                    contentDescription = trailer.name,
-                    modifier = Modifier
-                        .size(140.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)),
-                    contentScale = ContentScale.Crop
-                )
-            }
-
-            Spacer(Modifier.width(20.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-
-                Text(
-                    trailer.name ?: "Brak nazwy",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(Modifier.height(6.dp))
-
-                TableRow("Wymiary", trailer.size ?: "Brak wymiarów")
-                TableRow("Przeznaczenie", trailer.purpose ?: "Brak przeznaczenia")
-                TableRow("Liczba osi", "${trailer.axles ?: "Brak informacji"}")
-            }
-
-            Column(
-                horizontalAlignment = Alignment.End,
-                modifier = Modifier
+        Column {
+            // ===== GÓRNA CZĘŚĆ =====
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                TableRowPrice("Cena", "${trailer.price ?: "Brak informacji"}")
+                if(trailer.image == null) {
+                    Icon(Icons.Default.BrokenImage, "brak zdjęcia")
+                }
+                else {
+                    Image(
+                        painter = painterResource(trailer.image),
+                        contentDescription = trailer.name,
+                        modifier = Modifier
+                            .size(140.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                Spacer(Modifier.width(20.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(trailer.name ?: "")
+                    TableRow("Wymiary", trailer.size ?: "")
+                    TableRow("Przeznaczenie", trailer.purpose ?: "")
+                    TableRow("Liczba osi", "${trailer.axles}")
+                    TableRow("kat. prawa jazdy", "${trailer.licenseCategory ?: "brak informacji"}")
+                }
             }
+            // ===== CENA =====
+            TableRowPrice(
+                prices = trailer.prices,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+            )
+
+            // ===== CTA =====
+            Reservation(rezerwuj)
         }
-        Reservation()
     }
 }
 
 @Composable
-fun TrailerCardSmall(trailer: Trailer) {
+fun TrailerCardSmall(
+    trailer: Trailer,
+    rezerwuj: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
@@ -181,52 +161,150 @@ fun TrailerCardSmall(trailer: Trailer) {
                     TableRow("Wymiary", trailer.size ?: "Brak wymiarów")
                     TableRow("Przeznaczenie", trailer.purpose ?: "Brak przeznaczenia")
                     TableRow("Liczba osi", "${trailer.axles ?: "Brak informacji"}")
-                    TableRowPrice("Cena", "${trailer.price ?: "Brak informacji"}")
+                    TableRow("kat. prawa jazdy", "${trailer.licenseCategory}")
+                    TableRowPrice(trailer.prices)
                 }
 
             }
         }
-        Reservation()
+        Reservation(rezerwuj)
     }
 }
 
 @Composable
 fun TableRow(label: String, value: String) {
-    Row {
+    Column {
         Text(
-            text = "$label: ",
-            fontWeight = FontWeight.SemiBold
+            label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Text(text = value)
+        Text(
+            value,
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 @Composable
-fun TableRowPrice(label: String, value: String) {
-//    val fullPrice = String.format("%.2f zł", price)
-//    val halfDayPrice = String.format("%.2f zł", price * 0.6)
-    Row {
-        Text(
-            text = "$label: ",
-            fontWeight = FontWeight.SemiBold
-        )
-        Text(text = "$value zł")
-    }
-    Row {
-        Text(
-            text = "Cena za 12h: ",
-            fontWeight = FontWeight.SemiBold
-        )
-        Text(text = "${value.toDoubleOrNull() ?: (0.0 * 0.6)} zł")
+fun TableRowPrice(
+    prices: Prices?,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Surface(
+        modifier = modifier
+            .padding(top = 12.dp)
+            .fillMaxWidth()
+            .animateContentSize(),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        shape = RoundedCornerShape(12.dp),
+        tonalElevation = 2.dp
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+
+            // ===== GŁÓWNA LINIA =====
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Cena za dobę",
+                        style = MaterialTheme.typography.labelMedium
+                    )
+
+                    if (prices != null) {
+                        Text(
+                            "${prices.firstDay.asPrice()} zł",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    } else {
+                        Text(
+                            "Brak informacji",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                if (prices != null) {
+                    IconButton(onClick = { expanded = !expanded }) {
+                        Icon(
+                            imageVector = if (expanded)
+                                Icons.Default.ExpandLess
+                            else
+                                Icons.Default.ExpandMore,
+                            contentDescription = "Pokaż szczegóły ceny"
+                        )
+                    }
+                }
+            }
+
+            // ===== SZCZEGÓŁY (TYLKO GDY SĄ DANE) =====
+            if (prices != null) {
+                AnimatedVisibility(
+                    visible = expanded,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        PriceDetailRow("Każda kolejna doba", "${prices.nextDay.asPrice()} zł")
+                        PriceDetailRow("12 godzin", "${prices.half.asPrice()} zł")
+                        PriceDetailRow("Rezerwacja", "${prices.reservation.asPrice()} zł")
+                    }
+                }
+            }
+        }
     }
 }
 
+
 @Composable
-fun Reservation() {
+fun PriceDetailRow(
+    label: String,
+    value: String
+) {
     Row(
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(4.dp).fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text("Rezerwój")
+        Text(
+            label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+        Text(
+            value,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.SemiBold
+        )
+    }
+}
+@Composable
+fun Reservation(
+    onClick: () -> Unit = {}
+) {
+//    Row(
+//        horizontalArrangement = Arrangement.Center,
+//        verticalAlignment = Alignment.CenterVertically,
+//        modifier = Modifier.padding(4.dp).fillMaxWidth()
+//    ) {
+//        Text("Rezerwuj")
+//    }
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(12.dp),
+        shape = RoundedCornerShape(14.dp)
+    ) {
+        Text("Rezerwuj")
     }
 }

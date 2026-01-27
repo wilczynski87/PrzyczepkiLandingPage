@@ -22,23 +22,25 @@ kotlin {
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser()
+        binaries.executable()
     }
-    
+
+    @OptIn(ExperimentalWasmDsl::class)
     sourceSets {
         val commonMain by getting
         
 //         Definiujemy webMain i ustawiamy zależność od commonMain
-        val webMain by creating {
-            dependsOn(commonMain)
-        }
-
-        val jsMain by getting {
-            dependsOn(webMain)
-        }
-
-        val wasmJsMain by getting {
-            dependsOn(webMain)
-        }
+//        val webMain by creating {
+//            dependsOn(commonMain)
+//        }
+//
+//        val jsMain by getting {
+//            dependsOn(webMain)
+//        }
+//
+//        val wasmJsMain by getting {
+//            dependsOn(webMain)
+//        }
         webMain.dependencies {
             implementation(compose.components.resources)
         }

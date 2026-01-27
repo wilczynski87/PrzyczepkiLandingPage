@@ -10,6 +10,17 @@ data class Trailer(
     val size: String? = null,
     val purpose: String? = null,
     val axles: Int? = null,
-    val price: Double? = null,
+    val licenseCategory: String? = null,
+    val prices: Prices? = null,
     val image: DrawableResource? = null,
+)
+
+@Serializable
+data class Prices(
+    val id: Long,
+    val trilerId: Long? = null,
+    val firstDay: Double,
+    val nextDay: Double,
+    val half: Double,
+    val reservation: Double
 )

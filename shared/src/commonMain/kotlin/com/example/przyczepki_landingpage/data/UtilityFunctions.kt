@@ -30,3 +30,9 @@ fun todayUtcMillis(): Long {
         .atStartOfDayIn(TimeZone.currentSystemDefault())
         .toEpochMilliseconds()
 }
+
+fun Double.asPrice(): String {
+    val whole = this.toInt()
+    val fraction = ((this * 100).toInt() % 100)
+    return "$whole,${fraction.toString().padStart(2, '0')}"
+}

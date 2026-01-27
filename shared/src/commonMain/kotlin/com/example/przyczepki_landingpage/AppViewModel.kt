@@ -33,6 +33,11 @@ class AppViewModel {
         // TODO
     }
 
+    fun reservationButtonClick(trailer: Trailer) {
+        onTrailerSelected(trailer)
+        navigateTo(CurrentScreen.RESERVATION)
+    }
+
     fun openModal(type: ModalType) {
         _appState.update { it.copy(modal = type) }
     }
