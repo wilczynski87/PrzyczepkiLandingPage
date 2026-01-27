@@ -16,7 +16,7 @@ jobs:
 
       # 2️⃣ Ustawienie SSH agent z kluczem
       - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.9.x
+        uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.PRZYCZEPKI_WEB }}
 
