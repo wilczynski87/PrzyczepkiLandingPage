@@ -26,6 +26,6 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@87.106.116.143 "
             cd /przyczepki-landing-page || exit
             git pull origin master
-            docker compose clean build przyczepki-web
+            docker compose build przyczepki-web
             docker compose up -d przyczepki-web
           "
