@@ -12,7 +12,7 @@ jobs:
     steps:
       # 1️⃣ Pobranie kodu z repo
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # 2️⃣ Ustawienie SSH agent z kluczem
       - name: Set up SSH
