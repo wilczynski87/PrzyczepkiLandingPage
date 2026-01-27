@@ -8,6 +8,8 @@ data class Trailer(
     val id: Int? = null,
     val name: String? = null,
     val size: String? = null,
+    val loadingMass: Double? = null,
+    val gvw: Double? = null,
     val purpose: String? = null,
     val axles: Int? = null,
     val licenseCategory: String? = null,

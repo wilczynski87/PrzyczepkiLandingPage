@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -29,6 +31,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +43,7 @@ import com.example.przyczepki_landingpage.data.asPrice
 import com.example.przyczepki_landingpage.model.Prices
 import com.example.przyczepki_landingpage.model.Trailer
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.skia.Color
 
 @Composable
 fun TrailerTable(
@@ -97,10 +101,34 @@ fun TrailerCardBig(trailer: Trailer, rezerwuj: () -> Unit = {}) {
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(trailer.name ?: "")
-                    TableRow("Wymiary", trailer.size ?: "")
-                    TableRow("Przeznaczenie", trailer.purpose ?: "")
-                    TableRow("Liczba osi", "${trailer.axles}")
-                    TableRow("kat. prawa jazdy", "${trailer.licenseCategory ?: "brak informacji"}")
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column {
+                            TableRow("Wymiary", trailer.size ?: "")
+                            TableRow("Przeznaczenie", trailer.purpose ?: "")
+                            TableRow("Liczba osi", "${trailer.axles}")
+                        }
+                        VerticalDivider(
+                            thickness = 1.dp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Column {
+                            TableRow(
+                                "Obciążenie:",
+                                "${trailer.loadingMass ?: "brak informacji"} kg"
+                            )
+                            TableRow(
+                                "Dopuszczalna Masa Całkowita",
+                                "${trailer.gvw ?: "brak informacji"} kg"
+                            )
+                            TableRow(
+                                "kat. prawa jazdy",
+                                trailer.licenseCategory ?: "brak informacji"
+                            )
+                        }
+                    }
                 }
             }
             // ===== CENA =====
@@ -161,7 +189,18 @@ fun TrailerCardSmall(
                     TableRow("Wymiary", trailer.size ?: "Brak wymiarów")
                     TableRow("Przeznaczenie", trailer.purpose ?: "Brak przeznaczenia")
                     TableRow("Liczba osi", "${trailer.axles ?: "Brak informacji"}")
-                    TableRow("kat. prawa jazdy", "${trailer.licenseCategory}")
+                    TableRow(
+                        "Obciążenie:",
+                        "${trailer.loadingMass ?: "brak informacji"} kg"
+                    )
+                    TableRow(
+                        "Dopuszczalna Masa Całkowita",
+                        "${trailer.gvw ?: "brak informacji"} kg"
+                    )
+                    TableRow(
+                        "kat. prawa jazdy",
+                        trailer.licenseCategory ?: "brak informacji"
+                    )
                     TableRowPrice(trailer.prices)
                 }
 
@@ -291,18 +330,11 @@ fun PriceDetailRow(
 fun Reservation(
     onClick: () -> Unit = {}
 ) {
-//    Row(
-//        horizontalArrangement = Arrangement.Center,
-//        verticalAlignment = Alignment.CenterVertically,
-//        modifier = Modifier.padding(4.dp).fillMaxWidth()
-//    ) {
-//        Text("Rezerwuj")
-//    }
     Button(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(12.dp),
+            .padding(8.dp),
         shape = RoundedCornerShape(14.dp)
     ) {
         Text("Rezerwuj")

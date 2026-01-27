@@ -20,7 +20,7 @@ fun FrontInfoText() {
     ) {
         Text(
             "Wynajem przyczepek lekkich",
-            style = MaterialTheme.typography.headlineSmall
+            style = MaterialTheme.typography.headlineLarge
         )
         Text(
             "Do 750 kg • Prawo jazdy kat. B",

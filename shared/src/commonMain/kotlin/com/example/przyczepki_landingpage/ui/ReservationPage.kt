@@ -276,15 +276,6 @@ fun Order(
         startDate != null &&
         endDate != null
 
-//    Button(
-//        onClick = { viewModel.reserve() },
-//        enabled = canReserve,
-//        modifier = Modifier.fillMaxWidth()
-//    ) {
-//        Icon(Icons.Default.Check, contentDescription = null)
-//        Spacer(Modifier.width(8.dp))
-//        Text("Rezerwuj")
-//    }
     Button(
         onClick = { showModal.value = true },
         enabled = canReserve,

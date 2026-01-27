@@ -110,18 +110,24 @@ fun AppMainScreen() {
 
 val trailers = listOf(
     Trailer(
-        name = "Przyczepka lekka 750kg",
-        size = "201 x 130 cm",
+        name = "Przyczepka lekka - Vesta light 25",
+        size = "252,1 × 135,4 × 37,3 cm",
+        loadingMass = 520.00,
+        gvw = 750.00,
         purpose = "Towarowa",
         axles = 1,
+        licenseCategory = "B",
         prices = Prices(1,1, 60.00, 50.00, 40.00, 40.00),
         image = Res.drawable.vesta1
     ),
     Trailer(
-        name = "Przyczepka dłużycowa",
-        size = "300 x 150 cm",
+        name = "Przyczepka lekka - Zasław HL300T",
+        size = "300 x 150 x 35 cm",
+        loadingMass = 465.00,
+        gvw = 750.00,
         purpose = "Towarowa",
-        axles = 1,
+        axles = 2,
+        licenseCategory = "B",
         prices = Prices(2,2, 70.00, 60.00, 50.00, 50.00),
         image = Res.drawable.zaslaw1
     ),

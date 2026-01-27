@@ -48,13 +48,27 @@ fun MyTopAppBar(viewModel: AppViewModel) {
                         viewModel.navigateTo(CurrentScreen.LANDING)
                     }
                 )
-//                DropdownMenuItem(
-//                    text = { Text("Rezerwacja") },
-//                    onClick = {
-//                        expanded = false
-//                        viewModel.navigateTo(CurrentScreen.RESERVATION)
-//                    }
-//                )
+                DropdownMenuItem(
+                    text = { Text("Rezerwacja") },
+                    onClick = {
+                        expanded = false
+                        viewModel.navigateTo(CurrentScreen.RESERVATION)
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Jak rezerwować?") },
+                    onClick = {
+                        expanded = false
+                        viewModel.navigateTo(CurrentScreen.TERMS_AND_CONDITIONS)
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Cennik") },
+                    onClick = {
+                        expanded = false
+                        viewModel.navigateTo(CurrentScreen.PRICES)
+                    }
+                )
                 DropdownMenuItem(
                     text = { Text("Kontakt") },
                     onClick = {

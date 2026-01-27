@@ -42,7 +42,6 @@ fun MainScreen(
                 widthSizeClass,
                 modifier = Modifier
                     .fillMaxWidth()
-//                            .fillParentMaxHeight() // <-- wypycha do dołu kiedy brak scrolla
             )
         }
     }

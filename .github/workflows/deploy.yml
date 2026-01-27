@@ -1,0 +1,31 @@
+name: Deploy Przyczepki Landing Page
+
+on:
+  push:
+    branches:
+      - main  # zmiany w branchu main będą deployowane
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Pobranie kodu z repo
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2️⃣ Ustawienie SSH agent z kluczem
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.PRZYCZEPKI_WEB }}
+
+      # 3️⃣ Deploy na VPS
+      - name: Deploy to VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no root@87.106.116.143 "
+            cd /home/root/przyczepki-landing-page || exit
+            git pull origin main
+            docker-compose build przyczepki-web
+            docker-compose up -d przyczepki-web
+          "
