@@ -3,7 +3,7 @@ name: Deploy Przyczepki Landing Page
 on:
   push:
     branches:
-      - main  # zmiany w branchu main będą deployowane
+      - master  # zmiany w branchu main będą deployowane
 
 jobs:
   deploy:
