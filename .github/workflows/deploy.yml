@@ -20,15 +20,6 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.PRZYCZEPKI_WEB }}
 
-      # 3️⃣ Deploy na VPS
-#      - name: Deploy to VPS
-#        run: |
-#          ssh -o StrictHostKeyChecking=no root@87.106.116.143 "
-#            cd /przyczepki-landing-page || exit
-#            git pull origin master
-#            docker compose build przyczepki-web
-#            docker compose up -d przyczepki-web
-#          "
       - name: Deploy to VPS
         run: |
           ssh -o StrictHostKeyChecking=no root@87.106.116.143 "
@@ -44,8 +35,7 @@ jobs:
             fi
           
             # Docker Compose
-            docker compose down --remove-orphans
-            docker compose build przyczepki-web
+            docker compose build --pull przyczepki-web
             docker compose up -d przyczepki-web
           "
 
