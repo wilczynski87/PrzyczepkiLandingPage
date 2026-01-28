@@ -35,11 +35,12 @@ COPY --chown=gradle:gradle shared/ shared/
 COPY --chown=gradle:gradle composeApp/ composeApp/
 
 # 5. Build KMP WASM (production)
-RUN ./gradlew clean :composeApp:wasmJsBrowserDistribution \
+RUN ./gradlew clean \
+    :shared:compileKotlinWasmJs \
+    :composeApp:wasmJsBrowserDistribution \
     --no-daemon \
-    --stacktrace \
-    --build-cache \
-    --refresh-dependencies
+    --stacktrace
+
 
 # ==============================
 # RUNTIME STAGE

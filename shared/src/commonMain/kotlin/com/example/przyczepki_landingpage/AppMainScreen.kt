@@ -1,9 +1,12 @@
 package com.example.przyczepki_landingpage
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -14,14 +17,19 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.data.CurrentScreen
+import com.example.przyczepki_landingpage.data.ModalType
+import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.model.Prices
 import com.example.przyczepki_landingpage.model.Trailer
 import com.example.przyczepki_landingpage.ui.ContactPage
@@ -44,6 +52,8 @@ fun AppMainScreen() {
     val widthSizeClass: WindowWidthSizeClass = windowSizeClass.widthSizeClass
     val viewModel = remember { AppViewModel() }
     val currentState by viewModel.appState.collectAsState()
+    val modal: ModalType = currentState.modalType
+    val visible: Boolean = currentState.modalVisible
 
     Column(modifier = Modifier.fillMaxWidth()) {
         MyTopAppBar(viewModel)
@@ -67,7 +77,7 @@ fun AppMainScreen() {
                 targetState = currentState.currentScreen,
                 transitionSpec = {
                     fadeIn(animationSpec = tween(220)) togetherWith
-                            fadeOut(animationSpec = tween(220))
+                    fadeOut(animationSpec = tween(220))
                 },
                 label = "screen-fade"
             ) { screen ->
@@ -104,7 +114,15 @@ fun AppMainScreen() {
 
         }
     }
-    AppModals(viewModel)
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(tween(250)) + scaleIn(initialScale = 0.95f),
+        exit = fadeOut(tween(200)) + scaleOut(targetScale = 0.95f)
+    ) {
+        if (modal != ModalType.NONE) {
+            AppModals(viewModel)
+        }
+    }
 }
 
 

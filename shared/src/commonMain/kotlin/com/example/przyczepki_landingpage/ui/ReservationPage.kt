@@ -41,12 +41,15 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
+import com.example.przyczepki_landingpage.data.ModalType
 import com.example.przyczepki_landingpage.data.formatDatePl
 import com.example.przyczepki_landingpage.data.todayUtcMillis
+import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.model.Trailer
 import com.example.przyczepki_landingpage.ui.modal.ConfirmReservationSheet
 import com.example.przyczepki_landingpage.ui.reservation.TrailerSelectionList
@@ -269,29 +272,23 @@ fun Order(
     val startDate: Long? = state.dateRangePickerStart
     val endDate: Long? = state.dateRangePickerEnd
 
-    val showModal = remember { mutableStateOf(false) }
-
     val canReserve =
         trailer != null &&
         startDate != null &&
         endDate != null
 
     Button(
-        onClick = { showModal.value = true },
+        onClick = { viewModel.openModal(
+            ModalType.CONFIRM_RESERVATION,
+            ModalData(
+                dialogTitle = "Potwierdzenie rezerwacji",
+                dialogText = "Czy na pewno chcesz rezerwować przyczepkę?",
+                )
+            )
+        },
         enabled = canReserve,
         modifier = Modifier.fillMaxWidth().padding(4.dp)
     ) {
         Text("Rezerwuj")
-    }
-
-    if (showModal.value) {
-        ConfirmReservationSheet(
-            viewModel,
-            onCancel = { viewModel.closeModal() },
-            onConfirm = {
-                viewModel.reserve()
-                viewModel.closeModal()
-            },
-        )
     }
 }

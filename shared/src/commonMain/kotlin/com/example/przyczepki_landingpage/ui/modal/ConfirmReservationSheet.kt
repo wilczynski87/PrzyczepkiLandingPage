@@ -34,13 +34,6 @@ fun ConfirmReservationSheet(
     val startDate = state.dateRangePickerStart
     val endDate = state.dateRangePickerEnd
 
-//    ModalBottomSheet(
-//        onDismissRequest = onCancel,
-//        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-//        tonalElevation = 6.dp,
-//        modifier = Modifier.fillMaxWidth()
-//            .shadow(12.dp, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)),
-//    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -78,5 +71,4 @@ fun ConfirmReservationSheet(
                 }
             }
         }
-//    }
 }
