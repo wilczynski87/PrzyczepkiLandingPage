@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Today
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePickerDefaults
@@ -35,23 +34,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
 import com.example.przyczepki_landingpage.data.ModalType
-import com.example.przyczepki_landingpage.data.formatDatePl
 import com.example.przyczepki_landingpage.data.todayUtcMillis
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.model.Trailer
-import com.example.przyczepki_landingpage.ui.modal.ConfirmReservationSheet
 import com.example.przyczepki_landingpage.ui.reservation.TrailerSelectionList
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -188,23 +183,39 @@ fun ReservationPage(
 @Composable
 fun ReservationCalendar(
     viewModel: AppViewModel,
-    allowPastDates: Boolean = false
 ) {
+    val state by viewModel.appState.collectAsState()
+    val blockedDates: Set<Long> = state.blockedDates
+//    val blockedDates: Set<Long> = setOf(
+//        Instant.parse("2026-01-29T00:00:00Z").toEpochMilliseconds(),
+//        Instant.parse("2026-01-30T00:00:00Z").toEpochMilliseconds(),
+//    )
+
+
     val todayMillis = remember { todayUtcMillis() }
 
-    val selectableDates = if (!allowPastDates) {
+    val selectableDates = remember(blockedDates, todayMillis) {
         object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                // a) Walidacja przeszłych dat
+                if (utcTimeMillis < todayMillis) {
+                    return false
+                }
+                // b) Walidacja zablokowanych dat
+                if (blockedDates.contains(utcTimeMillis)) {
+                    return false
+                }
+
                 return true
             }
 
             override fun isSelectableYear(year: Int): Boolean {
                 val currentYear = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).year
+
+                // Jeśli nie pozwalamy na przeszłe daty, blokuj przeszłe lata
                 return year >= currentYear
             }
         }
-    } else {
-        DatePickerDefaults.AllDates
     }
 
     val dateRangePickerState: DateRangePickerState = rememberDateRangePickerState(
@@ -254,7 +265,8 @@ fun ReservationCalendar(
                     selectedDayContainerColor = MaterialTheme.colorScheme.primary,
                     selectedDayContentColor = MaterialTheme.colorScheme.onPrimary,
                     todayDateBorderColor = MaterialTheme.colorScheme.primary,
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    disabledDayContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
                 )
             )
             Order(viewModel)

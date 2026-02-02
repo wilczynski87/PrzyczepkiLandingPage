@@ -1,28 +1,31 @@
 package com.example.przyczepki_landingpage.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.CheckboxDefaults.colors
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
+import com.example.przyczepki_landingpage.CompanyMap
+import com.example.przyczepki_landingpage.data.latitude
+import com.example.przyczepki_landingpage.data.longitude
 
 @Composable
 fun ContactPage(
@@ -46,13 +49,25 @@ fun ContactPage(
         ) {
             Text(
                 text = "Zapraszamy do kontaktu:",
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    shadow = Shadow(
+                        color = Color.White,
+                        offset = Offset(2f, 2f),
+                        blurRadius = 4f
+                    )
+                ),
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
             )
             Text(
                 text = "Jesteśmy otwarci 24 h /7 dni - przyczepka można wypożyczyć lub zwrócić w każdej porze!",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    shadow = Shadow(
+                        color = Color.White,
+                        offset = Offset(2f, 2f),
+                        blurRadius = 4f
+                    )
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
@@ -92,22 +107,26 @@ fun ContactSection(widthSizeClass: WindowWidthSizeClass) {
                 ContactItem(
                     icon = Icons.Default.Phone,
                     title = "Telefon:",
-                    details = listOf("+48 727 188 330", "")
+                    details = listOf("+48 727 188 330", ""),
+                    modifier = Modifier.fillMaxWidth()
                 )
                 ContactItem(
                     icon = Icons.Default.Email,
                     title = "Em@il",
-                    details = listOf("parkingOstrowskiego@gmail.com", "")
+                    details = listOf("parkingOstrowskiego@gmail.com", ""),
+                    modifier = Modifier.fillMaxWidth()
                 )
                 ContactItem(
                     icon = Icons.Default.LocationOn,
                     title = "Adres:",
-                    details = listOf("ul. Aleksandra Ostrowskiego 102", "Wrocław, 53-238")
+                    details = listOf("ul. Aleksandra Ostrowskiego 102", "Wrocław, 53-238"),
+                    modifier = Modifier.fillMaxWidth()
                 )
                 ContactItem(
-                    icon = null,
+                    icon = Icons.Default.AccessTime,
                     title = "Godziny otwarcia:",
-                    details = listOf("Biuro: 7:00 - 16:00", "Wypożyczenie i zwrot: 24/7")
+                    details = listOf("Biuro: 7:00 - 16:00", "Wypożyczenie i zwrot: 24/7"),
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
@@ -134,7 +153,7 @@ fun ContactSection(widthSizeClass: WindowWidthSizeClass) {
                     details = listOf("ul. Aleksandra Ostrowskiego 102", "Wrocław, 53-238")
                 )
                 ContactItem(
-                    icon = null,
+                    icon = Icons.Default.AccessTime,
                     title = "Godziny otwarcia:",
                     details = listOf("Biuro: 7:00 - 16:00", "Wypożyczenie i zwrot: 24/7")
                 )
@@ -148,10 +167,11 @@ fun ContactSection(widthSizeClass: WindowWidthSizeClass) {
 fun ContactItem(
     icon: ImageVector?,
     title: String,
-    details: List<String>
+    details: List<String>,
+    modifier: Modifier = Modifier,
 ) {
     Card (
-        modifier = Modifier,
+        modifier = modifier,
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.background,
@@ -192,7 +212,8 @@ fun ContactItem(
 fun LocationSection() {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
     ) {
         Text(
             text = "Nasza Siedziba:",
@@ -206,27 +227,17 @@ fun LocationSection() {
         // Placeholder mapy
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = 600.dp)
-                .height(200.dp)
+                .sizeIn(maxWidth = 600.dp, maxHeight = 400.dp)
                 .padding(top = 8.dp),
             contentAlignment = Alignment.Center
         ) {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colorScheme.surfaceVariant
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(400.dp)
+                    .background(Color.Transparent)
             ) {
-                Text(
-                    text = "Link do mapy z dojazdem:",
-                    modifier = Modifier.padding(16.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-//                LocationSectionWithLink()
-//                ContactPageKMP()
-                Text("https://maps.app.goo.gl/jFz6YiNWMUcj5HC78")
-
+                CompanyMap(latitude, longitude, "google")
             }
         }
     }
@@ -357,3 +368,5 @@ fun QuickContactSection() {
         }
     }
 }
+
+

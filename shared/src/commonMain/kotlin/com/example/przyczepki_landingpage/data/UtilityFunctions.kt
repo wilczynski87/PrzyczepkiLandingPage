@@ -7,6 +7,9 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.Instant
 
+const val latitude = 51.093581049896694
+const val longitude = 16.966644208784885
+
 fun formatDatePl(millis: Long?): String? {
     if (millis == null) return null
 

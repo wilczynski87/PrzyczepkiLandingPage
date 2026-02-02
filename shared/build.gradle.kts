@@ -28,21 +28,21 @@ kotlin {
     @OptIn(ExperimentalWasmDsl::class)
     sourceSets {
         val commonMain by getting
-        
-//         Definiujemy webMain i ustawiamy zależność od commonMain
-//        val webMain by creating {
-//            dependsOn(commonMain)
+//        webMain.dependencies {
+//            implementation(compose.components.resources)
+//            implementation(compose.html.core)
 //        }
-//
-//        val jsMain by getting {
-//            dependsOn(webMain)
-//        }
-//
-//        val wasmJsMain by getting {
-//            dependsOn(webMain)
-//        }
-        webMain.dependencies {
+
+        jsMain.dependencies {
             implementation(compose.components.resources)
+            implementation(compose.html.core)
+        }
+
+        wasmJsMain.dependencies {
+            implementation(compose.components.resources)
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.ui)
         }
 
         commonMain.dependencies {
@@ -53,6 +53,10 @@ kotlin {
             implementation(libs.compose.material3.window.size)
             implementation(libs.kotlinx.datetime)
             implementation(libs.compose.material)
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(compose.ui)
         }
 
         commonTest.dependencies {

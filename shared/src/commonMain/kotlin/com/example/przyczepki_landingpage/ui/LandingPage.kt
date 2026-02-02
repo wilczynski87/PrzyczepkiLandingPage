@@ -40,6 +40,7 @@ fun MainScreen(
         item {
             BottomInfo(
                 widthSizeClass,
+                viewModel,
                 modifier = Modifier
                     .fillMaxWidth()
             )

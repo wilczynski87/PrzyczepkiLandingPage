@@ -17,22 +17,15 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Event
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.AttachMoney
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -42,26 +35,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
-import com.example.przyczepki_landingpage.AppState
 import com.example.przyczepki_landingpage.AppViewModel
 import com.example.przyczepki_landingpage.ReservationPrice
 import com.example.przyczepki_landingpage.data.ModalType
 import com.example.przyczepki_landingpage.data.asPrice
 import com.example.przyczepki_landingpage.data.formatDatePl
-import com.example.przyczepki_landingpage.model.ModalData
-import com.example.przyczepki_landingpage.model.Prices
 import com.example.przyczepki_landingpage.model.Trailer
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-import przyczepkilandingpage.shared.generated.resources.Res
-import przyczepkilandingpage.shared.generated.resources.przyczepka1
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,7 +76,7 @@ fun ReservationConfirmationModal(
     val trailer = state.selectedTrailer
     val from = state.dateRangePickerStart
     val to = state.dateRangePickerEnd
-    val prices = state.reservationPrice
+    val reservationPrices = state.reservationPrice
 
     Box(
         modifier = Modifier
@@ -149,21 +134,10 @@ fun ReservationConfirmationModal(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Prices
-                trailerReservationPrices(prices)
+                trailerReservationPrices(reservationPrices)
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-//                Row(
-//                    horizontalArrangement = Arrangement.Center,
-//                    modifier = Modifier.padding(12.dp).fillMaxWidth()
-//                ) {
-//                    Text(
-//                        text = "Koszt rezerwacji to ${trailer?.prices?.reservation?.asPrice() ?: "0,00"} zł",
-//                        style = MaterialTheme.typography.bodyLarge,
-//                        fontWeight = FontWeight.Medium,
-//                        color = MaterialTheme.colorScheme.onSurface
-//                    )
-//                }
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -174,26 +148,48 @@ fun ReservationConfirmationModal(
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Row(
-                        horizontalArrangement = Arrangement.Center,
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(16.dp)
+                            .fillMaxWidth()
                     ) {
-                        Icon(
-                            imageVector = Icons.Outlined.AttachMoney,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.AttachMoney,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "Koszt rezerwacji:",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                                Text(
+                                    text = "${trailer?.prices?.reservation?.asPrice() ?: "0,00"} zł",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
+
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "Koszt rezerwacji",
+                                text = "Całkowity koszt:",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                             Text(
-                                text = "${trailer?.prices?.reservation?.asPrice() ?: "0,00"} zł",
+                                text = "${reservationPrices?.sum?.asPrice() ?: "0,00"} zł",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -220,7 +216,7 @@ fun ReservationConfirmationModal(
                         },
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("Potwierdź rezerwację")
+                        Text("Przejdź dalej")
                     }
                 }
             }

@@ -10,8 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -43,7 +41,6 @@ import com.example.przyczepki_landingpage.data.asPrice
 import com.example.przyczepki_landingpage.model.Prices
 import com.example.przyczepki_landingpage.model.Trailer
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.skia.Color
 
 @Composable
 fun TrailerTable(
@@ -294,8 +291,8 @@ fun TableRowPrice(
                             .padding(top = 12.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        PriceDetailRow("Każda kolejna doba", "${prices.nextDay.asPrice()} zł")
-                        PriceDetailRow("12 godzin", "${prices.half.asPrice()} zł")
+                        PriceDetailRow("Każda kolejna doba", "${prices.otherDays.asPrice()} zł")
+                        PriceDetailRow("12 godzin", "${prices.halfDay.asPrice()} zł")
                         PriceDetailRow("Rezerwacja", "${prices.reservation.asPrice()} zł")
                     }
                 }
