@@ -38,7 +38,7 @@ jobs:
               git reset --hard origin/master
             fi
           
-            # Sprawdź czy docker-compose.yml istnieje
+            # Sprawdź czy docker-compose.yaml istnieje
             if [ ! -f docker-compose.yml ]; then
               echo \"Brak docker-compose.yml!\"
               exit 1
