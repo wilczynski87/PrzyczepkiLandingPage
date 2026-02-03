@@ -22,43 +22,41 @@ jobs:
 
       - name: Deploy to VPS
         run: |
-          ssh -o StrictHostKeyChecking=no root@87.106.116.143 "
-            set -e  # Zatrzymaj przy błędzie
+          ssh -o StrictHostKeyChecking=no root@87.106.116.143 << 'EOF'
+          set -e  # Zatrzymaj przy błędzie
           
-            # Stwórz katalog jeśli nie istnieje
-            mkdir -p /przyczepki-landing-page
-            cd /przyczepki-landing-page
+          # Stwórz katalog jeśli nie istnieje
+          mkdir -p /przyczepki-landing-page
+          cd /przyczepki-landing-page
           
-            # Klonowanie lub aktualizacja repo
-            if [ ! -d .git ]; then
-              echo \"Klonowanie repozytorium...\"
-              git clone https://github.com/wilczynski87/PrzyczepkiLandingPage.git .
-            else
-              git fetch origin
-              git reset --hard origin/master
-            fi
+          # Klonowanie lub aktualizacja repo
+          if [ ! -d .git ]; then
+            echo "Klonowanie repozytorium..."
+            git clone https://github.com/wilczynski87/PrzyczepkiLandingPage.git .
+          else
+            git fetch origin
+            git reset --hard origin/master
+          fi
           
-            # Sprawdź czy docker-compose.yaml istnieje
-            if [ ! -f docker-compose.yaml ]; then
-              echo \"Brak docker-compose.yml!\"
-              exit 1
-            fi
+          # Sprawdź czy docker-compose.yaml istnieje
+          if [ ! -f docker-compose.yaml ]; then
+            echo "Brak docker-compose.yaml!"
+            exit 1
+          fi
           
-            # Zbuduj tylko obraz przyczepki-landing-page
-            echo \"Budowanie nowego obrazu aplikacji...\"
-            docker build -t przyczepki-web:latest -f Dockerfile .
+          # Zbuduj tylko obraz przyczepki-landing-page
+          echo "Budowanie nowego obrazu aplikacji..."
+          docker build -t przyczepki-web:latest -f Dockerfile .
           
-            echo \"Budowanie i uruchamianie kontenerów...\"
-#            docker compose build --no-cache
-#            docker compose up -d
-            docker compose up -d --no-deps przyczepki-web
-               
-            echo \"Czyszczenie starych obrazów...\"
-            docker image prune -f
+          echo "Uruchamianie kontenera aplikacji..."
+          docker compose up -d --no-deps przyczepki-web
           
-            echo \"Sprawdzanie statusu kontenerów...\"
-            sleep 5
-            docker compose ps
+          echo "Czyszczenie starych obrazów..."
+          docker image prune -f
           
-            echo \"Deployment zakończony!\"
-          "
+          echo "Sprawdzanie statusu kontenerów..."
+          sleep 5
+          docker compose ps
+          
+          echo "Deployment zakończony!"
+          EOF
