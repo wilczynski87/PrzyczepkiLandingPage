@@ -52,13 +52,14 @@ jobs:
               echo "Klonowanie repozytorium..."
               git clone https://github.com/wilczynski87/PrzyczepkiLandingPage.git .
             else
-              git pull origin master
+              git fetch origin
+              git reset --hard origin/master
             fi
           
-            echo "Aktualizacja kodu..."
-            git fetch origin
-            git checkout master
-            git reset --hard origin/master
+#            echo "Aktualizacja kodu..."
+#            git fetch origin
+#            git checkout master
+#            git reset --hard origin/master
           
             # Sprawdź czy docker-compose.yml istnieje
             if [ ! -f docker-compose.yml ]; then
@@ -68,7 +69,7 @@ jobs:
           
             echo "Budowanie i uruchamianie kontenerów..."
             docker compose pull
-            docker compose build --pull
+            docker compose build --pull --no-cache
             docker compose up -d
           
             echo "Sprawdzanie statusu kontenerów..."
