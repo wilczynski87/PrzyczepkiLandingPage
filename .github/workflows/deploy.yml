@@ -39,7 +39,7 @@ jobs:
             fi
           
             # Sprawdź czy docker-compose.yaml istnieje
-            if [ ! -f docker-compose.yml ]; then
+            if [ ! -f docker-compose.yaml ]; then
               echo \"Brak docker-compose.yml!\"
               exit 1
             fi
