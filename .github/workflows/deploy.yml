@@ -46,7 +46,7 @@ jobs:
           
             echo \"Budowanie i uruchamianie kontenerów...\"
             docker compose pull
-            docker compose build --pull --no-cache
+            docker compose build --no-cache
             docker compose up -d
           
             echo \"Sprawdzanie statusu kontenerów...\"

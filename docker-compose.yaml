@@ -20,7 +20,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: przyczepki-web:local
+    image: przyczepki-web:latest
     environment:
       - TZ=Europe/Warsaw
     networks:
