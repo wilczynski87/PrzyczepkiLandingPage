@@ -43,16 +43,16 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@87.106.116.143 "
             set -e  # Zatrzymaj przy błędzie
           
-            APP_DIR="/przyczepki-landing-page"
-          
             # Stwórz katalog jeśli nie istnieje
-            mkdir -p $APP_DIR
-            cd $APP_DIR
+            mkdir -p /przyczepki-landing-page
+            cd /przyczepki-landing-page
           
             # Klonowanie lub aktualizacja repo
             if [ ! -d .git ]; then
               echo "Klonowanie repozytorium..."
               git clone https://github.com/wilczynski87/PrzyczepkiLandingPage.git .
+            else
+              git pull origin master
             fi
           
             echo "Aktualizacja kodu..."
