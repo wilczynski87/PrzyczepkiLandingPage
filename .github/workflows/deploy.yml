@@ -3,7 +3,7 @@ name: Deploy Przyczepki Landing Page
 on:
   push:
     branches:
-      - master  # zmiany w branchu main będą deployowane
+      - master
 
 jobs:
   deploy:
@@ -20,24 +20,6 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.PRZYCZEPKI_WEB }}
 
-#      - name: Deploy to VPS
-#        run: |
-#          ssh -o StrictHostKeyChecking=no root@87.106.116.143 "
-#            # jeśli katalog nie istnieje, stwórz
-#            mkdir -p /przyczepki-landing-page
-#            cd /przyczepki-landing-page
-#
-#            # jeśli repo nie jest sklonowane, sklonuj
-#            if [ ! -d .git ]; then
-#              git clone https://github.com/wilczynski87/PrzyczepkiLandingPage.git .
-#            else
-#              git pull origin master
-#            fi
-#
-#            # Docker Compose
-#            docker compose build --pull przyczepki-web
-#            docker compose up -d przyczepki-web
-#          "
       - name: Deploy to VPS
         run: |
           ssh -o StrictHostKeyChecking=no root@87.106.116.143 "
@@ -49,33 +31,27 @@ jobs:
           
             # Klonowanie lub aktualizacja repo
             if [ ! -d .git ]; then
-              echo "Klonowanie repozytorium..."
+              echo \"Klonowanie repozytorium...\"
               git clone https://github.com/wilczynski87/PrzyczepkiLandingPage.git .
             else
               git fetch origin
               git reset --hard origin/master
             fi
           
-#            echo "Aktualizacja kodu..."
-#            git fetch origin
-#            git checkout master
-#            git reset --hard origin/master
-          
             # Sprawdź czy docker-compose.yml istnieje
             if [ ! -f docker-compose.yml ]; then
-              echo "Brak docker-compose.yml!"
+              echo \"Brak docker-compose.yml!\"
               exit 1
             fi
           
-            echo "Budowanie i uruchamianie kontenerów..."
+            echo \"Budowanie i uruchamianie kontenerów...\"
             docker compose pull
             docker compose build --pull --no-cache
             docker compose up -d
           
-            echo "Sprawdzanie statusu kontenerów..."
+            echo \"Sprawdzanie statusu kontenerów...\"
             sleep 5
             docker compose ps
           
-            echo "Deployment zakończony!"
+            echo \"Deployment zakończony!\"
           "
-
