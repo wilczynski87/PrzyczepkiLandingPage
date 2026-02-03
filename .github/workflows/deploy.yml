@@ -44,9 +44,17 @@ jobs:
               exit 1
             fi
           
+            # Zbuduj tylko obraz przyczepki-landing-page
+            echo \"Budowanie nowego obrazu aplikacji...\"
+            docker build -t przyczepki-web:latest -f Dockerfile .
+          
             echo \"Budowanie i uruchamianie kontenerów...\"
-            docker compose build --no-cache
-            docker compose up -d
+#            docker compose build --no-cache
+#            docker compose up -d
+            docker compose up -d --no-deps przyczepki-web
+               
+            echo \"Czyszczenie starych obrazów...\"
+            docker image prune -f
           
             echo \"Sprawdzanie statusu kontenerów...\"
             sleep 5
