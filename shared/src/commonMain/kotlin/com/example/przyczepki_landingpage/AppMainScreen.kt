@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -43,11 +44,12 @@ import przyczepkilandingpage.shared.generated.resources.zaslaw1
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun AppMainScreen() {
+    val scope = rememberCoroutineScope()
     // 1. Calculate window size class
     val windowSizeClass = calculateWindowSizeClass()
     // 2. Extract width size class (Compact, Medium, Expanded)
     val widthSizeClass: WindowWidthSizeClass = windowSizeClass.widthSizeClass
-    val viewModel = remember { AppViewModel() }
+    val viewModel = remember { AppViewModel(scope) }
     val currentState by viewModel.appState.collectAsState()
     val modal: ModalType = currentState.modalType
     val visible: Boolean = currentState.modalVisible

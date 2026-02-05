@@ -1,19 +1,23 @@
 package com.example.przyczepki_landingpage
 
+import com.example.przyczepki_landingpage.controller.ApiClient
 import com.example.przyczepki_landingpage.model.CurrentScreen
 import com.example.przyczepki_landingpage.data.ModalType
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class AppViewModel {
+class AppViewModel(private val scope: CoroutineScope) {
     private val _appState = MutableStateFlow(AppState())
     val appState: StateFlow<AppState> = _appState.asStateFlow()
 
     fun navigateTo(destination: CurrentScreen) {
+        fetchTrailers()
         _appState.value = appState.value.copy(currentScreen = destination)
     }
 
@@ -53,6 +57,19 @@ class AppViewModel {
             modalType = ModalType.NONE,
             modalVisible = false
         ) }
+    }
+
+    fun fetchTrailers() {
+        scope.launch {
+            try {
+                val trailers = ApiClient.trailerController.getTrailers()
+                if (trailers.isNotEmpty()) {
+                    _appState.update { it.copy(trailers = trailers) }
+                }
+            } catch (e: Exception) {
+                println("Error: ${e.message}")
+            }
+        }
     }
 
 

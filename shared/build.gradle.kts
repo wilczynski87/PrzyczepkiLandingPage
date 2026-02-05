@@ -14,6 +14,7 @@ compose.resources {
 }
 
 kotlin {
+    jvmToolchain(21)
     jvm()
     
     js {
