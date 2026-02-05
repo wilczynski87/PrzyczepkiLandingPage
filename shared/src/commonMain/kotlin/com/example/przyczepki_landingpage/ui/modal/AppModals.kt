@@ -42,9 +42,9 @@ import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
 import com.example.przyczepki_landingpage.ReservationPrice
 import com.example.przyczepki_landingpage.data.ModalType
-import com.example.przyczepki_landingpage.data.asPrice
-import com.example.przyczepki_landingpage.data.formatDatePl
-import com.example.przyczepki_landingpage.model.Trailer
+import com.example.przyczepki_landingpage.model.asPrice
+import com.example.przyczepki_landingpage.model.formatDatePl
+import com.example.przyczepki_landingpage.data.Trailer
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
@@ -238,16 +238,17 @@ private fun TrailerInfoCard(trailer: Trailer) {
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            trailer.image?.let { imageRes ->
-                Image(
-                    painter = painterResource(imageRes),
-                    contentDescription = "Thumbnail przyczepy",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .padding(end = 16.dp)
-                )
+            trailer.images?.get("main")?.let { imageRes ->
+                Text("zdjęcie przyczepki")
+//                Image(
+//                    painter = painterResource(imageRes),
+//                    contentDescription = "Thumbnail przyczepy",
+//                    contentScale = ContentScale.Crop,
+//                    modifier = Modifier
+//                        .size(80.dp)
+//                        .clip(RoundedCornerShape(8.dp))
+//                        .padding(end = 16.dp)
+//                )
             }
             Column {
                 Text(

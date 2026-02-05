@@ -24,10 +24,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import com.example.przyczepki_landingpage.data.CurrentScreen
+import com.example.przyczepki_landingpage.data.LicenseCategory
+import com.example.przyczepki_landingpage.model.CurrentScreen
 import com.example.przyczepki_landingpage.data.ModalType
-import com.example.przyczepki_landingpage.model.Prices
-import com.example.przyczepki_landingpage.model.Trailer
+import com.example.przyczepki_landingpage.data.Prices
+import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.ui.ContactPage
 import com.example.przyczepki_landingpage.ui.MainScreen
 import com.example.przyczepki_landingpage.ui.MyTopAppBar
@@ -130,9 +131,9 @@ val trailers = listOf(
         gvw = 750.00,
         purpose = "Towarowa",
         axles = 1,
-        licenseCategory = "B",
+        licenseCategory = LicenseCategory.B,
         prices = Prices(1,1, 60.00, 50.00, 40.00, 40.00),
-        image = Res.drawable.vesta1
+//        image = Res.drawable.vesta1
     ),
     Trailer(
         name = "Przyczepka lekka - Zasław HL300T",
@@ -141,9 +142,9 @@ val trailers = listOf(
         gvw = 750.00,
         purpose = "Towarowa",
         axles = 2,
-        licenseCategory = "B",
+        licenseCategory = LicenseCategory.B,
         prices = Prices(2,2, 70.00, 60.00, 50.00, 50.00),
-        image = Res.drawable.zaslaw1
+//        image = Res.drawable.zaslaw1
     ),
 
 )

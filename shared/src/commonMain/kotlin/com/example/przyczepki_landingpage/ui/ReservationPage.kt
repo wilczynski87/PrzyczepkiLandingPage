@@ -44,9 +44,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
 import com.example.przyczepki_landingpage.data.ModalType
-import com.example.przyczepki_landingpage.data.todayUtcMillis
+import com.example.przyczepki_landingpage.model.todayUtcMillis
 import com.example.przyczepki_landingpage.model.ModalData
-import com.example.przyczepki_landingpage.model.Trailer
+import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.ui.reservation.TrailerSelectionList
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -89,20 +89,20 @@ fun ReservationPage(
                     , verticalAlignment = Alignment.CenterVertically
                     , horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    if(trailer?.image == null) {
+                    if(trailer?.images?.get("main") == null) {
                         Icon(
                             Icons.Default.BrokenImage,
                             contentDescription = "Brak zdjęcia"
                         )
                     } else {
-                        Image(
-                            painter = painterResource(trailer.image),
-                            contentDescription = trailer.name,
-                            modifier = Modifier
-                                .size(72.dp)
-                                .clip(RoundedCornerShape(12.dp)),
-                            contentScale = ContentScale.Crop
-                        )
+//                        Image(
+//                            painter = painterResource(trailer.image),
+//                            contentDescription = trailer.name,
+//                            modifier = Modifier
+//                                .size(72.dp)
+//                                .clip(RoundedCornerShape(12.dp)),
+//                            contentScale = ContentScale.Crop
+//                        )
                     }
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
@@ -137,20 +137,21 @@ fun ReservationPage(
                 , verticalAlignment = Alignment.CenterVertically
                 , horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                if(trailer?.image == null) {
+                if(trailer?.images?.get("main") == null) {
                     Icon(
                         Icons.Default.BrokenImage,
                         contentDescription = "Brak zdjęcia"
                     )
                 } else {
-                    Image(
-                        painter = painterResource(trailer.image),
-                        contentDescription = trailer.name,
-                        modifier = Modifier
-                            .size(72.dp)
-                            .clip(RoundedCornerShape(12.dp)),
-                        contentScale = ContentScale.Crop
-                    )
+                    Text("obraz przyczepki")
+//                    Image(
+//                        painter = painterResource(trailer.image),
+//                        contentDescription = trailer.name,
+//                        modifier = Modifier
+//                            .size(72.dp)
+//                            .clip(RoundedCornerShape(12.dp)),
+//                        contentScale = ContentScale.Crop
+//                    )
                 }
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(

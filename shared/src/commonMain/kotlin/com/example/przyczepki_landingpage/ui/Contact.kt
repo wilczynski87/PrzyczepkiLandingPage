@@ -24,8 +24,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import com.example.przyczepki_landingpage.AppViewModel
 import com.example.przyczepki_landingpage.CompanyMap
-import com.example.przyczepki_landingpage.data.latitude
-import com.example.przyczepki_landingpage.data.longitude
+import com.example.przyczepki_landingpage.model.latitude
+import com.example.przyczepki_landingpage.model.longitude
 
 @Composable
 fun ContactPage(

@@ -1,6 +1,7 @@
 package com.example.przyczepki_landingpage.model
 
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.example.przyczepki_landingpage.data.Trailer
 import org.jetbrains.compose.resources.DrawableResource
 
 data class ModalData(
@@ -18,4 +19,4 @@ data class ConfirmReservationModalData(
     val onConfirmation: () -> Unit = {},
     val trailer: Trailer,
 
-)
+    )

@@ -1,7 +1,7 @@
 package com.example.przyczepki_landingpage.ui.modal
 
-import com.example.przyczepki_landingpage.data.latitude
-import com.example.przyczepki_landingpage.data.longitude
+import com.example.przyczepki_landingpage.model.latitude
+import com.example.przyczepki_landingpage.model.longitude
 
 data class CompanyLocation(
     val name: String = "Przyczepki FAT",

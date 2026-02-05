@@ -1,9 +1,9 @@
 package com.example.przyczepki_landingpage
 
-import com.example.przyczepki_landingpage.data.CurrentScreen
+import com.example.przyczepki_landingpage.model.CurrentScreen
 import com.example.przyczepki_landingpage.data.ModalType
 import com.example.przyczepki_landingpage.model.ModalData
-import com.example.przyczepki_landingpage.model.Trailer
+import com.example.przyczepki_landingpage.data.Trailer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -34,7 +34,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
 import org.jetbrains.compose.resources.painterResource
-import com.example.przyczepki_landingpage.model.Trailer
+import com.example.przyczepki_landingpage.data.Trailer
 
 @Composable
 fun TrailerSelectionList(
@@ -103,15 +103,16 @@ fun TrailerCard(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (trailer.image != null) {
-                Image(
-                    painter = painterResource(trailer.image),
-                    contentDescription = trailer.name,
-                    modifier = Modifier
-                        .size(72.dp)
-                        .clip(RoundedCornerShape(12.dp)),
-                    contentScale = ContentScale.Crop
-                )
+            if (trailer.images?.get("main") != null) {
+                Text("obraz przyczepki")
+//                Image(
+//                    painter = painterResource(trailer.image),
+//                    contentDescription = trailer.name,
+//                    modifier = Modifier
+//                        .size(72.dp)
+//                        .clip(RoundedCornerShape(12.dp)),
+//                    contentScale = ContentScale.Crop
+//                )
             } else {
                 Icon(
                     imageVector = Icons.Default.BrokenImage,

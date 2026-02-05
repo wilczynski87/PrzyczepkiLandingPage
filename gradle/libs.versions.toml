@@ -10,6 +10,8 @@ compose-icons = "1.7.3"
 adaptive-ver = "1.2.0"
 hideoo-kalendar = "1.4.0"
 kotlinx-datetime-ver = "0.7.1"
+koin-core-ver = "4.1.1"
+
 
 
 [libraries]
@@ -30,6 +32,26 @@ compose-material3-window-size = { module = "org.jetbrains.compose.material3:mate
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime-ver" }
 compose-material = { module = "org.jetbrains.compose.material:material", version.ref = "composeMultiplatform" }
 
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin-core-ver" }
+koin-logger = { module = "io.insert-koin:koin-logger-slf4j", version.ref = "koin-core-ver" }
+koin-server = { module = "io.insert-koin:koin-ktor", version.ref = "koin-core-ver" }
+
+koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin-core-ver" }
+koin-test-junit5 = { module = "io.insert-koin:koin-test-junit5", version.ref = "koin-core-ver" }
+
+ktor-client = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
+ktor-server-content-negotiation-jvm = { module = "io.ktor:ktor-server-content-negotiation-jvm", version.ref = "ktor" }
+
+ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
+
+
+
+
+
 
 [plugins]
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
@@ -37,3 +59,4 @@ composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "k
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

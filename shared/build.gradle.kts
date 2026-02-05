@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlin.plugin.serialization)
 }
 
 
@@ -36,6 +37,7 @@ kotlin {
         jsMain.dependencies {
             implementation(compose.components.resources)
             implementation(compose.html.core)
+            implementation(libs.ktor.client.js)
         }
 
         wasmJsMain.dependencies {
@@ -43,6 +45,7 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.ui)
+            implementation(libs.ktor.client.js)
         }
 
         commonMain.dependencies {
@@ -57,6 +60,8 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
+            implementation(libs.ktor.client)
+            implementation(libs.ktor.serialization.kotlinx.json)
         }
 
         commonTest.dependencies {

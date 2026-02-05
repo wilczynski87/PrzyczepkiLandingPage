@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.size
 import com.example.przyczepki_landingpage.AppViewModel
-import com.example.przyczepki_landingpage.data.CurrentScreen
+import com.example.przyczepki_landingpage.model.CurrentScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

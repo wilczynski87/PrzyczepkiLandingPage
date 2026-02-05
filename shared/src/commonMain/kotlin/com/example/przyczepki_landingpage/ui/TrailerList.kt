@@ -37,9 +37,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
 import com.example.przyczepki_landingpage.AppViewModel
-import com.example.przyczepki_landingpage.data.asPrice
-import com.example.przyczepki_landingpage.model.Prices
-import com.example.przyczepki_landingpage.model.Trailer
+import com.example.przyczepki_landingpage.model.asPrice
+import com.example.przyczepki_landingpage.data.Prices
+import com.example.przyczepki_landingpage.data.Trailer
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -80,19 +80,19 @@ fun TrailerCardBig(trailer: Trailer, rezerwuj: () -> Unit = {}) {
                 modifier = Modifier.padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if(trailer.image == null) {
+                if(trailer.images?.get("main") == null) {
                     Icon(Icons.Default.BrokenImage, "brak zdjęcia")
                 }
                 else {
-                    Image(
-                        painter = painterResource(trailer.image),
-                        contentDescription = trailer.name,
-                        modifier = Modifier
-                            .size(140.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)),
-                        contentScale = ContentScale.Crop
-                    )
+//                    Image(
+//                        painter = painterResource(trailer.image),
+//                        contentDescription = trailer.name,
+//                        modifier = Modifier
+//                            .size(140.dp)
+//                            .clip(RoundedCornerShape(14.dp))
+//                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)),
+//                        contentScale = ContentScale.Crop
+//                    )
                 }
                 Spacer(Modifier.width(20.dp))
 
@@ -122,7 +122,7 @@ fun TrailerCardBig(trailer: Trailer, rezerwuj: () -> Unit = {}) {
                             )
                             TableRow(
                                 "kat. prawa jazdy",
-                                trailer.licenseCategory ?: "brak informacji"
+                                trailer.licenseCategory?.name ?: "brak informacji"
                             )
                         }
                     }
@@ -159,18 +159,18 @@ fun TrailerCardSmall(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(Modifier) {
-                if(trailer.image != null) {
-                    Image(
-                        painter = painterResource(trailer.image),
-                        contentDescription = trailer.name,
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .align(Alignment.Center)
-                            .clip(RoundedCornerShape(14.dp))
-                            .alpha(0.5f)
-                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)),
-                        contentScale = ContentScale.Fit
-                    )
+                if(trailer.images?.get("main") != null) {
+//                    Image(
+//                        painter = painterResource(trailer.image),
+//                        contentDescription = trailer.name,
+//                        modifier = Modifier
+//                            .fillMaxHeight()
+//                            .align(Alignment.Center)
+//                            .clip(RoundedCornerShape(14.dp))
+//                            .alpha(0.5f)
+//                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)),
+//                        contentScale = ContentScale.Fit
+//                    )
                 }
 
                 Column(modifier = Modifier.align(Alignment.Center)) {
@@ -196,7 +196,7 @@ fun TrailerCardSmall(
                     )
                     TableRow(
                         "kat. prawa jazdy",
-                        trailer.licenseCategory ?: "brak informacji"
+                        trailer.licenseCategory?.name ?: "brak informacji"
                     )
                     TableRowPrice(trailer.prices)
                 }

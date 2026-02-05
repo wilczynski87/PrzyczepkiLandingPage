@@ -1,4 +1,4 @@
-package com.example.przyczepki_landingpage.model
+package com.example.przyczepki_landingpage.data
 
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.DrawableResource
@@ -12,9 +12,11 @@ data class Trailer(
     val gvw: Double? = null,
     val purpose: String? = null,
     val axles: Int? = null,
-    val licenseCategory: String? = null,
+    val licenseCategory: LicenseCategory? = null,
+    val hasBreaks: Boolean? = null,
+    val hasTrailer: Boolean? = null,
     val prices: Prices? = null,
-    val image: DrawableResource? = null,
+    val images: Map<String, String>? = null,
 )
 
 @Serializable
@@ -26,3 +28,10 @@ data class Prices(
     val halfDay: Double,
     val reservation: Double
 )
+
+@Serializable
+enum class LicenseCategory {
+    B,
+    BE,
+    C,
+}
