@@ -9,7 +9,8 @@ actual fun createHttpClient(): HttpClient {
 }
 
 @OptIn(ExperimentalWasmJsInterop::class)
-@JsFun("() => (typeof process !== 'undefined' && process.env) ? process.env.APP_ENV : undefined")
+//@JsFun("() => (typeof process !== 'undefined' && process.env) ? process.env.APP_ENV : undefined")
+@JsFun("() => import.meta.env?.APP_ENV")
 private external fun getEnvFromProcess(): String?
 
-actual fun getEnvironment(): String = getEnvFromProcess() ?: "dev"
+actual fun getEnvironment(): String = getEnvFromProcess() ?: "prod"

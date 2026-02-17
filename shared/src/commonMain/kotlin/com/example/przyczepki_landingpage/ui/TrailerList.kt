@@ -137,6 +137,7 @@ fun TrailerCardBig(trailer: Trailer, rezerwuj: () -> Unit = {}) {
             )
 
             // ===== CTA =====
+            println("ENV: ${getEnvironment()}")
             if(getEnvironment() == "prod") Reservation(rezerwuj)
         }
     }
