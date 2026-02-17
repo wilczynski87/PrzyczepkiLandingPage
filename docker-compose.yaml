@@ -1,4 +1,4 @@
-version: "3.9"
+#version: "3.9"
 
 services:
   npm:
@@ -26,6 +26,21 @@ services:
     networks:
       - przyczepki-network
     restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: server/DockerfileServer
+    image: przyczepki-api:latest
+    container_name: przyczepki-api
+    environment:
+      - TZ=Europe/Warsaw
+    networks:
+      - przyczepki-network
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+
 
 networks:
   przyczepki-network:

@@ -1,5 +1,6 @@
 package com.example.przyczepki_landingpage
 
+import com.example.przyczepki_landingpage.controller.healthCheck
 import com.example.przyczepki_landingpage.controller.trailers
 import com.example.przyczepki_landingpage.di.appModule
 import com.example.przyczepki_landingpage.di.networkModule
@@ -39,6 +40,7 @@ private fun Application.configureDependencyInjection() {
 
 private fun Application.routing() {
     routing {
+        healthCheck()
         trailers()
     }
 

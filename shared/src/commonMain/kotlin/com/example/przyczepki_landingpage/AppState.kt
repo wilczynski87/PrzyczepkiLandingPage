@@ -19,8 +19,7 @@ data class AppState(
     val blockedDates: Set<Long> = emptySet(),
 
 
-//    val trailers: List<Trailer> = emptyList(),
-    val trailers: List<Trailer> = com.example.przyczepki_landingpage.trailers,
+    val trailers: List<Trailer> = emptyList(),
     val selectedTrailer: Trailer? = null,
 )
 

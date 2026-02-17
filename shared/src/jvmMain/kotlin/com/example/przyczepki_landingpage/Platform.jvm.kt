@@ -1,6 +1,7 @@
 package com.example.przyczepki_landingpage
 
 import androidx.compose.runtime.Composable
+import io.ktor.client.HttpClient
 
 class JVMPlatform: Platform {
     override val name: String = "Java ${System.getProperty("java.version")}"
@@ -18,4 +19,8 @@ actual fun openNavigationApp(
     label: String,
     mapsProvider: String?
 ) {
+}
+
+actual fun createHttpClient(): HttpClient {
+    TODO("Not yet implemented")
 }

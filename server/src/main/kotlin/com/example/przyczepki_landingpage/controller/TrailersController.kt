@@ -17,7 +17,7 @@ interface TrailersController {
 fun Route.trailers() {
     val trailerService by inject<TrailersService>()
 
-    route("/trailers") {
+    route("/trailer") {
         get("/all") {
             val trailers = trailerService.getTrailers()
             call.respond(trailers)

@@ -45,6 +45,7 @@ fun MyTopAppBar(viewModel: AppViewModel) {
                     text = { Text("Strona główna") },
                     onClick = {
                         expanded = false
+                        viewModel.fetchTrailers()
                         viewModel.navigateTo(CurrentScreen.LANDING)
                     }
                 )

@@ -1,0 +1,40 @@
+# ===== STAGE 1 – build =====
+#FROM gradle:8.5-jdk21 AS builder
+FROM gradle:8.14.3-jdk21-jammy AS builder
+LABEL authors="karol"
+
+WORKDIR /app
+
+# kopiujemy tylko pliki potrzebne do cache zależności
+COPY gradlew .
+COPY gradle gradle
+COPY settings.gradle.kts .
+COPY build.gradle.kts .
+
+# kopiujemy pliki build submodułów (dla cache zależności)
+COPY server/build.gradle.kts server/
+COPY shared/build.gradle.kts shared/
+
+# nadajemy prawa do wrappera
+RUN chmod +x gradlew
+
+# pobranie zależności (cache layer)
+RUN ./gradlew :server:dependencies --no-daemon
+
+# kopiujemy resztę projektu
+COPY . .
+
+# budujemy fat jar (shadowJar)
+RUN ./gradlew :server:shadowJar --no-daemon
+
+
+# ===== STAGE 2 – runtime =====
+FROM eclipse-temurin:21-jre-alpine
+
+WORKDIR /app
+
+COPY --from=builder /app/server/build/libs/*-all.jar app.jar
+
+EXPOSE 8090
+
+ENTRYPOINT ["java","-jar","app.jar"]

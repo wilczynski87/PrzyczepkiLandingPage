@@ -11,7 +11,9 @@ adaptive-ver = "1.2.0"
 hideoo-kalendar = "1.4.0"
 kotlinx-datetime-ver = "0.7.1"
 koin-core-ver = "4.1.1"
-
+server-cors = "2.3.8"
+ktorVer = "3.4.0"
+kotlinx-serialization-json = "1.10.0"
 
 
 [libraries]
@@ -47,6 +49,17 @@ ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negoti
 ktor-server-content-negotiation-jvm = { module = "io.ktor:ktor-server-content-negotiation-jvm", version.ref = "ktor" }
 
 ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
+
+ktor-server-cors = { module = "io.ktor:ktor-server-cors", version.ref = "server-cors" }
+
+# Auth
+ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktorVer" }
+
+# Serialization
+jetbrains-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+
+# Logging
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktorVer" }
 
 
 

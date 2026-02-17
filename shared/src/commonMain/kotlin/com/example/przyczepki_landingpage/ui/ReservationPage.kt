@@ -68,9 +68,7 @@ fun ReservationPage(
                 modifier = Modifier
                     .sizeIn(maxWidth = 450.dp)
             ) {
-                TrailerSelectionList(
-                    viewModel
-                )
+                TrailerSelectionList( viewModel )
             }
 
             Column(

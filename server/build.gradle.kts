@@ -41,4 +41,8 @@ dependencies {
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.ktor.server.content.negotiation.jvm)
 
+    // Cors
+    implementation(libs.ktor.server.cors)
+
+
 }

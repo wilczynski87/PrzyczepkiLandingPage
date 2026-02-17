@@ -22,6 +22,7 @@ COPY gradle/ gradle/
 COPY gradle.properties .
 COPY settings.gradle.kts .
 COPY build.gradle.kts .
+
 RUN chmod +x gradlew
 
 # 2. Utwórz katalog .gradle i nadaj prawa gradle userowi
@@ -30,12 +31,15 @@ RUN mkdir -p /workspace/.gradle && chown -R gradle:gradle /workspace
 # 3. Przełącz na gradle usera
 USER gradle
 
+# Przyśpieszenie  - catch zależności
+RUN ./gradlew --no-daemon help
+
 # 4. Skopiuj moduły projektu **raz** i ustaw właściciela
 COPY --chown=gradle:gradle shared/ shared/
 COPY --chown=gradle:gradle composeApp/ composeApp/
 
 # 5. Build KMP WASM (production)
-RUN ./gradlew clean \
+RUN ./gradlew \
     :shared:compileKotlinWasmJs \
     :composeApp:wasmJsBrowserDistribution \
     --no-daemon \
