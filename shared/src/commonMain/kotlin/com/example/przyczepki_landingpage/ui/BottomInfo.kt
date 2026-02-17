@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
+import com.example.przyczepki_landingpage.getEnvironment
 import com.example.przyczepki_landingpage.model.CurrentScreen
 import com.example.przyczepki_landingpage.model.latitude
 import com.example.przyczepki_landingpage.model.longitude
@@ -74,7 +75,8 @@ fun BottomInfo(
         Column (
             modifier = Modifier.weight(1f)
         ) {
-            TextButton(
+
+            if(getEnvironment() == "prod")  TextButton(
                 onClick = {
                     viewModel.navigateTo(CurrentScreen.RESERVATION)
                 },

@@ -10,6 +10,8 @@ expect fun getPlatform(): Platform
 
 expect fun createHttpClient(): HttpClient
 
+expect fun getEnvironment(): String
+
 @Composable
 expect fun CompanyMap(latitude: Double, longitude: Double, mapsProvider: String?)
 expect fun openNavigationApp(latitude: Double, longitude: Double, label: String, mapsProvider: String? = null,)

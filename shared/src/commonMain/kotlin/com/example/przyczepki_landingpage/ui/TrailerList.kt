@@ -40,6 +40,7 @@ import com.example.przyczepki_landingpage.AppViewModel
 import com.example.przyczepki_landingpage.model.asPrice
 import com.example.przyczepki_landingpage.data.Prices
 import com.example.przyczepki_landingpage.data.Trailer
+import com.example.przyczepki_landingpage.getEnvironment
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -136,7 +137,7 @@ fun TrailerCardBig(trailer: Trailer, rezerwuj: () -> Unit = {}) {
             )
 
             // ===== CTA =====
-            Reservation(rezerwuj)
+            if(getEnvironment() == "prod") Reservation(rezerwuj)
         }
     }
 }
@@ -203,7 +204,7 @@ fun TrailerCardSmall(
 
             }
         }
-        Reservation(rezerwuj)
+        if(getEnvironment() == "prod") Reservation(rezerwuj)
     }
 }
 

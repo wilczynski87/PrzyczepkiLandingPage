@@ -24,3 +24,5 @@ actual fun openNavigationApp(
 actual fun createHttpClient(): HttpClient {
     TODO("Not yet implemented")
 }
+
+actual fun getEnvironment(): String = System.getenv("APP_ENV") ?: "dev"

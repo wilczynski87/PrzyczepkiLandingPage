@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.size
 import com.example.przyczepki_landingpage.AppViewModel
+import com.example.przyczepki_landingpage.getEnvironment
 import com.example.przyczepki_landingpage.model.CurrentScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,7 +50,7 @@ fun MyTopAppBar(viewModel: AppViewModel) {
                         viewModel.navigateTo(CurrentScreen.LANDING)
                     }
                 )
-                DropdownMenuItem(
+                if(getEnvironment() == "prod") DropdownMenuItem(
                     text = { Text("Rezerwacja") },
                     onClick = {
                         expanded = false

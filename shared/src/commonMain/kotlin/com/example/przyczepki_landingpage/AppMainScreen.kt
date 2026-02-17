@@ -33,13 +33,16 @@ import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.ui.ContactPage
 import com.example.przyczepki_landingpage.ui.MainScreen
 import com.example.przyczepki_landingpage.ui.MyTopAppBar
+import com.example.przyczepki_landingpage.ui.PricesPage
 import com.example.przyczepki_landingpage.ui.ReservationPage
+import com.example.przyczepki_landingpage.ui.TermsPage
 import com.example.przyczepki_landingpage.ui.modal.AppModals
 import org.jetbrains.compose.resources.painterResource
 import przyczepkilandingpage.shared.generated.resources.Res
 import przyczepkilandingpage.shared.generated.resources.przyczepka1
 import przyczepkilandingpage.shared.generated.resources.vesta1
 import przyczepkilandingpage.shared.generated.resources.zaslaw1
+import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
@@ -90,7 +93,7 @@ fun AppMainScreen() {
                     }
 
                     CurrentScreen.PRICES -> {
-//                        PricesPage(widthSizeClass, viewModel)
+                        PricesPage(widthSizeClass, viewModel)
                     }
 
                     CurrentScreen.CONTACT -> {
@@ -98,7 +101,7 @@ fun AppMainScreen() {
                     }
 
                     CurrentScreen.TERMS_AND_CONDITIONS -> {
-//                        TermsPage(widthSizeClass)
+                        TermsPage(widthSizeClass, viewModel)
                     }
 
                     CurrentScreen.LOGIN -> {
