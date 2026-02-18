@@ -23,6 +23,7 @@ services:
     image: przyczepki-web:latest
     environment:
       - TZ=Europe/Warsaw
+      - APP_ENV=dev
     networks:
       - przyczepki-network
     restart: unless-stopped

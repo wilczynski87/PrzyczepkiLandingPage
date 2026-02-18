@@ -64,5 +64,7 @@ LABEL name="przyczepki-web"
 LABEL version="1.0"
 LABEL description="Landing page dla przyczepek - web"
 
+ENV APP_ENV=dev
+
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
