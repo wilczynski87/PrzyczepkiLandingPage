@@ -55,9 +55,13 @@ FROM nginx:stable-alpine
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
 # 2. Skopiuj pliki WASM
+#COPY --from=builder \
+#  /workspace/composeApp/build/dist/wasmJs/productionExecutable/ \
+#  /usr/share/nginx/html/
 COPY --from=builder \
   /workspace/composeApp/build/dist/wasmJs/productionExecutable/ \
   /usr/share/nginx/html/
+
 
 # 3. Metadane obrazu
 LABEL name="przyczepki-web"

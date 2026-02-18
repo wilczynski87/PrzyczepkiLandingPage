@@ -4,25 +4,33 @@ import com.example.przyczepki_landingpage.data.Trailer
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.isSuccess
 
 class TrailerController(private val client: HttpClient = HttpClient()) {
 
     suspend fun getTrailers(): List<Trailer> {
         return try {
-            client.get("$base_url/trailer/all").body()
+            val response: HttpResponse = client.get("$base_url/trailer/all")
+            if (response.status.isSuccess()) {
+                response.body()
+            } else {
+                println("Błąd fetch trailers: ${response.status}")
+                emptyList()
+            }
         } catch (e: Exception) {
-            println("Error: ${e.message}")
+            println("Error fetching trailers: ${e.message}")
             emptyList()
         }
     }
 
     suspend fun getTrailer(trailerId: Int): Trailer? {
-        try {
+        return try {
+            client.get("$base_url/trailer/$trailerId").body()
 
         } catch (e: Exception) {
             null
         }
-        return client.get("$base_url/trailer/$trailerId").body()
     }
 
     fun close() {

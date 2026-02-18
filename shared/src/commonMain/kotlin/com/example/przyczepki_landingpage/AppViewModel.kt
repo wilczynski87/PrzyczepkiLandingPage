@@ -19,7 +19,7 @@ class AppViewModel(private val scope: CoroutineScope) {
     val appState: StateFlow<AppState> = _appState.asStateFlow()
 
     init {
-        fetchTrailers()
+//        fetchTrailers()
     }
 
     fun navigateTo(destination: CurrentScreen) {

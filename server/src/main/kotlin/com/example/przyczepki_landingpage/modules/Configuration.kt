@@ -26,8 +26,9 @@ fun Application.config() {
     }
 
     install(CORS) {
-        allowHost("localhost:8080")
-        allowHost("przyczepki-landing-page:8080")
+//        allowHost("localhost:8080")
+//        allowHost("przyczepki-landing-page:80")
+        anyHost()
         allowMethod(HttpMethod.Get)
         allowMethod(HttpMethod.Post)
         allowMethod(HttpMethod.Put)

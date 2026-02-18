@@ -12,7 +12,6 @@ hideoo-kalendar = "1.4.0"
 kotlinx-datetime-ver = "0.7.1"
 koin-core-ver = "4.1.1"
 server-cors = "2.3.8"
-ktorVer = "3.4.0"
 kotlinx-serialization-json = "1.10.0"
 
 
@@ -53,13 +52,13 @@ ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
 ktor-server-cors = { module = "io.ktor:ktor-server-cors", version.ref = "server-cors" }
 
 # Auth
-ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktorVer" }
+ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
 
 # Serialization
 jetbrains-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 
 # Logging
-ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktorVer" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
 
 
 
