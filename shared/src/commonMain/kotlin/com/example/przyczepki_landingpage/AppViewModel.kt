@@ -3,6 +3,7 @@ package com.example.przyczepki_landingpage
 import com.example.przyczepki_landingpage.controller.ApiClient
 import com.example.przyczepki_landingpage.model.CurrentScreen
 import com.example.przyczepki_landingpage.data.ModalType
+import com.example.przyczepki_landingpage.data.ReservationDto
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
 import io.ktor.util.logging.Logger
@@ -79,5 +80,38 @@ class AppViewModel(private val scope: CoroutineScope) {
         }
     }
 
+    /*
+        RESERVATION
+     */
+    fun fetchReservations() {
+        scope.launch {
+            try {
+                val reservations = ApiClient.reservationController.getReservations()
+                if (reservations.isNotEmpty()) {
+                    _appState.update { it.copy(reservations = reservations) }
+                    val blockedDates = mapReservationsToBlockedDates()
+                    _appState.update { it.copy(blockedDates = blockedDates) }
+                }
+            } catch (e: Exception) {
+                println("Error: ${e.message}")
+            }
+        }
+    }
+
+    private fun mapReservationsToBlockedDates(): Set<Long> {
+        val reservations: List<ReservationDto> = appState.value.reservations
+        val trailerId: Int = appState.value.selectedTrailer?.id ?: return emptySet()
+
+        val blockedDates = mutableSetOf<Long>()
+
+        reservations.filter { it.trailerId == trailerId.toLong() }.forEach {
+            var current = it.startDate
+            while (current <= it.endDate) {
+                blockedDates.add(current)
+                current += 24 * 60 * 60 * 1000
+            }
+        }
+        return blockedDates
+    }
 
 }

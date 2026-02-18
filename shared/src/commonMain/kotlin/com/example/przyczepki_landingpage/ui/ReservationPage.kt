@@ -51,7 +51,9 @@ import com.example.przyczepki_landingpage.ui.reservation.TrailerSelectionList
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
+import kotlin.ranges.rangeTo
 import kotlin.time.Clock
+import kotlin.time.Instant
 
 @Composable
 fun ReservationPage(
@@ -185,9 +187,13 @@ fun ReservationCalendar(
 ) {
     val state by viewModel.appState.collectAsState()
     val blockedDates: Set<Long> = state.blockedDates
+    val startDate: Long? = state.dateRangePickerStart
+    val endDate: Long? = state.dateRangePickerEnd
+    val trailer: Trailer? = state.selectedTrailer
+
 //    val blockedDates: Set<Long> = setOf(
-//        Instant.parse("2026-01-29T00:00:00Z").toEpochMilliseconds(),
-//        Instant.parse("2026-01-30T00:00:00Z").toEpochMilliseconds(),
+//        Instant.parse("2026-02-20T00:00:00Z").toEpochMilliseconds(),
+//        Instant.parse("2026-02-21T00:00:00Z").toEpochMilliseconds(),
 //    )
 
 
@@ -268,7 +274,13 @@ fun ReservationCalendar(
                     disabledDayContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
                 )
             )
-            Order(viewModel)
+            if(canReserve(blockedDates, startDate, endDate).not()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) { canReserveInfo(trailer, blockedDates, startDate, endDate) }
+            }
+            Order(viewModel, trailer, blockedDates, startDate, endDate)
         }
 
     }
@@ -276,17 +288,17 @@ fun ReservationCalendar(
 
 @Composable
 fun Order(
-    viewModel: AppViewModel
+    viewModel: AppViewModel,
+    trailer: Trailer?,
+    blockedDates: Set<Long> = emptySet(),
+    startDate: Long?,
+    endDate: Long?,
 ) {
-    val state by viewModel.appState.collectAsState()
-    val trailer: Trailer? = state.selectedTrailer
-    val startDate: Long? = state.dateRangePickerStart
-    val endDate: Long? = state.dateRangePickerEnd
-
     val canReserve =
         trailer != null &&
         startDate != null &&
-        endDate != null
+        endDate != null &&
+                canReserve(blockedDates, startDate, endDate)
 
     Button(
         onClick = { viewModel.openModal(
@@ -301,5 +313,31 @@ fun Order(
         modifier = Modifier.fillMaxWidth().padding(4.dp)
     ) {
         Text("Rezerwuj")
+    }
+}
+
+
+fun canReserve(
+    blockedDates: Set<Long>,
+    startDate: Long?,
+    endDate: Long?,
+): Boolean {
+    if( startDate == null || endDate == null) return false
+    return blockedDates.any { it in startDate..endDate }.not()
+}
+
+@Composable
+fun canReserveInfo(
+    trailer: Trailer?,
+    blockedDates: Set<Long>,
+    startDate: Long?,
+    endDate: Long?,
+) {
+    Column {
+        if(trailer == null) Text("Nie wybrano przyczepki")
+        if(startDate == null) Text("Nie wybrano daty rozpoczęcia")
+        if(endDate == null) Text("Nie wybrano daty zakończenia")
+        if(!canReserve(blockedDates, startDate, endDate) && startDate != null && endDate != null)
+            Text("Nie można rezerwować z rezerwacjami pomiędzy")
     }
 }

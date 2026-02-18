@@ -16,8 +16,6 @@ const val base_url = "http://przyczepki-api:8090"
 object ApiClient {
     val client: HttpClient = createHttpClient()
 
-
     val trailerController by lazy { TrailerController(client) }
-    
-
+    val reservationController by lazy { ReservationController(client) }
 }

@@ -2,6 +2,7 @@ package com.example.przyczepki_landingpage
 
 import com.example.przyczepki_landingpage.model.CurrentScreen
 import com.example.przyczepki_landingpage.data.ModalType
+import com.example.przyczepki_landingpage.data.ReservationDto
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
 import kotlinx.serialization.Serializable
@@ -17,6 +18,7 @@ data class AppState(
     val dateRangePickerEnd: Long? = null,
     val reservationPrice: ReservationPrice? = null,
     val blockedDates: Set<Long> = emptySet(),
+    val reservations: List<ReservationDto> = emptyList(),
 
 
     val trailers: List<Trailer> = emptyList(),

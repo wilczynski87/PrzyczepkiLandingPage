@@ -90,6 +90,7 @@ fun AppMainScreen() {
 
                     CurrentScreen.RESERVATION -> {
                         ReservationPage(widthSizeClass, viewModel)
+                        viewModel.fetchReservations()
                     }
 
                     CurrentScreen.PRICES -> {

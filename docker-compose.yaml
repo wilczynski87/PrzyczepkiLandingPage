@@ -1,32 +1,32 @@
 #version: "3.9"
 
 services:
-  npm:
-    image: jc21/nginx-proxy-manager:latest
-    container_name: nginx-proxy-manager
-    ports:
-      - "80:80"
-      - "81:81"    # panel admina
-      - "443:443"
-    volumes:
-      - ./npm/data:/data
-      - ./npm/letsencrypt:/etc/letsencrypt
-    networks:
-      - przyczepki-network
-    restart: unless-stopped
-
-  przyczepki-web:
-    container_name: przyczepki-landing-page
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: przyczepki-web:latest
-    environment:
-      - TZ=Europe/Warsaw
-      - APP_ENV=dev
-    networks:
-      - przyczepki-network
-    restart: unless-stopped
+#  npm:
+#    image: jc21/nginx-proxy-manager:latest
+#    container_name: nginx-proxy-manager
+#    ports:
+#      - "80:80"
+#      - "81:81"    # panel admina
+#      - "443:443"
+#    volumes:
+#      - ./npm/data:/data
+#      - ./npm/letsencrypt:/etc/letsencrypt
+#    networks:
+#      - przyczepki-network
+#    restart: unless-stopped
+#
+#  przyczepki-web:
+#    container_name: przyczepki-landing-page
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    image: przyczepki-web:latest
+#    environment:
+#      - TZ=Europe/Warsaw
+#      - APP_ENV=dev
+#    networks:
+#      - przyczepki-network
+#    restart: unless-stopped
 #    ports:
 #      - "80:80"
 
@@ -41,8 +41,8 @@ services:
     networks:
       - przyczepki-network
     restart: unless-stopped
-#    ports:
-#      - "8090:8090"
+    ports:
+      - "8090:8090"
 
 
 networks:
