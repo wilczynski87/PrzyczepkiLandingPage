@@ -2,7 +2,7 @@ package com.example.przyczepki_landingpage
 
 import com.example.przyczepki_landingpage.controller.ApiClient
 import com.example.przyczepki_landingpage.model.CurrentScreen
-import com.example.przyczepki_landingpage.data.ModalType
+import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.data.ReservationDto
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
@@ -41,9 +41,8 @@ class AppViewModel(private val scope: CoroutineScope) {
     }
 
     /*
-        Sever HelathCheck
+        Sever health check
      */
-
     fun checkServerHealth() {
         scope.launch {
             val serverStatus = ApiClient.healthCheck.healthCheck()
@@ -70,8 +69,23 @@ class AppViewModel(private val scope: CoroutineScope) {
         }
     }
 
-    fun reserve() {
-        // TODO
+    fun checkReservation(reservation: ReservationDto) {
+        scope.launch {
+            ApiClient.reservationController.checkReservation(reservation)
+                .onSuccess { reservation ->
+                    _appState.update { currentState -> currentState.copy(
+                            reservationToMake = reservation,
+                            reservationErrors = emptyList()
+                        )
+                    }
+                }.onFailure { errors ->
+                    _appState.update { currentState -> currentState.copy(
+                            reservationToMake = reservation,
+                            reservationErrors = errors.message?.split(",") ?: emptyList()
+                        )
+                    }
+                }
+        }
     }
 
     fun reservationButtonClick(trailer: Trailer) {
@@ -136,8 +150,10 @@ class AppViewModel(private val scope: CoroutineScope) {
         val blockedDates = mutableSetOf<Long>()
 
         reservations.filter { it.trailerId == trailerId.toLong() }.forEach {
-            var current = it.startDate
-            while (current <= it.endDate) {
+            var current = it.startDate ?: throw NullPointerException("mapReservationsToBlockedDates: Brakuje daty rozpoczęcia")
+            while (current <= (it.endDate
+                    ?: throw NullPointerException("mapReservationsToBlockedDates: Brakuje daty zakończenia"))
+            ) {
                 blockedDates.add(current)
                 current += 24 * 60 * 60 * 1000
             }

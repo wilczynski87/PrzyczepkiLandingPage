@@ -1,6 +1,8 @@
 package com.example.przyczepki_landingpage.controller
 
 import com.example.przyczepki_landingpage.data.ReservationDto
+import com.example.przyczepki_landingpage.data.ReservationPrice
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -14,7 +16,25 @@ fun Route.reservation() {
 
             call.respond(testReservations)
         }
-        post {
+
+        post("/check") {
+            try {
+                val reservationDto: ReservationDto = call.receive()
+                println("reservationDto: $reservationDto")
+
+                // reservation validation
+
+                // calculate prices
+                val reservationToConfirm = testReservations2
+
+                call.respond(reservationToConfirm)
+            } catch (e: Exception) {
+                println("reservation, check error: $e")
+            }
+
+        }
+
+        post("/save") {
 //            call.respond(reservationService.setReservation())
         }
 
@@ -29,6 +49,22 @@ val testReservations: List<ReservationDto> = listOf(
         startDate = todayStartMillis(),
         endDate = todayStartMillis() + 24 * 60 * 60 * 1000,
     ),
+)
+
+val testReservations2: ReservationDto = ReservationDto(
+        id = 2,
+        trailerId = 2,
+        startDate = todayStartMillis() + 2 * 24 * 60 * 60 * 1000,
+        endDate = todayStartMillis() + 4 * 24 * 60 * 60 * 1000,
+        reservationPrice = ReservationPrice(
+            trailerId = 2,
+            firstDay = 50.00,
+            otherDays = 70.00,
+            halfDay = null,
+            reservation = 40.00,
+            daysNumber = 2,
+            sum = 120.00,
+        )
 )
 
 fun todayStartMillis(): Long {

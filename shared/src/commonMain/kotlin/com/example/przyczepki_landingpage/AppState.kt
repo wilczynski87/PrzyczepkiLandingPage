@@ -1,7 +1,8 @@
 package com.example.przyczepki_landingpage
 
+import com.example.przyczepki_landingpage.data.Customer
 import com.example.przyczepki_landingpage.model.CurrentScreen
-import com.example.przyczepki_landingpage.data.ModalType
+import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.data.ReservationDto
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
@@ -19,22 +20,14 @@ data class AppState(
 
     val dateRangePickerStart: Long? = null,
     val dateRangePickerEnd: Long? = null,
-    val reservationPrice: ReservationPrice? = null,
     val blockedDates: Set<Long> = emptySet(),
     val reservations: List<ReservationDto> = emptyList(),
 
+    val reservationToMake: ReservationDto? = null,
+    val reservationErrors: List<String> = emptyList(),
 
     val trailers: List<Trailer> = emptyList(),
     val selectedTrailer: Trailer? = null,
-)
 
-@Serializable
-data class ReservationPrice(
-    val trailerId: Long? = null,
-    val halfDay: Double,
-    val reservation: Double,
-    val firstDay: Double,
-    val otherDays: Double,
-    val daysNumber: Long = 1,
-    val sum: Double = 0.0,
+    val customer: Customer? = null,
 )

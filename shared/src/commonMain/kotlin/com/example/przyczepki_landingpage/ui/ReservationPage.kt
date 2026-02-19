@@ -43,7 +43,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
-import com.example.przyczepki_landingpage.data.ModalType
+import com.example.przyczepki_landingpage.data.ReservationDto
+import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.model.todayUtcMillis
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
@@ -292,15 +293,23 @@ fun Order(
         trailer != null &&
         startDate != null &&
         endDate != null &&
-                canReserve(blockedDates, startDate, endDate)
+        canReserve(blockedDates, startDate, endDate)
 
     Button(
-        onClick = { viewModel.openModal(
-            ModalType.CONFIRM_RESERVATION,
-            ModalData(
-                dialogTitle = "Potwierdzenie rezerwacji",
-                dialogText = "Czy na pewno chcesz rezerwować przyczepkę?",
-                )
+        onClick = {
+            val reservation = ReservationDto(
+                startDate = startDate,
+                endDate = endDate,
+                trailerId = trailer?.id?.toLong()
+            )
+            viewModel.checkReservation(reservation)
+            viewModel.openModal(
+                ModalType.CONFIRM_RESERVATION,
+                ModalData(
+                    onConfirmation = {  },
+                    dialogTitle = "Potwierdzenie rezerwacji",
+                    dialogText = "Czy na pewno chcesz rezerwować przyczepkę?",
+                    )
             )
         },
         enabled = canReserve,

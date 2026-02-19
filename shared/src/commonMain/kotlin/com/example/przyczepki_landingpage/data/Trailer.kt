@@ -23,10 +23,10 @@ data class Trailer(
 data class Prices(
     val id: Long,
     val trailerId: Long? = null,
-    val firstDay: Double,
-    val otherDays: Double,
-    val halfDay: Double,
-    val reservation: Double
+    val firstDay: Double? = null,
+    val otherDays: Double? = null,
+    val halfDay: Double? = null,
+    val reservation: Double? = null,
 )
 
 @Serializable

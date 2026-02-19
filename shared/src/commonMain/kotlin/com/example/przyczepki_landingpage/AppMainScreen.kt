@@ -20,14 +20,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.data.LicenseCategory
 import com.example.przyczepki_landingpage.model.CurrentScreen
-import com.example.przyczepki_landingpage.data.ModalType
+import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.data.Prices
 import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.ui.ContactPage
@@ -41,11 +40,7 @@ import kotlinx.coroutines.MainScope
 import org.jetbrains.compose.resources.painterResource
 import przyczepkilandingpage.shared.generated.resources.Res
 import przyczepkilandingpage.shared.generated.resources.przyczepka1
-import przyczepkilandingpage.shared.generated.resources.vesta1
-import przyczepkilandingpage.shared.generated.resources.zaslaw1
-import kotlin.time.Clock
 val scope = MainScope()
-
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun AppMainScreen() {

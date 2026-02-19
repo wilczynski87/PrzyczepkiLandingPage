@@ -1,4 +1,4 @@
-package com.example.przyczepki_landingpage.data
+package com.example.przyczepki_landingpage.model
 
 enum class ModalType {
     NONE,

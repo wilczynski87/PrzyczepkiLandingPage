@@ -1,5 +1,6 @@
 package com.example.przyczepki_landingpage.ui.modal
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,43 +9,49 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
-import com.example.przyczepki_landingpage.ReservationPrice
-import com.example.przyczepki_landingpage.data.ModalType
+import com.example.przyczepki_landingpage.data.ReservationPrice
+import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.model.asPrice
 import com.example.przyczepki_landingpage.model.formatDatePl
 import com.example.przyczepki_landingpage.data.Trailer
+import com.example.przyczepki_landingpage.ui.LoadingScreen
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
@@ -72,11 +79,15 @@ fun ReservationConfirmationModal(
     viewModel: AppViewModel
 ) {
     val state by viewModel.appState.collectAsState()
+
     val modal = state.modal
+
+    val reservationToMake = state.reservationToMake
     val trailer = state.selectedTrailer
-    val from = state.dateRangePickerStart
-    val to = state.dateRangePickerEnd
-    val reservationPrices = state.reservationPrice
+
+    val from = reservationToMake?.startDate
+    val to = reservationToMake?.endDate
+    val reservationPrices = reservationToMake?.reservationPrice
 
     Box(
         modifier = Modifier
@@ -94,10 +105,16 @@ fun ReservationConfirmationModal(
             modifier = Modifier
                 .padding(24.dp)
                 .widthIn(max = 600.dp)
+//                .fillMaxHeight(0.9f)
         ) {
             Column(
-                modifier = Modifier.padding(24.dp)
+                modifier = Modifier
+                    .padding(24.dp)
+//                    .verticalScroll(rememberScrollState())
             ) {
+                if(reservationToMake == null) {
+                    LoadingScreen("loading reservation")
+                } else
                 // Header
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -134,7 +151,7 @@ fun ReservationConfirmationModal(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Prices
-                trailerReservationPrices(reservationPrices)
+                if(reservationPrices != null) trailerReservationPrices(reservationPrices)
 
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -172,7 +189,7 @@ fun ReservationConfirmationModal(
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                                 Text(
-                                    text = "${trailer?.prices?.reservation?.asPrice() ?: "0,00"} zł",
+                                    text = "${trailer?.prices?.reservation?.asPrice() ?: "Błąd!"} zł",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -189,7 +206,7 @@ fun ReservationConfirmationModal(
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                             Text(
-                                text = "${reservationPrices?.sum?.asPrice() ?: "0,00"} zł",
+                                text = "${reservationToMake?.reservationPrice?.sum ?: "Błąd!"} zł",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -380,89 +397,88 @@ fun trailerReservationDates(
 
 @Composable
 fun trailerReservationPrices(
-    prices: ReservationPrice?,
+    reservationPrice: ReservationPrice?,
     modifier: Modifier = Modifier
 ) {
-    if (prices == null) return
-
-    val totalPrice = remember(prices) {
-        if (prices.daysNumber == 1L) {
-            prices.firstDay + prices.reservation
-        } else {
-            prices.firstDay + (prices.otherDays * (prices.daysNumber - 1)) + prices.reservation
-        }
-    }
+    if (reservationPrice == null || reservationPrice.daysNumber == null) return
+    var furtherInfo: Boolean by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
         // Nagłówek sekcji
-        Text(
-            text = "Szczegóły płatności",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        // Lista pozycji cenowych
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        OutlinedButton(
+            onClick = {furtherInfo = !furtherInfo},
         ) {
-            // Pół dnia (jeśli dotyczy)
-            if (prices.halfDay > 0) {
-                PriceRow(
-                    label = "Wynajem pół dnia",
-                    amount = prices.halfDay,
-                    showInfo = true,
-                    infoText = "Do 5 godzin wynajmu"
-                )
-            }
-
-            // Pierwszy dzień
-            PriceRow(
-                label = if (prices.daysNumber == 1L) "Wynajem 1 dnia"
-                else "Pierwszy dzień",
-                amount = prices.firstDay,
-            )
-
-            // Kolejne dni (jeśli więcej niż 1 dzień)
-            if (prices.daysNumber > 1) {
-                val subsequentDays = prices.daysNumber - 1
-                PriceRow(
-                    label = "Kolejne $subsequentDays dni",
-                    amount = prices.otherDays * subsequentDays,
-                    showInfo = true,
-                    infoText = "${prices.otherDays.asPrice()} za dzień"
-                )
-            }
-
-            // Kaucja rezerwacyjna
-            PriceRow(
-                label = "Kaucja rezerwacyjna",
-                amount = prices.reservation,
-                showInfo = true,
-                infoText = "Bezzwrotna przy rezygnacji"
-            )
-
-            // Linia separatora przed sumą
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 8.dp),
-                thickness = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant
-            )
-
-            // Suma końcowa
-            PriceRow(
-                label = "Łącznie do zapłaty",
-                amount = totalPrice,
-                isTotal = true
-            )
-
-            // Informacja o sposobie płatności
             Text(
-                text = "Kaucja rezerwacyjna płatna od razu, pozostała kwota przy odbiorze",
-                style = MaterialTheme.typography.bodySmall,
+                text = "Szczegóły płatności",
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 8.dp)
+                modifier = Modifier
             )
+        }
+        if(furtherInfo) {
+        // Lista pozycji cenowych
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Pół dnia (jeśli dotyczy)
+                if (reservationPrice.halfDay != null) {
+                    PriceRow(
+                        label = "Wynajem pół dnia",
+                        amount = reservationPrice.halfDay,
+                        showInfo = true,
+                        infoText = "Do 6 godzin wynajmu"
+                    )
+                }
+
+                // Pierwszy dzień
+                PriceRow(
+                    label = if (reservationPrice.daysNumber == 1L) "Wynajem 1 dnia"
+                    else "Pierwszy dzień",
+                    amount = reservationPrice.firstDay ?: throw NullPointerException("Brak 1 dnia rezerwacji"),
+                )
+
+                // Kolejne dni (jeśli więcej niż 1 dzień)
+                if (reservationPrice.daysNumber > 1) {
+                    reservationPrice.otherDays ?: throw NullPointerException("Brak kolejnych dni rezerwacji")
+                    val subsequentDays = reservationPrice.daysNumber - 1
+                    PriceRow(
+                        label = "Kolejne $subsequentDays dni",
+                        amount = reservationPrice.otherDays * subsequentDays,
+                        showInfo = true,
+                        infoText = "${reservationPrice.otherDays.asPrice()} za dzień"
+                    )
+                }
+
+                // Kaucja rezerwacyjna
+                PriceRow(
+                    label = "Kaucja rezerwacyjna",
+                    amount = reservationPrice.reservation ?: 40.00,
+                    showInfo = true,
+                    infoText = "Bezzwrotna przy rezygnacji"
+                )
+
+                // Linia separatora przed sumą
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
+
+                // Suma końcowa
+                PriceRow(
+                    label = "Łącznie do zapłaty",
+                    amount = reservationPrice.sum ?: throw NullPointerException("Brak sumy wypożyczenia"),
+                    isTotal = true
+                )
+
+                // Informacja o sposobie płatności
+                Text(
+                    text = "Kaucja rezerwacyjna płatna od razu, pozostała kwota przy odbiorze",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
         }
     }
 }

@@ -259,7 +259,7 @@ fun TableRowPrice(
 
                     if (prices != null) {
                         Text(
-                            "${prices.firstDay.asPrice()} zł",
+                            "${prices.firstDay?.asPrice()} zł",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -298,9 +298,9 @@ fun TableRowPrice(
                             .padding(top = 12.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        PriceDetailRow("Każda kolejna doba", "${prices.otherDays.asPrice()} zł")
-                        PriceDetailRow("12 godzin", "${prices.halfDay.asPrice()} zł")
-                        PriceDetailRow("Rezerwacja", "${prices.reservation.asPrice()} zł")
+                        PriceDetailRow("Każda kolejna doba", "${prices.otherDays?.asPrice()} zł")
+                        PriceDetailRow("12 godzin", "${prices.halfDay?.asPrice()} zł")
+                        PriceDetailRow("Rezerwacja", "${prices.reservation?.asPrice()} zł")
                     }
                 }
             }
