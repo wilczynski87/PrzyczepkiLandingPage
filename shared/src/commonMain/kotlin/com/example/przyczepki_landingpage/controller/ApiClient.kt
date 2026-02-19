@@ -10,11 +10,13 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.serialization.json.Json
 
-const val base_url = "http://przyczepki-api:8090"
-//const val base_url = "http://localhost:8090"
+//const val base_url = "http://przyczepki-api:8090"
+const val base_url = "http://localhost:8090"
 
 object ApiClient {
-    val client: HttpClient = createHttpClient()
+    val client: HttpClient by lazy { createHttpClient() }
+
+    val healthCheck by lazy { HealthCheck(client) }
 
     val trailerController by lazy { TrailerController(client) }
     val reservationController by lazy { ReservationController(client) }

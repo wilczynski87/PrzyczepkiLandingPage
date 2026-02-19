@@ -5,10 +5,13 @@ import com.example.przyczepki_landingpage.data.ModalType
 import com.example.przyczepki_landingpage.data.ReservationDto
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
+import com.example.przyczepki_landingpage.model.ServerResponse
 import kotlinx.serialization.Serializable
 
 data class AppState(
     val currentScreen: CurrentScreen = CurrentScreen.LANDING,
+
+    val serverStatus: ServerResponse? = null,
 
     val modalVisible: Boolean = false,
     val modalType: ModalType = ModalType.NONE,

@@ -191,12 +191,6 @@ fun ReservationCalendar(
     val endDate: Long? = state.dateRangePickerEnd
     val trailer: Trailer? = state.selectedTrailer
 
-//    val blockedDates: Set<Long> = setOf(
-//        Instant.parse("2026-02-20T00:00:00Z").toEpochMilliseconds(),
-//        Instant.parse("2026-02-21T00:00:00Z").toEpochMilliseconds(),
-//    )
-
-
     val todayMillis = remember { todayUtcMillis() }
 
     val selectableDates = remember(blockedDates, todayMillis) {

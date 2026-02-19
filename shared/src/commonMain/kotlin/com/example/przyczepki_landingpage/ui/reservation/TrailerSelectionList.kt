@@ -59,7 +59,9 @@ fun TrailerSelectionList(
             TrailerCard(
                 trailer = it,
                 selected = it == selectedTrailer,
-                onClick = { onSelect(it) }
+                onClick = {
+                    onSelect(it)
+                }
             )
         }
     }

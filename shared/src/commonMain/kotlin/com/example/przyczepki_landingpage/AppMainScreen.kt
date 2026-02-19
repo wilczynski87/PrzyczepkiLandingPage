@@ -37,17 +37,18 @@ import com.example.przyczepki_landingpage.ui.PricesPage
 import com.example.przyczepki_landingpage.ui.ReservationPage
 import com.example.przyczepki_landingpage.ui.TermsPage
 import com.example.przyczepki_landingpage.ui.modal.AppModals
+import kotlinx.coroutines.MainScope
 import org.jetbrains.compose.resources.painterResource
 import przyczepkilandingpage.shared.generated.resources.Res
 import przyczepkilandingpage.shared.generated.resources.przyczepka1
 import przyczepkilandingpage.shared.generated.resources.vesta1
 import przyczepkilandingpage.shared.generated.resources.zaslaw1
 import kotlin.time.Clock
+val scope = MainScope()
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun AppMainScreen() {
-    val scope = rememberCoroutineScope()
     // 1. Calculate window size class
     val windowSizeClass = calculateWindowSizeClass()
     // 2. Extract width size class (Compact, Medium, Expanded)
@@ -90,7 +91,6 @@ fun AppMainScreen() {
 
                     CurrentScreen.RESERVATION -> {
                         ReservationPage(widthSizeClass, viewModel)
-                        viewModel.fetchReservations()
                     }
 
                     CurrentScreen.PRICES -> {
@@ -131,6 +131,7 @@ fun AppMainScreen() {
 
 val trailers = listOf(
     Trailer(
+        id = 1,
         name = "Przyczepka lekka - Vesta light 25",
         size = "252,1 × 135,4 × 37,3 cm",
         loadingMass = 520.00,
@@ -142,6 +143,7 @@ val trailers = listOf(
 //        image = Res.drawable.vesta1
     ),
     Trailer(
+        id = 2,
         name = "Przyczepka lekka - Zasław HL300T",
         size = "300 x 150 x 35 cm",
         loadingMass = 465.00,

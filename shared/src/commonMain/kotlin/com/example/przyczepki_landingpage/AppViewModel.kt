@@ -6,25 +6,31 @@ import com.example.przyczepki_landingpage.data.ModalType
 import com.example.przyczepki_landingpage.data.ReservationDto
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
-import io.ktor.util.logging.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
 class AppViewModel(private val scope: CoroutineScope) {
     private val _appState = MutableStateFlow(AppState())
     val appState: StateFlow<AppState> = _appState.asStateFlow()
 
     init {
-//        fetchTrailers()
+        scope.launch {
+            checkServerHealth()
+            fetchTrailers()
+            fetchReservations()
+        }
     }
 
     fun navigateTo(destination: CurrentScreen) {
-        _appState.value = appState.value.copy(currentScreen = destination)
+        _appState.update {
+            it.copy(
+                currentScreen = destination
+            )
+        }
     }
 
     fun updateDateRangePicker(start: Long?, end: Long?) {
@@ -34,9 +40,33 @@ class AppViewModel(private val scope: CoroutineScope) {
         )
     }
 
+    /*
+        Sever HelathCheck
+     */
+
+    fun checkServerHealth() {
+        scope.launch {
+            val serverStatus = ApiClient.healthCheck.healthCheck()
+
+            _appState.update { it.copy(serverStatus = serverStatus) }
+        }
+    }
+
     fun onTrailerSelected(trailer: Trailer? = null) {
-        _appState.update {
-            it.copy(selectedTrailer = trailer)
+        scope.launch {
+            val trailerId: Int? = trailer?.id ?: appState.value.selectedTrailer?.id
+            val reservations = appState.value.reservations
+            val blockedDates = mapReservationsToBlockedDates(reservations, trailerId)
+
+            _appState.update {
+                it.copy(
+                    selectedTrailer = trailer,
+                    blockedDates = blockedDates
+                )
+            }
+//            println("onTrailerSelected blockedDates: $blockedDates")
+//            println("onTrailerSelected reservations: $reservations")
+//            println("onTrailerSelected trailerId: $trailerId")
         }
     }
 
@@ -89,8 +119,6 @@ class AppViewModel(private val scope: CoroutineScope) {
                 val reservations = ApiClient.reservationController.getReservations()
                 if (reservations.isNotEmpty()) {
                     _appState.update { it.copy(reservations = reservations) }
-                    val blockedDates = mapReservationsToBlockedDates()
-                    _appState.update { it.copy(blockedDates = blockedDates) }
                 }
             } catch (e: Exception) {
                 println("Error: ${e.message}")
@@ -98,9 +126,12 @@ class AppViewModel(private val scope: CoroutineScope) {
         }
     }
 
-    private fun mapReservationsToBlockedDates(): Set<Long> {
-        val reservations: List<ReservationDto> = appState.value.reservations
-        val trailerId: Int = appState.value.selectedTrailer?.id ?: return emptySet()
+    private fun mapReservationsToBlockedDates(
+        reservations: List<ReservationDto>? = null,
+        trailerId: Int? = null
+    ): Set<Long> {
+        val reservations: List<ReservationDto> = reservations ?: appState.value.reservations
+        val trailerId: Int = trailerId ?: appState.value.selectedTrailer?.id ?: return emptySet()
 
         val blockedDates = mutableSetOf<Long>()
 

@@ -34,7 +34,7 @@ fun Application.module() {
 // Funkcje konfiguracyjne w osobnym pliku
 private fun Application.configureDependencyInjection() {
     install(Koin) {
-        slf4jLogger()
+//        slf4jLogger()
         modules(appModule, networkModule)
     }
 }

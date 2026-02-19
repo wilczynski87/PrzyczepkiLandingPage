@@ -31,6 +31,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,11 +46,15 @@ import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun TrailerTable(
-    trailers: List<Trailer> = emptyList(),
+    trailers: List<Trailer>? = emptyList(),
     widthSizeClass: WindowWidthSizeClass = WindowWidthSizeClass.Compact,
     appViewModel: AppViewModel,
     modifier: Modifier = Modifier
 ) {
+    val state by appViewModel.appState.collectAsState()
+    val trailers = if(trailers.isNullOrEmpty()) state.trailers else trailers
+
+
     Column(
         modifier = modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)

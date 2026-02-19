@@ -7,7 +7,9 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.isSuccess
 
-class TrailerController(private val client: HttpClient) {
+class TrailerController(
+    private val client: HttpClient
+) {
 
     suspend fun getTrailers(): List<Trailer> {
         return try {
