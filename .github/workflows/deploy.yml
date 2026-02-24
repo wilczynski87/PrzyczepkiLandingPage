@@ -90,8 +90,8 @@ jobs:
       # BACKEND
       - name: Build backend image
         run: |
-          docker build -t wilczynski/przyczepki-api:latest -f server/DockerfileServer .
-          docker push wilczynski/przyczepki-api:latest
+          docker build -t wilczynski87/przyczepki-api:latest -f server/DockerfileServer .
+          docker push wilczynski87/przyczepki-api:latest
 
       # DEPLOY
       - name: Deploy on VPS
