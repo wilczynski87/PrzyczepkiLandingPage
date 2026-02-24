@@ -84,8 +84,8 @@ jobs:
       # FRONTEND
       - name: Build frontend image
         run: |
-          docker build -t wilczynski/przyczepki-web:latest -f Dockerfile .
-          docker push wilczynski/przyczepki-web:latest
+          docker build -t wilczynski87/przyczepki-web:latest -f Dockerfile .
+          docker push wilczynski87/przyczepki-web:latest
 
       # BACKEND
       - name: Build backend image
@@ -102,6 +102,6 @@ jobs:
           key: ${{ secrets.PRZYCZEPKI_WEB }}
           script: |
             cd /przyczepki-landing-page
-            docker pull wilczynski/przyczepki-web:latest
-            docker pull wilczynski/przyczepki-api:latest
+            docker pull wilczynski87/przyczepki-web:latest
+            docker pull wilczynski87/przyczepki-api:latest
             docker compose up -d
