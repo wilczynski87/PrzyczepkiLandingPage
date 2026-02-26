@@ -4,29 +4,29 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Customer(
-    val id: Long,
-    val private: Private,
-    val company: Company?,
+    val id: String? = null,
+    val private: Private? = null,
+    val company: Company? = null,
 ) {
 }
 
 
 @Serializable
 data class Private(
-    val firstName: String,
-    val lastName: String,
-    val address: String,
-    val email: String?,
-    val phoneNumber: String,
-    val pesel: String?,
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val address: String? = null,
+    val email: String? = null,
+    val phoneNumber: String? = null,
+    val pesel: String? = null,
 )
 
 @Serializable
 data class Company(
-    val name: String,
-    val address: String,
-    val email: String?,
-    val phoneNumber: String,
-    val nip: String,
+    val name: String? = null,
+    val address: String? = null,
+    val email: String? = null,
+    val phoneNumber: String? = null,
+    val nip: String? = null,
 )
 

@@ -13,6 +13,7 @@ kotlinx-datetime-ver = "0.7.1"
 koin-core-ver = "4.1.1"
 server-cors = "2.3.8"
 kotlinx-serialization-json = "1.10.0"
+mongodb = "5.1.0"
 
 
 [libraries]
@@ -32,6 +33,9 @@ compose-material3-window-size = { module = "org.jetbrains.compose.material3:mate
 #io-github-hideoo-kalendar = { module = "io.github.hideoo:kalendar", version = "hideoo-kalendar" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime-ver" }
 compose-material = { module = "org.jetbrains.compose.material:material", version.ref = "composeMultiplatform" }
+mongodb-coroutine = { module = "org.mongodb:mongodb-driver-kotlin-coroutine", version.ref = "mongodb" }
+mongodb-bson = { module = "org.mongodb:mongodb-bson", version.ref = "mongodb" }
+
 
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin-core-ver" }
 koin-logger = { module = "io.insert-koin:koin-logger-slf4j", version.ref = "koin-core-ver" }

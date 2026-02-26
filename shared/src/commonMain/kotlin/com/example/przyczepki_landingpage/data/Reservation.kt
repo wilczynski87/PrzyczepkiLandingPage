@@ -4,9 +4,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ReservationDto(
-    val id: Long? = null,
-    val customerId: Long? = null,
-    val trailerId: Long? = null,
+    val id: String? = null,
+    val customerId: String? = null,
+    val trailerId: String? = null,
     val startDate: Long? = null,
     val endDate: Long? = null,
     val reservationPrice: ReservationPrice? = null,
@@ -14,11 +14,28 @@ data class ReservationDto(
 
 @Serializable
 data class ReservationPrice(
-    val trailerId: Long? = null,
-    val firstDay: Double? = null,
-    val otherDays: Double? = null,
-    val halfDay: Double? = null,
+    val trailerId: String? = null,
     val reservation: Double? = null,
     val daysNumber: Long? = null,
     val sum: Double? = null,
 )
+
+@Serializable
+data class Reservation(
+    val id: String? = null,
+    val customer: Customer? = null,
+    val trailer: Trailer? = null,
+    val startDate: Long? = null,
+    val endDate: Long? = null,
+    val reservationPrice: ReservationPrice? = null,
+) {
+    fun toDto(): ReservationDto = ReservationDto(
+        id = id,
+        customerId = customer?.id,
+        trailerId = trailer?.id,
+        startDate = startDate,
+        endDate = endDate,
+        reservationPrice = reservationPrice,
+    )
+
+}

@@ -1,5 +1,7 @@
 package com.example.przyczepki_landingpage.modules
 
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.serialization.kotlinx.json.json
@@ -39,6 +41,21 @@ fun Application.config() {
         allowHeader(HttpHeaders.Authorization)
 
         allowCredentials = true
+    }
+
+    HttpClient(CIO) {
+        install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
+            json(
+                Json {
+                    prettyPrint = true
+                    isLenient = true
+                    ignoreUnknownKeys = true
+                    classDiscriminator = "type"
+                    encodeDefaults = true
+                    explicitNulls = false
+                }
+            )
+        }
     }
 
 }

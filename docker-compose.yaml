@@ -17,7 +17,7 @@ services:
 
   przyczepki-web:
     container_name: przyczepki-landing-page
-    image: wilczynski/przyczepki-web:latest
+    image: wilczynski87/przyczepki-web:latest
     environment:
       - TZ=Europe/Warsaw
       - APP_ENV=dev
@@ -27,17 +27,33 @@ services:
 #    ports:
 #      - "80:80"
 
-  api:
-    image: wilczynski/przyczepki-api:latest
+  przyczepki-api:
+#    image: wilczynski87/przyczepki-api:latest
+    build:
+      context: .
+      dockerfile: server/DockerfileServer
+#    image: przyczepki-api:latest
     container_name: przyczepki-api
     environment:
       - TZ=Europe/Warsaw
+      - MONGO_URI=mongodb://admin:admin@przyczepki-db:27017/przyczepki?authSource=admin
     networks:
       - przyczepki-network
     restart: unless-stopped
+    depends_on:
+      - przyczepki-db
 #    ports:
 #      - "8090:8090"
 
+  przyczepki-db:
+    image: mongo
+    container_name: przyczepki-db
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    ports:
+      - "27017:27017"
 
 networks:
   przyczepki-network:

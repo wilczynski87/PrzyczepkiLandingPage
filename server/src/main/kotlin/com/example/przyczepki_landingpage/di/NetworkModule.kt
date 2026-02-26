@@ -9,17 +9,17 @@ import kotlinx.serialization.json.Json
 import org.koin.dsl.module
 
 val networkModule = module {
-    single {
-        HttpClient(CIO) {
-            install(ContentNegotiation) {
-                json(
-                    Json {
-                        prettyPrint = true
-                        isLenient = true
-                        ignoreUnknownKeys = true
-                    }
-                )
-            }
-        }
-    }
+//    single {
+//        HttpClient(CIO) {
+//            install(ContentNegotiation) {
+//                json(
+//                    Json {
+//                        prettyPrint = true
+//                        isLenient = true
+//                        ignoreUnknownKeys = true
+//                    }
+//                )
+//            }
+//        }
+//    }
 }

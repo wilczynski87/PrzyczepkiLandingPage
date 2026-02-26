@@ -300,7 +300,7 @@ fun Order(
             val reservation = ReservationDto(
                 startDate = startDate,
                 endDate = endDate,
-                trailerId = trailer?.id?.toLong()
+                trailerId = trailer?.id
             )
             viewModel.checkReservation(reservation)
             viewModel.openModal(

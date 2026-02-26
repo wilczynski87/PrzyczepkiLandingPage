@@ -53,7 +53,7 @@ class AppViewModel(private val scope: CoroutineScope) {
 
     fun onTrailerSelected(trailer: Trailer? = null) {
         scope.launch {
-            val trailerId: Int? = trailer?.id ?: appState.value.selectedTrailer?.id
+            val trailerId: String? = trailer?.id ?: appState.value.selectedTrailer?.id
             val reservations = appState.value.reservations
             val blockedDates = mapReservationsToBlockedDates(reservations, trailerId)
 
@@ -142,14 +142,14 @@ class AppViewModel(private val scope: CoroutineScope) {
 
     private fun mapReservationsToBlockedDates(
         reservations: List<ReservationDto>? = null,
-        trailerId: Int? = null
+        trailerId: String? = null
     ): Set<Long> {
         val reservations: List<ReservationDto> = reservations ?: appState.value.reservations
-        val trailerId: Int = trailerId ?: appState.value.selectedTrailer?.id ?: return emptySet()
+        val trailerId: String = trailerId ?: appState.value.selectedTrailer?.id ?: return emptySet()
 
         val blockedDates = mutableSetOf<Long>()
 
-        reservations.filter { it.trailerId == trailerId.toLong() }.forEach {
+        reservations.filter { it.trailerId == trailerId }.forEach {
             var current = it.startDate ?: throw NullPointerException("mapReservationsToBlockedDates: Brakuje daty rozpoczęcia")
             while (current <= (it.endDate
                     ?: throw NullPointerException("mapReservationsToBlockedDates: Brakuje daty zakończenia"))

@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
+import com.example.przyczepki_landingpage.data.Prices
 import com.example.przyczepki_landingpage.data.ReservationPrice
 import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.model.asPrice
@@ -151,7 +152,7 @@ fun ReservationConfirmationModal(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Prices
-                if(reservationPrices != null) trailerReservationPrices(reservationPrices)
+                if(reservationPrices != null) trailerReservationPrices(reservationPrices, trailer?.prices)
 
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -398,6 +399,7 @@ fun trailerReservationDates(
 @Composable
 fun trailerReservationPrices(
     reservationPrice: ReservationPrice?,
+    prices: Prices?,
     modifier: Modifier = Modifier
 ) {
     if (reservationPrice == null || reservationPrice.daysNumber == null) return
@@ -421,10 +423,10 @@ fun trailerReservationPrices(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Pół dnia (jeśli dotyczy)
-                if (reservationPrice.halfDay != null) {
+                if (prices?.halfDay != null) {
                     PriceRow(
                         label = "Wynajem pół dnia",
-                        amount = reservationPrice.halfDay,
+                        amount = prices.halfDay,
                         showInfo = true,
                         infoText = "Do 6 godzin wynajmu"
                     )
@@ -434,18 +436,29 @@ fun trailerReservationPrices(
                 PriceRow(
                     label = if (reservationPrice.daysNumber == 1L) "Wynajem 1 dnia"
                     else "Pierwszy dzień",
-                    amount = reservationPrice.firstDay ?: throw NullPointerException("Brak 1 dnia rezerwacji"),
+                    amount = prices?.firstDay ?: throw NullPointerException("Brak 1 dnia rezerwacji"),
                 )
 
+                // Drugi dzień
+                if (reservationPrice.daysNumber > 1 && prices.secondDay != null) {
+                    prices.secondDay ?: throw NullPointerException("Brak kolejnych dni rezerwacji")
+                    PriceRow(
+                        label = "Drugi dzień",
+                        amount = prices.secondDay,
+                        showInfo = true,
+                        infoText = "${prices.secondDay.asPrice()} za dzień"
+                    )
+                }
+
                 // Kolejne dni (jeśli więcej niż 1 dzień)
-                if (reservationPrice.daysNumber > 1) {
-                    reservationPrice.otherDays ?: throw NullPointerException("Brak kolejnych dni rezerwacji")
-                    val subsequentDays = reservationPrice.daysNumber - 1
+                if (reservationPrice.daysNumber > 2) {
+                    prices.otherDays ?: throw NullPointerException("Brak kolejnych dni rezerwacji")
+                    val subsequentDays = reservationPrice.daysNumber - 2
                     PriceRow(
                         label = "Kolejne $subsequentDays dni",
-                        amount = reservationPrice.otherDays * subsequentDays,
+                        amount = prices.otherDays * subsequentDays,
                         showInfo = true,
-                        infoText = "${reservationPrice.otherDays.asPrice()} za dzień"
+                        infoText = "${prices.otherDays.asPrice()} za dzień"
                     )
                 }
 

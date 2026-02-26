@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
 import com.example.przyczepki_landingpage.model.ServerStatus
-import com.example.przyczepki_landingpage.trailers
 
 @Composable
 fun MainScreen(

@@ -44,5 +44,8 @@ dependencies {
     // Cors
     implementation(libs.ktor.server.cors)
 
+    // Mongo
+    implementation(libs.mongodb.coroutine)
+
 
 }

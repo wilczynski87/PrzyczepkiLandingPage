@@ -26,7 +26,7 @@ class TrailerController(
         }
     }
 
-    suspend fun getTrailer(trailerId: Int): Trailer? {
+    suspend fun getTrailer(trailerId: String): Trailer? {
         return try {
             client.get("$base_url/trailer/$trailerId").body()
 
