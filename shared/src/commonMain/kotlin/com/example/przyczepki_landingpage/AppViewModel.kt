@@ -12,6 +12,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
 
 class AppViewModel(private val scope: CoroutineScope) {
     private val _appState = MutableStateFlow(AppState())
@@ -33,7 +36,7 @@ class AppViewModel(private val scope: CoroutineScope) {
         }
     }
 
-    fun updateDateRangePicker(start: Long?, end: Long?) {
+    fun updateDateRangePicker(start: LocalDate?, end: LocalDate?) {
         _appState.value = appState.value.copy(
             dateRangePickerStart = start,
             dateRangePickerEnd = end
@@ -143,11 +146,11 @@ class AppViewModel(private val scope: CoroutineScope) {
     private fun mapReservationsToBlockedDates(
         reservations: List<ReservationDto>? = null,
         trailerId: String? = null
-    ): Set<Long> {
+    ): Set<LocalDate> {
         val reservations: List<ReservationDto> = reservations ?: appState.value.reservations
         val trailerId: String = trailerId ?: appState.value.selectedTrailer?.id ?: return emptySet()
 
-        val blockedDates = mutableSetOf<Long>()
+        val blockedDates = mutableSetOf<LocalDate>()
 
         reservations.filter { it.trailerId == trailerId }.forEach {
             var current = it.startDate ?: throw NullPointerException("mapReservationsToBlockedDates: Brakuje daty rozpoczęcia")
@@ -155,7 +158,7 @@ class AppViewModel(private val scope: CoroutineScope) {
                     ?: throw NullPointerException("mapReservationsToBlockedDates: Brakuje daty zakończenia"))
             ) {
                 blockedDates.add(current)
-                current += 24 * 60 * 60 * 1000
+                current.plus(1, DateTimeUnit.DAY)
             }
         }
         return blockedDates

@@ -28,7 +28,8 @@ val appModule = module {
 
     single<ReservationService> {
         ReservationServiceImpl(
-            reservationRepo = get()
+            reservationRepo = get(),
+            trailersRepo = get()
         )
     }
 

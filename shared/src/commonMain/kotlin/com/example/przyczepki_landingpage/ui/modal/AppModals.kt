@@ -53,6 +53,8 @@ import com.example.przyczepki_landingpage.model.asPrice
 import com.example.przyczepki_landingpage.model.formatDatePl
 import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.ui.LoadingScreen
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.daysUntil
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
@@ -310,12 +312,12 @@ fun trailerMiniImage(thumbnail: DrawableResource?, name: String? = "", modifier:
 
 @Composable
 fun trailerReservationDates(
-    from: Long?,
-    to: Long?,
+    from: LocalDate?,
+    to: LocalDate?,
     modifier: Modifier = Modifier
 ) {
-    val daysNumber = if (from != null && to != null) {
-        ((to - from) / (1000 * 60 * 60 * 24)).toInt() + 1
+    val daysNumber = if(from != null && to != null) {
+        from.daysUntil(to)
     } else 0
 
     Column(modifier = modifier) {
@@ -343,7 +345,7 @@ fun trailerReservationDates(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = from?.let { formatDatePl(it) } ?: "-",
+                    text = from?.formatDatePl() ?: "-",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Medium
@@ -369,7 +371,7 @@ fun trailerReservationDates(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = to?.let { formatDatePl(it) } ?: "-",
+                    text = to?.formatDatePl() ?: "-",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Medium

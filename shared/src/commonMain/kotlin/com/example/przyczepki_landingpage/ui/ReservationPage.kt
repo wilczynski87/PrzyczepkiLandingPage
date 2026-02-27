@@ -49,6 +49,7 @@ import com.example.przyczepki_landingpage.model.todayUtcMillis
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.ui.reservation.TrailerSelectionList
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
@@ -187,9 +188,9 @@ fun ReservationCalendar(
     viewModel: AppViewModel,
 ) {
     val state by viewModel.appState.collectAsState()
-    val blockedDates: Set<Long> = state.blockedDates
-    val startDate: Long? = state.dateRangePickerStart
-    val endDate: Long? = state.dateRangePickerEnd
+    val blockedDates: Set<LocalDate> = state.blockedDates
+    val startDate: LocalDate? = state.dateRangePickerStart
+    val endDate: LocalDate? = state.dateRangePickerEnd
     val trailer: Trailer? = state.selectedTrailer
 
     val todayMillis = remember { todayUtcMillis() }
@@ -202,7 +203,10 @@ fun ReservationCalendar(
                     return false
                 }
                 // b) Walidacja zablokowanych dat
-                if (blockedDates.contains(utcTimeMillis)) {
+                if (blockedDates
+                        .map { it.toEpochDays() }
+                        .contains(utcTimeMillis)
+                    ) {
                     return false
                 }
 
@@ -227,7 +231,10 @@ fun ReservationCalendar(
             dateRangePickerState.selectedStartDateMillis to
                     dateRangePickerState.selectedEndDateMillis
         }.collect { (start, end) ->
-            viewModel.updateDateRangePicker(start, end)
+            viewModel.updateDateRangePicker(
+                start?.let { LocalDate.fromEpochDays(it) },
+                end?.let { LocalDate.fromEpochDays(it) }
+            )
         }
     }
 
@@ -285,9 +292,9 @@ fun ReservationCalendar(
 fun Order(
     viewModel: AppViewModel,
     trailer: Trailer?,
-    blockedDates: Set<Long> = emptySet(),
-    startDate: Long?,
-    endDate: Long?,
+    blockedDates: Set<LocalDate> = emptySet(),
+    startDate: LocalDate?,
+    endDate: LocalDate?,
 ) {
     val canReserve =
         trailer != null &&
@@ -321,9 +328,9 @@ fun Order(
 
 
 fun canReserve(
-    blockedDates: Set<Long>,
-    startDate: Long?,
-    endDate: Long?,
+    blockedDates: Set<LocalDate>,
+    startDate: LocalDate?,
+    endDate: LocalDate?,
 ): Boolean {
     if( startDate == null || endDate == null) return false
     return blockedDates.any { it in startDate..endDate }.not()
@@ -332,9 +339,9 @@ fun canReserve(
 @Composable
 fun canReserveInfo(
     trailer: Trailer?,
-    blockedDates: Set<Long>,
-    startDate: Long?,
-    endDate: Long?,
+    blockedDates: Set<LocalDate>,
+    startDate: LocalDate?,
+    endDate: LocalDate?,
 ) {
     Column {
         if(trailer == null) Text("Nie wybrano przyczepki")

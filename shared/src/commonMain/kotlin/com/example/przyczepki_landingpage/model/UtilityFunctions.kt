@@ -1,7 +1,9 @@
 package com.example.przyczepki_landingpage.model
 
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.format
 import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
@@ -22,6 +24,20 @@ fun formatDatePl(millis: Long?): String? {
     val year = date.year
 
     return "$day.$month.$year"
+}
+
+fun LocalDate.formatDatePl(): String {
+
+    val day = day.toString().padStart(2, '0')
+    val month = month.number.toString().padStart(2, '0')
+    val year = year
+
+    return "$day/$month/$year"
+}
+
+fun String.toLocalDate(): LocalDate? {
+    return if(this.isBlank().not()) null
+        else LocalDate.parse(this)
 }
 
 fun todayUtcMillis(): Long {

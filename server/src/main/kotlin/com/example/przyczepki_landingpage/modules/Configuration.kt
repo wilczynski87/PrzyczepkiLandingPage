@@ -45,16 +45,7 @@ fun Application.config() {
 
     HttpClient(CIO) {
         install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
-            json(
-                Json {
-                    prettyPrint = true
-                    isLenient = true
-                    ignoreUnknownKeys = true
-                    classDiscriminator = "type"
-                    encodeDefaults = true
-                    explicitNulls = false
-                }
-            )
+            json(json)
         }
     }
 

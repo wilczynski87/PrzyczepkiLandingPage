@@ -7,6 +7,7 @@ import com.example.przyczepki_landingpage.data.ReservationDto
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.model.ServerResponse
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 
 data class AppState(
@@ -18,9 +19,9 @@ data class AppState(
     val modalType: ModalType = ModalType.NONE,
     val modal: ModalData? = null,
 
-    val dateRangePickerStart: Long? = null,
-    val dateRangePickerEnd: Long? = null,
-    val blockedDates: Set<Long> = emptySet(),
+    val dateRangePickerStart: LocalDate? = null,
+    val dateRangePickerEnd: LocalDate? = null,
+    val blockedDates: Set<LocalDate> = emptySet(),
     val reservations: List<ReservationDto> = emptyList(),
 
     val reservationToMake: ReservationDto? = null,

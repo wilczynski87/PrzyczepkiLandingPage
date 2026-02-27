@@ -17,22 +17,26 @@ services:
 
   przyczepki-web:
     container_name: przyczepki-landing-page
-    image: wilczynski87/przyczepki-web:latest
+#    image: wilczynski87/przyczepki-web:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: przyczepki-web
     environment:
       - TZ=Europe/Warsaw
       - APP_ENV=dev
     networks:
       - przyczepki-network
     restart: unless-stopped
-#    ports:
-#      - "80:80"
+    ports:
+      - "80:80"
 
   przyczepki-api:
 #    image: wilczynski87/przyczepki-api:latest
     build:
       context: .
       dockerfile: server/DockerfileServer
-#    image: przyczepki-api:latest
+    image: przyczepki-api
     container_name: przyczepki-api
     environment:
       - TZ=Europe/Warsaw

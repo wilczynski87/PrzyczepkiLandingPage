@@ -31,9 +31,9 @@ class TrailersRepoImpl: TrailersRepo {
 
     override suspend fun saveTrailer(trailer: Trailer): Trailer? {
         val id = ObjectId()
-        val trailerRepo = TrailerRepo(trailer).copy(_id = id, id = id.toHexString(), prices = trailer.prices?.copy(trailerId = id.toHexString()))
+        val trailerTable = TrailerTable(trailer).copy(_id = id, id = id.toHexString(), prices = trailer.prices?.copy(trailerId = id.toHexString()))
         return try {
-            val _id = trailerCollection.insertOne(trailerRepo).insertedId
+            val _id = trailerCollection.insertOne(trailerTable).insertedId
             trailerCollection.find(Filters.eq("_id", _id)).firstOrNull()?.toTrailer()
         } catch (e: Exception) {
             println("TrailersRepoImpl: Error saving trailer: ${e.message}")
@@ -49,7 +49,7 @@ class TrailersRepoImpl: TrailersRepo {
     }
 
     override suspend fun updateTrailer(trailer: Trailer): Trailer? {
-        val updated = TrailerRepo(trailer)
+        val updated = TrailerTable(trailer)
         val updates = mutableListOf<Bson>()
 
         updated.name?.let { updates.add(Updates.set("name", it)) }
@@ -94,7 +94,7 @@ class TrailersRepoImpl: TrailersRepo {
 }
 
 @Serializable
-data class TrailerRepo(
+data class TrailerTable(
     @Contextual
     val _id: ObjectId = ObjectId(),
     val id: String? = _id.toHexString(),
@@ -128,5 +128,5 @@ data class TrailerRepo(
 }
 
 
-val trailerCollection: MongoCollection<TrailerRepo> =
+val trailerCollection: MongoCollection<TrailerTable> =
     MongoProvider.database.getCollection("trailer")

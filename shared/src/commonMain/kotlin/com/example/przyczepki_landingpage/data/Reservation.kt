@@ -1,5 +1,7 @@
 package com.example.przyczepki_landingpage.data
 
+import com.example.przyczepki_landingpage.data.serializer.KotlinxLocalDateSerializer
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -7,8 +9,10 @@ data class ReservationDto(
     val id: String? = null,
     val customerId: String? = null,
     val trailerId: String? = null,
-    val startDate: Long? = null,
-    val endDate: Long? = null,
+    @Serializable(with = KotlinxLocalDateSerializer::class)
+    val startDate: LocalDate? = null,
+    @Serializable(with = KotlinxLocalDateSerializer::class)
+    val endDate: LocalDate? = null,
     val reservationPrice: ReservationPrice? = null,
 )
 
@@ -25,8 +29,8 @@ data class Reservation(
     val id: String? = null,
     val customer: Customer? = null,
     val trailer: Trailer? = null,
-    val startDate: Long? = null,
-    val endDate: Long? = null,
+    val startDate: LocalDate? = null,
+    val endDate: LocalDate? = null,
     val reservationPrice: ReservationPrice? = null,
 ) {
     fun toDto(): ReservationDto = ReservationDto(

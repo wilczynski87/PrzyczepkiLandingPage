@@ -47,5 +47,7 @@ dependencies {
     // Mongo
     implementation(libs.mongodb.coroutine)
 
+    // datetime
+    implementation(libs.kotlinx.datetime)
 
 }
