@@ -232,8 +232,8 @@ fun ReservationCalendar(
                     dateRangePickerState.selectedEndDateMillis
         }.collect { (start, end) ->
             viewModel.updateDateRangePicker(
-                start?.let { LocalDate.fromEpochDays(it) },
-                end?.let { LocalDate.fromEpochDays(it) }
+                start,
+                end
             )
         }
     }

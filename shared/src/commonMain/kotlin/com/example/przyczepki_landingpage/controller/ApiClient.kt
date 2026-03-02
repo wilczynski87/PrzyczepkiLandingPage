@@ -10,7 +10,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.serialization.json.Json
 
-//const val base_url = "http://przyczepki-api:8090"
+//const val base_url = "http://przyczepki_api:8090"
 const val base_url = "http://localhost:8090"
 
 object ApiClient {

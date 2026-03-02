@@ -55,3 +55,9 @@ fun Double.asPrice(): String {
     val fraction = ((this * 100).toInt() % 100)
     return "$whole,${fraction.toString().padStart(2, '0')}"
 }
+
+fun millisToLocalDate(millis: Long, timeZone: TimeZone = TimeZone.currentSystemDefault()): LocalDate {
+    val instant = Instant.fromEpochMilliseconds(millis)        // Long -> Instant
+    val localDateTime = instant.toLocalDateTime(timeZone)       // Instant -> LocalDateTime w danej strefie
+    return localDateTime.date                                   // LocalDateTime -> LocalDate
+}

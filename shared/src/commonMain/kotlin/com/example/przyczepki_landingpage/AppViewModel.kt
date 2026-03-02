@@ -6,6 +6,7 @@ import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.data.ReservationDto
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
+import com.example.przyczepki_landingpage.model.millisToLocalDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,6 +38,15 @@ class AppViewModel(private val scope: CoroutineScope) {
     }
 
     fun updateDateRangePicker(start: LocalDate?, end: LocalDate?) {
+        _appState.value = appState.value.copy(
+            dateRangePickerStart = start,
+            dateRangePickerEnd = end
+        )
+    }
+    fun updateDateRangePicker(start: Long?, end: Long?) {
+        val start = if(start == null) null else millisToLocalDate(start)
+        val end = if(end == null) null else millisToLocalDate(end)
+
         _appState.value = appState.value.copy(
             dateRangePickerStart = start,
             dateRangePickerEnd = end

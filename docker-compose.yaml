@@ -1,27 +1,27 @@
 #version: "3.9"
 
 services:
-  npm:
-    image: jc21/nginx-proxy-manager:latest
-    container_name: nginx-proxy-manager
-    ports:
-      - "80:80"
-      - "81:81"    # panel admina
-      - "443:443"
-    volumes:
-      - ./npm/data:/data
-      - ./npm/letsencrypt:/etc/letsencrypt
-    networks:
-      - przyczepki-network
-    restart: unless-stopped
+#  npm:
+#    image: jc21/nginx-proxy-manager:latest
+#    container_name: nginx-proxy-manager
+#    ports:
+#      - "80:80"
+#      - "81:81"    # panel admina
+#      - "443:443"
+#    volumes:
+#      - ./npm/data:/data
+#      - ./npm/letsencrypt:/etc/letsencrypt
+#    networks:
+#      - przyczepki-network
+#    restart: unless-stopped
 
-  przyczepki-web:
+  przyczepki_web:
     container_name: przyczepki-landing-page
 #    image: wilczynski87/przyczepki-web:latest
     build:
       context: .
       dockerfile: Dockerfile
-    image: przyczepki-web
+    image: wilczynski87/przyczepki-web
     environment:
       - TZ=Europe/Warsaw
       - APP_ENV=dev
@@ -31,28 +31,30 @@ services:
     ports:
       - "80:80"
 
-  przyczepki-api:
+  przyczepki_api:
 #    image: wilczynski87/przyczepki-api:latest
     build:
       context: .
       dockerfile: server/DockerfileServer
-    image: przyczepki-api
-    container_name: przyczepki-api
+    image: wilczynski87/przyczepki-api
+    container_name: przyczepki_api
     environment:
       - TZ=Europe/Warsaw
-      - MONGO_URI=mongodb://admin:admin@przyczepki-db:27017/przyczepki?authSource=admin
+      - MONGO_URI=mongodb://admin:admin@przyczepki_db:27017/przyczepki?authSource=admin
     networks:
       - przyczepki-network
     restart: unless-stopped
     depends_on:
-      - przyczepki-db
-#    ports:
-#      - "8090:8090"
+      - przyczepki_db
+    ports:
+      - "8090:8090"
 
-  przyczepki-db:
+  przyczepki_db:
     image: mongo
-    container_name: przyczepki-db
+    container_name: przyczepki_db
     restart: unless-stopped
+    networks:
+      - przyczepki-network
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
