@@ -1,6 +1,7 @@
 package com.example.przyczepki_landingpage
 
 import androidx.compose.runtime.Composable
+import kotlinx.browser.window
 
 class JsPlatform: Platform {
     override val name: String = "Web with Kotlin/JS"
@@ -18,4 +19,12 @@ actual fun openNavigationApp(
     label: String,
     mapsProvider: String?
 ) {
+}
+
+actual fun openEmail(email: String) {
+    window.open("mailto:$email", "_self")
+}
+
+actual fun callPhone(phone: String) {
+    window.open("tel:$phone", "_self")
 }

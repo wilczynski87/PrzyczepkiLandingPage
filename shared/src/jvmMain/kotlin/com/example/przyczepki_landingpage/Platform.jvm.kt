@@ -26,3 +26,8 @@ actual fun createHttpClient(): HttpClient {
 }
 
 actual fun getEnvironment(): String = System.getenv("APP_ENV") ?: "prod"
+actual fun openEmail(email: String) {
+}
+
+actual fun callPhone(phone: String) {
+}

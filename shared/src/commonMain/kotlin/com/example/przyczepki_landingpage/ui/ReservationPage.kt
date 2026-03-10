@@ -48,6 +48,8 @@ import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.model.todayUtcMillis
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
+import com.example.przyczepki_landingpage.model.CurrentScreen
+import com.example.przyczepki_landingpage.model.ServerStatus
 import com.example.przyczepki_landingpage.ui.reservation.TrailerSelectionList
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -296,6 +298,10 @@ fun Order(
     startDate: LocalDate?,
     endDate: LocalDate?,
 ) {
+    val state by viewModel.appState.collectAsState()
+    val serverStatus = state.serverStatus
+
+
     val canReserve =
         trailer != null &&
         startDate != null &&
@@ -309,15 +315,26 @@ fun Order(
                 endDate = endDate,
                 trailerId = trailer?.id
             )
-            viewModel.checkReservation(reservation)
-            viewModel.openModal(
-                ModalType.CONFIRM_RESERVATION,
-                ModalData(
-                    onConfirmation = {  },
-                    dialogTitle = "Potwierdzenie rezerwacji",
-                    dialogText = "Czy na pewno chcesz rezerwować przyczepkę?",
+            if(serverStatus?.status != ServerStatus.OK) {
+                viewModel.openModal(
+                    ModalType.CALL_FOR_RESERVATION,
+                    ModalData(
+                        onConfirmation = { viewModel.navigateTo(CurrentScreen.RESERVATION_FINALISE) },
+                        dialogTitle = "Zadzwoń/napisz w celu rezerwacji",
+                        dialogText = "Czy na pewno chcesz rezerwować przyczepkę?",
                     )
-            )
+                )
+            } else {
+                viewModel.checkReservation(reservation)
+                viewModel.openModal(
+                    ModalType.CONFIRM_RESERVATION,
+                    ModalData(
+                        onConfirmation = { viewModel.navigateTo(CurrentScreen.RESERVATION_FINALISE) },
+                        dialogTitle = "Potwierdzenie rezerwacji",
+                        dialogText = "Czy na pewno chcesz rezerwować przyczepkę?",
+                    )
+                )
+            }
         },
         enabled = canReserve,
         modifier = Modifier.fillMaxWidth().padding(4.dp)

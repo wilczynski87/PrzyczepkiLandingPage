@@ -33,6 +33,7 @@ import com.example.przyczepki_landingpage.ui.ContactPage
 import com.example.przyczepki_landingpage.ui.MainScreen
 import com.example.przyczepki_landingpage.ui.MyTopAppBar
 import com.example.przyczepki_landingpage.ui.PricesPage
+import com.example.przyczepki_landingpage.ui.ReservationFinaliseMain
 import com.example.przyczepki_landingpage.ui.ReservationPage
 import com.example.przyczepki_landingpage.ui.TermsPage
 import com.example.przyczepki_landingpage.ui.modal.AppModals
@@ -107,6 +108,10 @@ fun AppMainScreen() {
                     CurrentScreen.SIGN_UP -> {
 //                        SignUpPage(viewModel)
                     }
+
+                    CurrentScreen.RESERVATION_FINALISE -> {
+                        ReservationFinaliseMain(viewModel)
+                    }
                 }
             }
 
@@ -122,30 +127,3 @@ fun AppMainScreen() {
         }
     }
 }
-
-
-val trailers = listOf(
-    Trailer(
-        name = "Przyczepka lekka - Vesta light 25",
-        size = "252,1 × 135,4 × 37,3 cm",
-        loadingMass = 520.00,
-        gvw = 750.00,
-        purpose = "Towarowa",
-        axles = 1,
-        licenseCategory = LicenseCategory.B,
-        prices = Prices("1", 60.00, 50.00, 40.00, 40.00, 40.00),
-//        image = Res.drawable.vesta1
-    ),
-    Trailer(
-        name = "Przyczepka lekka - Zasław HL300T",
-        size = "300 x 150 x 35 cm",
-        loadingMass = 465.00,
-        gvw = 750.00,
-        purpose = "Towarowa",
-        axles = 2,
-        licenseCategory = LicenseCategory.B,
-        prices = Prices("2", 70.00, 60.00, 50.00, 50.00),
-//        image = Res.drawable.zaslaw1
-    ),
-
-)

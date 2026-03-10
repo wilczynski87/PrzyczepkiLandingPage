@@ -8,4 +8,5 @@ enum class CurrentScreen {
     TERMS_AND_CONDITIONS,
     LOGIN,
     SIGN_UP,
+    RESERVATION_FINALISE
 }

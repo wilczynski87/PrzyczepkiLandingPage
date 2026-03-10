@@ -43,6 +43,7 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.html.core)
             implementation(libs.ktor.client.js)
+            implementation(libs.kotlinx.browser)
         }
 
         wasmJsMain.dependencies {
@@ -51,6 +52,7 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.ui)
             implementation(libs.ktor.client.js)
+            implementation(libs.kotlinx.browser)
         }
 
         commonMain.dependencies {

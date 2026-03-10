@@ -52,7 +52,9 @@ import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.model.asPrice
 import com.example.przyczepki_landingpage.model.formatDatePl
 import com.example.przyczepki_landingpage.data.Trailer
+import com.example.przyczepki_landingpage.seller
 import com.example.przyczepki_landingpage.ui.LoadingScreen
+import com.example.przyczepki_landingpage.ui.ReservationServerProblemScreen
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
 import org.jetbrains.compose.resources.DrawableResource
@@ -73,6 +75,9 @@ fun AppModals(
         }
         ModalType.TRAILER_DETAILS -> {
 
+        }
+        ModalType.CALL_FOR_RESERVATION -> {
+            ReservationServerProblemScreen(viewModel)
         }
     }
 }
@@ -443,7 +448,7 @@ fun trailerReservationPrices(
 
                 // Drugi dzień
                 if (reservationPrice.daysNumber > 1 && prices.secondDay != null) {
-                    prices.secondDay ?: throw NullPointerException("Brak kolejnych dni rezerwacji")
+                    prices.secondDay
                     PriceRow(
                         label = "Drugi dzień",
                         amount = prices.secondDay,

@@ -6,6 +6,7 @@ import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.data.ReservationDto
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
+import com.example.przyczepki_landingpage.model.ServerStatus
 import com.example.przyczepki_landingpage.model.millisToLocalDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,9 +24,23 @@ class AppViewModel(private val scope: CoroutineScope) {
 
     init {
         scope.launch {
-            checkServerHealth()
-            fetchTrailers()
-            fetchReservations()
+            val serverStatus = ApiClient.healthCheck.healthCheck()
+            if(serverStatus.status != ServerStatus.OK) {
+                _appState.update {
+                    it.copy(
+                        serverStatus = serverStatus,
+                        trailers = trailers
+                    )
+                }
+            } else {
+                _appState.update {
+                    it.copy(
+                        serverStatus = serverStatus,
+                    )
+                }
+                fetchTrailers()
+                fetchReservations()
+            }
         }
     }
 
@@ -58,9 +73,25 @@ class AppViewModel(private val scope: CoroutineScope) {
      */
     fun checkServerHealth() {
         scope.launch {
-            val serverStatus = ApiClient.healthCheck.healthCheck()
+            try {
+                println("HealthCheck: Checking server health...")
+                val serverStatus = ApiClient.healthCheck.healthCheck()
+                println("Server status: $serverStatus")
 
-            _appState.update { it.copy(serverStatus = serverStatus) }
+                _appState.update { state ->
+                    state.copy(
+                        serverStatus = serverStatus,
+                        trailers = if (serverStatus.status != ServerStatus.OK && state.trailers.isEmpty())
+                            trailers
+                        else
+                            state.trailers
+                    )
+                }
+
+            } catch (e: Exception) {
+                println("Error healthcheck: ${e.message}")
+            }
+
         }
     }
 

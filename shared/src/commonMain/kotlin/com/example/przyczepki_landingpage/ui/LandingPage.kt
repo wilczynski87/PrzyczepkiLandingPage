@@ -42,8 +42,8 @@ fun MainScreen(
                 FrontInfoText()
                 if (serverStatus == null) {
                     LoadingScreen()
-                } else if (serverStatus.status != ServerStatus.OK) {
-                    ServerStatusError(serverStatus)
+//                } else if (serverStatus.status != ServerStatus.OK) {
+//                    ServerStatusError(serverStatus)
                 } else TrailerTable(trailers = trailers, widthSizeClass = widthSizeClass, appViewModel =  viewModel)
             }
         }

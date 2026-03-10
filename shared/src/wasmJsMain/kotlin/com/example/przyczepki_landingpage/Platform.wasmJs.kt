@@ -3,6 +3,7 @@ package com.example.przyczepki_landingpage
 import androidx.compose.runtime.Composable
 import com.example.przyczepki_landingpage.service.CompanyMapImpl
 import com.example.przyczepki_landingpage.service.openNavigationAppImpl
+import kotlinx.browser.window
 
 class WasmPlatform: Platform {
     override val name: String = "Web with Kotlin/Wasm"
@@ -22,4 +23,12 @@ actual fun openNavigationApp(
     mapsProvider: String?,
 ) {
     openNavigationAppImpl(latitude, longitude, label, mapsProvider = mapsProvider)
+}
+
+actual fun openEmail(email: String) {
+    window.open("mailto:$email", "_self")
+}
+
+actual fun callPhone(phone: String) {
+    window.open("tel:$phone", "_self")
 }

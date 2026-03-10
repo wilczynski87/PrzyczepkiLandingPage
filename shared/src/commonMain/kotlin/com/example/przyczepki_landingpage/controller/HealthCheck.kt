@@ -13,7 +13,7 @@ class HealthCheck( private val client: HttpClient) {
     suspend fun healthCheck(): ServerResponse {
         return try {
 
-            val response = client.get(base_url)
+            val response = client.get("$base_url/healthCheck")
 
             when (response.status.value) {
 
@@ -56,7 +56,7 @@ class HealthCheck( private val client: HttpClient) {
                 "⏳ Request timeout"
             )
 
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
 
             val message = e.message ?: "Unknown error"
             println("HealthCheck error: $message")
