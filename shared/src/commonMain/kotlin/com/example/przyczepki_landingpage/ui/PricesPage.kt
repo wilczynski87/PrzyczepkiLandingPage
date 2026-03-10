@@ -52,7 +52,8 @@ fun PricesPage(
                 prices = listOf(
                     "Rezerwacja" to "40 zł",
                     "Pierwsza doba" to "60 zł",
-                    "Każda kolejna doba" to "50 zł",
+                    "Druga doba" to "50 zł",
+                    "Każda kolejna doba" to "40 zł",
                     "Do 12h" to "40 zł"
                 )
             )
@@ -64,7 +65,8 @@ fun PricesPage(
                 prices = listOf(
                     "Rezerwacja" to "40 zł",
                     "Pierwsza doba" to "70 zł",
-                    "Każda kolejna doba" to "60 zł",
+                    "Druga doba" to "60 zł",
+                    "Każda kolejna doba" to "50 zł",
                     "Do 12h" to "50 zł"
                 )
             )

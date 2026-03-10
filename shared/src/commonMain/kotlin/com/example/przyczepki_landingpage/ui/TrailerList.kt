@@ -298,6 +298,7 @@ fun TableRowPrice(
                             .padding(top = 12.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+                        PriceDetailRow("Druga doba", "${prices.secondDay?.asPrice()} zł")
                         PriceDetailRow("Każda kolejna doba", "${prices.otherDays?.asPrice()} zł")
                         PriceDetailRow("12 godzin", "${prices.halfDay?.asPrice()} zł")
                         PriceDetailRow("Rezerwacja", "${prices.reservation?.asPrice()} zł")
