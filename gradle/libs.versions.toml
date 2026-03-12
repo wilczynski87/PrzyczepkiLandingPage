@@ -15,6 +15,7 @@ server-cors = "2.3.8"
 kotlinx-serialization-json = "1.10.0"
 mongodb = "5.1.0"
 kotlinx-browser = "0.5.0"
+kamel = "1.0.8"
 
 
 [libraries]
@@ -66,6 +67,10 @@ jetbrains-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
 
 kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.ref = "kotlinx-browser" }
+
+# Biblioteka do obrazów
+#kamel-image = { module = "io.kamel:kamel-image", version.ref = "kamel" }
+kamel-image-default = { module = "media.kamel:kamel-image-default", version.ref = "kamel" }
 
 
 

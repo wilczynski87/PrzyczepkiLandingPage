@@ -1,5 +1,6 @@
 package com.example.przyczepki_landingpage
 
+import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import com.example.przyczepki_landingpage.service.CompanyMapImpl
 import com.example.przyczepki_landingpage.service.openNavigationAppImpl

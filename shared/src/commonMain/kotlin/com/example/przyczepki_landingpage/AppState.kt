@@ -38,6 +38,22 @@ data class AppState(
 )
 
 
+val vesta = mapOf<String, String>(
+    "thumbnail" to "https://i.postimg.cc/t1FRyJMH/vesta4.webp",
+    "plandeka" to "https://i.postimg.cc/YSsv6mNj/vesta4.webp",
+    "przod" to "https://i.postimg.cc/SKvn6zL2/vesta_przod.webp",
+    "bokPrzod" to "https://i.postimg.cc/28G8dZmP/vesta3.webp",
+    "tyl" to "https://i.postimg.cc/pd6mfnQp/vesta2.webp",
+)
+
+val zaslaw = mapOf<String, String>(
+    "thumbnail" to "https://i.postimg.cc/D8QF00rt/zaslaw1.webp",
+    "bokZamkniety" to "https://i.postimg.cc/zX6fdRVX/zaslaw1.webp",
+    "bokOtwarty" to "https://i.postimg.cc/YqZSXmhH/zaslaw_bok.webp",
+    "przod" to "https://i.postimg.cc/TYFPkWph/zaslaw4.webp",
+    "tyl" to "https://i.postimg.cc/kXz5jtB2/zaslaw2.webp",
+)
+
 val trailers = listOf(
     Trailer(
         name = "Przyczepka lekka - Vesta light 25",
@@ -49,7 +65,7 @@ val trailers = listOf(
         licenseCategory = LicenseCategory.B,
         hasBreaks = false,
         prices = Prices("1", 60.00, 50.00, 40.00, 40.00, 40.00),
-//        image = Res.drawable.vesta1
+        images = vesta
     ),
     Trailer(
         name = "Przyczepka lekka - Zasław HL300T",
@@ -61,7 +77,7 @@ val trailers = listOf(
         licenseCategory = LicenseCategory.B,
         hasBreaks = false,
         prices = Prices("2", 70.00, 60.00, 50.00, 50.00, reservation = 50.00),
-//        image = Res.drawable.zaslaw1
+        images = zaslaw
     ),
 )
 

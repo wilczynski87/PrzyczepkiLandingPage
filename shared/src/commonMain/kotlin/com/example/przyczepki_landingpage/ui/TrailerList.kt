@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -43,6 +44,9 @@ import com.example.przyczepki_landingpage.data.Prices
 import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.getEnvironment
 import org.jetbrains.compose.resources.painterResource
+import io.kamel.image.KamelImage
+import io.kamel.image.asyncPainterResource
+
 
 @Composable
 fun TrailerTable(
@@ -86,19 +90,19 @@ fun TrailerCardBig(trailer: Trailer, rezerwuj: () -> Unit = {}) {
                 modifier = Modifier.padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if(trailer.images?.get("main") == null) {
+                if(trailer.images.isNullOrEmpty() || trailer.images["thumbnail"] == null) {
                     Icon(Icons.Default.BrokenImage, "brak zdjęcia")
-                }
-                else {
-//                    Image(
-//                        painter = painterResource(trailer.image),
-//                        contentDescription = trailer.name,
-//                        modifier = Modifier
-//                            .size(140.dp)
-//                            .clip(RoundedCornerShape(14.dp))
-//                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)),
-//                        contentScale = ContentScale.Crop
-//                    )
+                } else {
+                    val resource = trailer.images["thumbnail"]?.let { asyncPainterResource(it) }
+                    KamelImage(
+                        { resource!! },
+                        contentDescription = "Przyczepka",
+                        onLoading = { CircularProgressIndicator() },
+                        onFailure = { Icon(Icons.Default.BrokenImage, "brak zdjęcia") },
+                        modifier = Modifier
+                            .size(140.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                    )
                 }
                 Spacer(Modifier.width(20.dp))
 
@@ -166,18 +170,16 @@ fun TrailerCardSmall(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(Modifier) {
-                if(trailer.images?.get("main") != null) {
-//                    Image(
-//                        painter = painterResource(trailer.image),
-//                        contentDescription = trailer.name,
-//                        modifier = Modifier
-//                            .fillMaxHeight()
-//                            .align(Alignment.Center)
-//                            .clip(RoundedCornerShape(14.dp))
-//                            .alpha(0.5f)
-//                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)),
-//                        contentScale = ContentScale.Fit
-//                    )
+                if(trailer.images.isNullOrEmpty() || trailer.images["thumbnail"] == null) {
+                    Icon(Icons.Default.BrokenImage, "brak zdjęcia")
+                } else {
+                    val resource = trailer.images["thumbnail"]?.let { asyncPainterResource(it) }
+                    KamelImage(
+                        { resource!! },
+                        contentDescription = "Przyczepka",
+                        onLoading = { CircularProgressIndicator() },
+                        onFailure = { Text("Błąd ładowania") }
+                    )
                 }
 
                 Column(modifier = Modifier.align(Alignment.Center)) {

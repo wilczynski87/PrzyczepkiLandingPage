@@ -69,6 +69,9 @@ kotlin {
             implementation(compose.ui)
             implementation(libs.ktor.client)
             implementation(libs.ktor.serialization.kotlinx.json)
+//            implementation(libs.kamel.image)
+            implementation(libs.kamel.image.default)
+
 
             // Ktor dependencies
             implementation(libs.ktor.client.content.negotiation)
