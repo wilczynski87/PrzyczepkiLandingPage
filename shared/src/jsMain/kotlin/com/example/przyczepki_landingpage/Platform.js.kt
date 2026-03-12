@@ -28,3 +28,13 @@ actual fun openEmail(email: String) {
 actual fun callPhone(phone: String) {
     window.open("tel:$phone", "_self")
 }
+
+actual fun getBaseUrl(): String {
+    val hostname = js("window.location.hostname") as String
+
+    return if (hostname == "localhost") {
+        "http://localhost:8090"
+    } else {
+        "/api"
+    }
+}

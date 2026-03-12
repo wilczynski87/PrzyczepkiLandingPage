@@ -2,6 +2,7 @@ package com.example.przyczepki_landingpage.controller
 
 import com.example.przyczepki_landingpage.createHttpClient
 import com.example.przyczepki_landingpage.data.Trailer
+import com.example.przyczepki_landingpage.getBaseUrl
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.api.Send.install
@@ -10,8 +11,10 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.serialization.json.Json
 
-const val base_url = "http://przyczepki_api:8090"
+//const val base_url = "http://przyczepki_api:8090"
 //const val base_url = "http://localhost:8090"
+//const val base_url = "/api"
+val base_url = getBaseUrl()
 
 object ApiClient {
     val client: HttpClient by lazy { createHttpClient() }

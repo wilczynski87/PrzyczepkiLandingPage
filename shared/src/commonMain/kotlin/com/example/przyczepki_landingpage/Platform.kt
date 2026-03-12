@@ -19,3 +19,5 @@ expect fun openNavigationApp(latitude: Double, longitude: Double, label: String,
 expect fun openEmail(email: String)
 expect fun callPhone(phone: String)
 //expect fun openUrl(url: String)
+
+expect fun getBaseUrl(): String
