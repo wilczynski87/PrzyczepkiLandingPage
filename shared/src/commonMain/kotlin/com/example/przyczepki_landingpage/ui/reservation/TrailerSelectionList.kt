@@ -116,7 +116,10 @@ fun TrailerCard(
                     { resource!! },
                     contentDescription = "Przyczepka",
                     onLoading = { CircularProgressIndicator() },
-                    onFailure = { Text("Błąd ładowania") }
+                    onFailure = { Icon(Icons.Default.BrokenImage, "brak zdjęcia") },
+                    modifier = Modifier
+                        .size(140.dp)
+                        .clip(RoundedCornerShape(14.dp))
                 )
             }
 
