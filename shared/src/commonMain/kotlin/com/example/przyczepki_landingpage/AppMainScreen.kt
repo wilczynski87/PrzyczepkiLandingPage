@@ -30,6 +30,7 @@ import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.data.Prices
 import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.ui.ContactPage
+import com.example.przyczepki_landingpage.ui.CustomerRegistrationForm
 import com.example.przyczepki_landingpage.ui.MainScreen
 import com.example.przyczepki_landingpage.ui.MyTopAppBar
 import com.example.przyczepki_landingpage.ui.PricesPage
@@ -106,11 +107,11 @@ fun AppMainScreen() {
                     }
 
                     CurrentScreen.SIGN_UP -> {
-//                        SignUpPage(viewModel)
+                        CustomerRegistrationForm(widthSizeClass, viewModel)
                     }
 
                     CurrentScreen.RESERVATION_FINALISE -> {
-                        ReservationFinaliseMain(viewModel)
+                        ReservationFinaliseMain(widthSizeClass, viewModel)
                     }
                 }
             }

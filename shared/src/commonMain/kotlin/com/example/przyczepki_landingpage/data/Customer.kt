@@ -8,6 +8,7 @@ data class Customer(
     val private: Private? = null,
     val company: Company? = null,
 ) {
+    fun getName(): String = company?.name ?: "${private?.firstName} ${private?.lastName}"
 }
 
 

@@ -173,12 +173,24 @@ fun TrailerCardSmall(
                 if(trailer.images.isNullOrEmpty() || trailer.images["thumbnail"] == null) {
                     Icon(Icons.Default.BrokenImage, "brak zdjęcia")
                 } else {
-                    val resource = trailer.images["thumbnail"]?.let { asyncPainterResource(it) }
                     KamelImage(
-                        { resource!! },
+                        resource = {
+                            asyncPainterResource(trailer.images["thumbnail"]!!)
+                        },
                         contentDescription = "Przyczepka",
-                        onLoading = { CircularProgressIndicator() },
-                        onFailure = { Text("Błąd ładowania") }
+                        contentScale = ContentScale.Crop,
+                        onLoading = {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp)
+                            )
+                        },
+                        onFailure = {
+                            Icon(
+                                Icons.Default.BrokenImage,
+                                contentDescription = "Błąd ładowania"
+                            )
+                        },
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
 
@@ -212,6 +224,7 @@ fun TrailerCardSmall(
 
             }
         }
+        // Rezerwacja przy kalendarzu
         if(getEnvironment() == "prod") Reservation(rezerwuj)
     }
 }
@@ -344,6 +357,6 @@ fun Reservation(
             .padding(8.dp),
         shape = RoundedCornerShape(14.dp)
     ) {
-        Text("Rezerwuj")
+        Text("Rezerwacja")
     }
 }

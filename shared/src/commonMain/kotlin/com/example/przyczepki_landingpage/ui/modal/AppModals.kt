@@ -47,13 +47,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
 import com.example.przyczepki_landingpage.data.Prices
+import com.example.przyczepki_landingpage.data.Reservation
 import com.example.przyczepki_landingpage.data.ReservationPrice
 import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.model.asPrice
 import com.example.przyczepki_landingpage.model.formatDatePl
 import com.example.przyczepki_landingpage.data.Trailer
+import com.example.przyczepki_landingpage.model.CurrentScreen
+import com.example.przyczepki_landingpage.model.LoginUiState
 import com.example.przyczepki_landingpage.seller
 import com.example.przyczepki_landingpage.ui.LoadingScreen
+import com.example.przyczepki_landingpage.ui.LoginScreen
 import com.example.przyczepki_landingpage.ui.ReservationServerProblemScreen
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
@@ -78,6 +82,9 @@ fun AppModals(
         }
         ModalType.CALL_FOR_RESERVATION -> {
             ReservationServerProblemScreen(viewModel)
+        }
+        ModalType.LOGIN -> {
+            LoginModal(viewModel)
         }
     }
 }
@@ -123,28 +130,8 @@ fun ReservationConfirmationModal(
                 if(reservationToMake == null) {
                     LoadingScreen("loading reservation")
                 } else
-                // Header
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Event,
-                        contentDescription = "rezerwacja",
-                    )
-                    Text(
-                        text = modal?.dialogTitle ?: "",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                }
-
-                Text(
-                    text = modal?.dialogText ?: "",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
+                // Heade
+                ReservationHeader(modal?.dialogTitle, modal?.dialogText)
 
                 // Trailer info
                 trailer?.let { currentTrailer ->
@@ -163,65 +150,8 @@ fun ReservationConfirmationModal(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(16.dp)
-                            .fillMaxWidth()
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.AttachMoney,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.padding(end = 8.dp)
-                            )
-
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = "Koszt rezerwacji:",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                                Text(
-                                    text = "${trailer?.prices?.reservation?.asPrice() ?: "Błąd!"} zł",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
-                        }
-
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "Całkowity koszt:",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                            Text(
-                                text = "${reservationToMake?.reservationPrice?.sum ?: "Błąd!"} zł",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
-                    }
-                }
+                // Total price
+                ReservationTotalPrice(trailer?.prices?.reservation?.asPrice(), reservationToMake?.reservationPrice?.sum?.asPrice())
 
                 // Action buttons
                 Row(
@@ -236,8 +166,9 @@ fun ReservationConfirmationModal(
                     }
                     Button(
                         onClick = {
-                            // TODO: Handle reservation confirmation
                             viewModel.closeModal()
+                            viewModel.navigateTo(CurrentScreen.RESERVATION_FINALISE)
+
                         },
                         shape = RoundedCornerShape(8.dp)
                     ) {
@@ -248,10 +179,97 @@ fun ReservationConfirmationModal(
         }
     }
 }
+@Composable
+fun ReservationHeader(dialogTitle: String? = "", dialogText: String? = "") {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.padding(bottom = 16.dp)
+    ) {
+        Icon(
+            Icons.Default.Event,
+            contentDescription = "rezerwacja",
+        )
+        Text(
+            text = dialogTitle ?: "",
+            style = MaterialTheme.typography.titleLarge
+        )
+    }
+
+    Text(
+        text = dialogText ?: "",
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(bottom = 12.dp)
+    )
+}
+
+@Composable
+fun ReservationTotalPrice(reservationPrice: String?, reservationToMake: String?) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(16.dp)
+                .fillMaxWidth()
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.AttachMoney,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Koszt rezerwacji:",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Text(
+                        text = "${reservationPrice ?: "Błąd!"} zł",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Całkowity koszt:",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Text(
+                    text = "${reservationToMake ?: "Błąd!"} zł",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+    }
+}
 
 
 @Composable
-private fun TrailerInfoCard(trailer: Trailer) {
+fun TrailerInfoCard(trailer: Trailer) {
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
@@ -326,13 +344,6 @@ fun trailerReservationDates(
     } else 0
 
     Column(modifier = modifier) {
-        // Nagłówek sekcji
-        Text(
-            text = "Termin rezerwacji",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -547,6 +558,39 @@ private fun PriceRow(
 
         if (!isTotal && !showInfo) {
             Spacer(modifier = Modifier.height(4.dp))
+        }
+    }
+}
+
+@Composable
+fun LoginModal(viewModel: AppViewModel) {
+    val state: LoginUiState = LoginUiState()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.45f))
+            .clickable { viewModel.closeModal() },
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(8.dp),
+            modifier = Modifier
+                .padding(24.dp)
+                .widthIn(max = 600.dp)
+//                .fillMaxHeight(0.9f)
+        ) {
+            LoginScreen(
+                state,
+                {},
+                {},
+                {},
+                {},
+                {},
+            )
         }
     }
 }

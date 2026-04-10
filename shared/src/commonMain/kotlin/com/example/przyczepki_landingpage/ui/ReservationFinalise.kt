@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,19 +15,25 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,13 +44,23 @@ import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
 import com.example.przyczepki_landingpage.callPhone
 import com.example.przyczepki_landingpage.data.Trailer
+import com.example.przyczepki_landingpage.model.CurrentScreen
+import com.example.przyczepki_landingpage.model.ModalData
+import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.model.ServerResponse
 import com.example.przyczepki_landingpage.model.ServerStatus
+import com.example.przyczepki_landingpage.model.asPrice
 import com.example.przyczepki_landingpage.openEmail
 import com.example.przyczepki_landingpage.seller
+import com.example.przyczepki_landingpage.ui.modal.ReservationHeader
+import com.example.przyczepki_landingpage.ui.modal.ReservationTotalPrice
+import com.example.przyczepki_landingpage.ui.modal.TrailerInfoCard
+import com.example.przyczepki_landingpage.ui.modal.trailerReservationDates
+import com.example.przyczepki_landingpage.ui.modal.trailerReservationPrices
 
 @Composable
 fun ReservationFinaliseMain(
+    widthSizeClass: WindowWidthSizeClass,
     viewModel: AppViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -54,7 +71,7 @@ fun ReservationFinaliseMain(
 
     if(serverStatus != ServerStatus.OK) {
         ReservationServerProblemScreen(viewModel)
-    } else PaymentForReservation()
+    } else PaymentForReservation(viewModel)
 
 
 
@@ -138,6 +155,116 @@ fun ReservationServerProblemScreen(
 }
 
 @Composable
-fun PaymentForReservation() {
+fun PaymentForReservation(
+    viewModel: AppViewModel
+) {
+
+    val state by viewModel.appState.collectAsState()
+    val reservationToMake = state.reservationToMake
+    val trailer = state.selectedTrailer
+    val from = reservationToMake?.startDate
+    val to = reservationToMake?.endDate
+    val reservationPrices = reservationToMake?.reservationPrice
+    // TODO powórt do rezerwacji
     Text("PaymentForReservation")
+
+    Column(
+        modifier = Modifier
+            .padding(24.dp)
+//                    .verticalScroll(rememberScrollState())
+    ) {
+        NavigationBackBar()
+        //    ReservationHeader(modal?.dialogTitle, modal?.dialogText)
+
+        TitleForSection("Dla kogo rezerwacja:")
+        LoggingOptions(viewModel)
+
+        // Trailer info
+        trailer?.let { currentTrailer ->
+            TitleForSection("Przyczepka:")
+            OutlinedCard() {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TrailerInfoCard(currentTrailer)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Dates
+        // Nagłówek sekcji
+        TitleForSection("Termin rezerwacji:")
+        trailerReservationDates(from, to)
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Prices
+        TitleForSection("Ceny:")
+        if (reservationPrices != null) trailerReservationPrices(reservationPrices, trailer?.prices)
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Total price
+        TitleForSection("Podsumowanie Cen:")
+        ReservationTotalPrice(
+            trailer?.prices?.reservation?.asPrice(),
+            reservationToMake?.reservationPrice?.sum?.asPrice()
+        )
+
+
+    }
 }
+
+@Composable
+fun NavigationBackBar() {
+    Row (modifier = Modifier) {
+        Icon(Icons.AutoMirrored.Filled.ArrowBack, "back navigation")
+        Text("Powrót do rezerwacji")
+    }
+}
+
+@Composable
+fun TitleForSection(text: String? = "") {
+    // Nagłówek sekcji
+    Text(
+        text = text ?: "",
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
+}
+
+@Composable
+fun LoggingOptions(viewModel: AppViewModel) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Button(onClick = {
+            viewModel.openModal(
+                ModalType.LOGIN,
+                ModalData(
+                    onConfirmation = { viewModel.navigateTo(CurrentScreen.RESERVATION_FINALISE) },
+                    dialogTitle = "Zadzwoń/napisz w celu rezerwacji",
+                    dialogText = "Czy na pewno chcesz rezerwować przyczepkę?",
+                )
+            )
+        }) {
+            Text("Logowanie")
+        }
+        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.onSurfaceVariant )
+        Text("nie masz konta?")
+        Button(onClick = {
+            viewModel.navigateTo(CurrentScreen.SIGN_UP)
+        }) {
+            Text("Podaj dane")
+        }
+    }
+
+}
+

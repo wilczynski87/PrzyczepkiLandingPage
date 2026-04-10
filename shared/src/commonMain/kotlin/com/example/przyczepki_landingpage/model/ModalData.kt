@@ -14,9 +14,9 @@ data class ModalData(
     val thumbnail: DrawableResource? = null,
 )
 
-data class ConfirmReservationModalData(
-    val onDismissRequest: () -> Unit = {},
-    val onConfirmation: () -> Unit = {},
-    val trailer: Trailer,
-
-    )
+//data class ConfirmReservationModalData(
+//    val onDismissRequest: () -> Unit = {},
+//    val onConfirmation: () -> Unit = {},
+//    val trailer: Trailer,
+//
+//    )
