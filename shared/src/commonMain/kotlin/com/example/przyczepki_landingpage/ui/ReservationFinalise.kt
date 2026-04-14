@@ -27,6 +27,7 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
@@ -71,9 +72,7 @@ fun ReservationFinaliseMain(
 
     if(serverStatus != ServerStatus.OK) {
         ReservationServerProblemScreen(viewModel)
-    } else PaymentForReservation(viewModel)
-
-
+    } else PaymentForReservation(widthSizeClass, viewModel)
 
 }
 
@@ -156,6 +155,7 @@ fun ReservationServerProblemScreen(
 
 @Composable
 fun PaymentForReservation(
+    widthSizeClass: WindowWidthSizeClass,
     viewModel: AppViewModel
 ) {
 
@@ -173,42 +173,31 @@ fun PaymentForReservation(
             .padding(24.dp)
 //                    .verticalScroll(rememberScrollState())
     ) {
-        NavigationBackBar()
+        NavigationBackBar({ viewModel.navigateTo(CurrentScreen.RESERVATION) }, "Powrót do rezerwacji")
         //    ReservationHeader(modal?.dialogTitle, modal?.dialogText)
 
         TitleForSection("Dla kogo rezerwacja:")
-        LoggingOptions(viewModel)
+        LoggingOptions(widthSizeClass, viewModel)
 
         // Trailer info
         trailer?.let { currentTrailer ->
-            TitleForSection("Przyczepka:")
-            OutlinedCard() {
-                Row(
-                    modifier = Modifier.padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TrailerInfoCard(currentTrailer)
-                }
-            }
+            TrailerInfoCard(currentTrailer)
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
         // Dates
         // Nagłówek sekcji
-        TitleForSection("Termin rezerwacji:")
         trailerReservationDates(from, to)
 
         Spacer(modifier = Modifier.height(12.dp))
 
         // Prices
-        TitleForSection("Ceny:")
         if (reservationPrices != null) trailerReservationPrices(reservationPrices, trailer?.prices)
 
         Spacer(modifier = Modifier.height(12.dp))
 
         // Total price
-        TitleForSection("Podsumowanie Cen:")
         ReservationTotalPrice(
             trailer?.prices?.reservation?.asPrice(),
             reservationToMake?.reservationPrice?.sum?.asPrice()
@@ -218,11 +207,25 @@ fun PaymentForReservation(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavigationBackBar() {
-    Row (modifier = Modifier) {
-        Icon(Icons.AutoMirrored.Filled.ArrowBack, "back navigation")
-        Text("Powrót do rezerwacji")
+fun NavigationBackBar(onClick: () -> Unit = {}, title: String = "Powrót") {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        IconButton(onClick = { onClick }) {
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Powrót do rezerwacji"
+            )
+        }
+        Text(
+            title,
+            style = MaterialTheme.typography.titleMedium
+        )
     }
 }
 
@@ -237,34 +240,4 @@ fun TitleForSection(text: String? = "") {
     )
 }
 
-@Composable
-fun LoggingOptions(viewModel: AppViewModel) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Button(onClick = {
-            viewModel.openModal(
-                ModalType.LOGIN,
-                ModalData(
-                    onConfirmation = { viewModel.navigateTo(CurrentScreen.RESERVATION_FINALISE) },
-                    dialogTitle = "Zadzwoń/napisz w celu rezerwacji",
-                    dialogText = "Czy na pewno chcesz rezerwować przyczepkę?",
-                )
-            )
-        }) {
-            Text("Logowanie")
-        }
-        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.onSurfaceVariant )
-        Text("nie masz konta?")
-        Button(onClick = {
-            viewModel.navigateTo(CurrentScreen.SIGN_UP)
-        }) {
-            Text("Podaj dane")
-        }
-    }
-
-}
 

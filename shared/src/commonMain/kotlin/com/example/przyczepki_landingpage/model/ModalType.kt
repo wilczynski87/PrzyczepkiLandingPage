@@ -6,4 +6,5 @@ enum class ModalType {
     TRAILER_DETAILS,
     CALL_FOR_RESERVATION,
     LOGIN,
+    CUSTOMER_ERROR,
 }

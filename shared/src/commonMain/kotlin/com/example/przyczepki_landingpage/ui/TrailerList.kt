@@ -38,6 +38,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import com.example.przyczepki_landingpage.AppViewModel
 import com.example.przyczepki_landingpage.model.asPrice
 import com.example.przyczepki_landingpage.data.Prices
@@ -170,27 +174,37 @@ fun TrailerCardSmall(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(Modifier) {
-                if(trailer.images.isNullOrEmpty() || trailer.images["thumbnail"] == null) {
+                if(trailer.images.isNullOrEmpty() || trailer.images["tyl"] == null) {
                     Icon(Icons.Default.BrokenImage, "brak zdjęcia")
                 } else {
                     KamelImage(
                         resource = {
-                            asyncPainterResource(trailer.images["thumbnail"]!!)
+                            asyncPainterResource(trailer.images["tyl"]!!)
                         },
                         contentDescription = "Przyczepka",
-                        contentScale = ContentScale.Crop,
+                        contentScale = ContentScale.Fit,
                         onLoading = {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(24.dp)
                             )
                         },
                         onFailure = {
-                            Icon(
-                                Icons.Default.BrokenImage,
-                                contentDescription = "Błąd ładowania"
-                            )
+                            Box(
+                                Modifier.matchParentSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    Icons.Default.BrokenImage,
+                                    contentDescription = "Błąd",
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
                         },
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .matchParentSize()
+                            .clip(RoundedCornerShape(14.dp))
+                            .alpha(0.5f)
+
                     )
                 }
 
@@ -231,15 +245,38 @@ fun TrailerCardSmall(
 
 @Composable
 fun TableRow(label: String, value: String) {
+    val shadow = Shadow(
+        color = Color.White,
+        offset = Offset(0f, 1f),
+        blurRadius = 4f
+    )
     Column {
         Text(
             label,
-            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.background(
+                Brush.verticalGradient(
+                    listOf(
+                        Color.Transparent,
+                        Color.White.copy(alpha = 0.6f)
+                    )
+                ),
+                shape = RoundedCornerShape(4.dp)
+            ),
+            style = MaterialTheme.typography.labelSmall.copy(shadow = shadow),
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Text(
             value,
-            style = MaterialTheme.typography.bodyMedium
+            modifier = Modifier.background(
+                Brush.verticalGradient(
+                    listOf(
+                        Color.Transparent,
+                        Color.White.copy(alpha = 0.6f)
+                    )
+                ),
+                shape = RoundedCornerShape(4.dp)
+            ),
+            style = MaterialTheme.typography.bodyMedium.copy(shadow = shadow)
         )
     }
 }

@@ -1,6 +1,7 @@
 package com.example.przyczepki_landingpage
 
 import com.example.przyczepki_landingpage.controller.ApiClient
+import com.example.przyczepki_landingpage.data.Customer
 import com.example.przyczepki_landingpage.model.CurrentScreen
 import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.data.ReservationDto
@@ -205,4 +206,100 @@ class AppViewModel(private val scope: CoroutineScope) {
         return blockedDates
     }
 
+
+    // CUSTOMER
+    // State update
+    fun updateCustomer(transform: (Customer) -> Customer) {
+        _appState.update { state ->
+            val current = state.customer ?: Customer()
+            state.copy(
+                customer = transform(current)
+            )
+        }
+    }
+
+    // Server update
+    fun saveCustomer() {
+        scope.launch {
+            val customer = appState.value.customer ?: return@launch
+            ApiClient.customerController.saveCustomer(customer)
+                .onSuccess {
+                    _appState.update { state ->
+                        state.copy(
+                            customer = it
+                        )
+                    }
+                    navigateTo(CurrentScreen.RESERVATION_FINALISE)
+                }.onFailure {
+                    println("Error: ${it.message}")
+                    openModal(ModalType.CUSTOMER_ERROR, ModalData(
+                        dialogTitle = "Błąd przy zapisie danych klienta",
+                        dialogText = it.message ?: "Unknown error")
+                    )
+                }
+        }
+    }
+
+    fun putCustomer() {
+        scope.launch {
+            val customer = appState.value.customer ?: return@launch
+            ApiClient.customerController.updateCustomer(customer)
+                .onSuccess {
+                    _appState.update { state ->
+                        state.copy(
+                            customer = it
+                        )
+                    }
+                }
+                .onFailure {
+                    println("Error: ${it.message}")
+                    openModal(ModalType.CUSTOMER_ERROR, ModalData(
+                        dialogTitle = "Błąd przy aktualizacji danych klienta",
+                        dialogText = it.message ?: "Unknown error")
+                    )
+                }
+        }
+    }
+
+    fun deleteCustomer(customerId: String? = null) {
+        scope.launch {
+            val customerId: String = customerId ?: appState.value.customer?.id ?: return@launch
+            ApiClient.customerController.deleteCustomer(customerId)
+                .onSuccess {
+                    _appState.update { state ->
+                        state.copy(
+                            customer = null
+                        )
+                    }
+                }
+                .onFailure {
+                    println("Error: ${it.message}")
+                    openModal(ModalType.CUSTOMER_ERROR, ModalData(
+                        dialogTitle = "Błąd przy usuwaniu danych klienta",
+                        dialogText = it.message ?: "Unknown error")
+                    )
+                }
+        }
+    }
+
+    fun fetchCustomer(customerId: String? = null) {
+        scope.launch {
+            val customerId: String = customerId ?: appState.value.customer?.id ?: return@launch
+            ApiClient.customerController.getCustomer(customerId)
+                .onSuccess { customer ->
+                    _appState.update { state ->
+                        state.copy(
+                            customer = customer
+                        )
+                    }
+                }
+                .onFailure {
+                    println("Error: ${it.message}")
+                    openModal(ModalType.CUSTOMER_ERROR, ModalData(
+                        dialogTitle = "Błąd przy pobieraniu danych klienta",
+                        dialogText = it.message ?: "Unknown error")
+                    )
+                }
+        }
+    }
 }

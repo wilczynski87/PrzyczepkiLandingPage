@@ -31,10 +31,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.przyczepki_landingpage.AppViewModel
 import com.example.przyczepki_landingpage.model.LoginUiState
 
 @Composable
 fun LoginScreen(
+    viewModel: AppViewModel,
     state: LoginUiState,
     onLoginChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,

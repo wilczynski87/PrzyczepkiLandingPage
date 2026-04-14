@@ -15,18 +15,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -34,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -42,7 +46,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
@@ -59,6 +66,8 @@ import com.example.przyczepki_landingpage.seller
 import com.example.przyczepki_landingpage.ui.LoadingScreen
 import com.example.przyczepki_landingpage.ui.LoginScreen
 import com.example.przyczepki_landingpage.ui.ReservationServerProblemScreen
+import io.kamel.image.KamelImage
+import io.kamel.image.asyncPainterResource
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
 import org.jetbrains.compose.resources.DrawableResource
@@ -85,6 +94,9 @@ fun AppModals(
         }
         ModalType.LOGIN -> {
             LoginModal(viewModel)
+        }
+        ModalType.CUSTOMER_ERROR -> {
+            CustomerErrorModal(viewModel)
         }
     }
 }
@@ -125,7 +137,7 @@ fun ReservationConfirmationModal(
             Column(
                 modifier = Modifier
                     .padding(24.dp)
-//                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState())
             ) {
                 if(reservationToMake == null) {
                     LoadingScreen("loading reservation")
@@ -152,6 +164,8 @@ fun ReservationConfirmationModal(
 
                 // Total price
                 ReservationTotalPrice(trailer?.prices?.reservation?.asPrice(), reservationToMake?.reservationPrice?.sum?.asPrice())
+
+                Spacer(modifier = Modifier.height(12.dp))
 
                 // Action buttons
                 Row(
@@ -189,6 +203,7 @@ fun ReservationHeader(dialogTitle: String? = "", dialogText: String? = "") {
         Icon(
             Icons.Default.Event,
             contentDescription = "rezerwacja",
+            modifier = Modifier.padding(end = 12.dp)
         )
         Text(
             text = dialogTitle ?: "",
@@ -213,12 +228,12 @@ fun ReservationTotalPrice(reservationPrice: String?, reservationToMake: String?)
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+//            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(8.dp)
                 .fillMaxWidth()
         ) {
             Row(
@@ -228,7 +243,7 @@ fun ReservationTotalPrice(reservationPrice: String?, reservationToMake: String?)
                     imageVector = Icons.Outlined.AttachMoney,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.padding(end = 4.dp)
                 )
 
                 Column(
@@ -247,8 +262,9 @@ fun ReservationTotalPrice(reservationPrice: String?, reservationToMake: String?)
                     )
                 }
             }
-
+//            VerticalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.padding(vertical = 4.dp))
             Column(
+                modifier = Modifier.padding(start = 4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -270,29 +286,58 @@ fun ReservationTotalPrice(reservationPrice: String?, reservationToMake: String?)
 
 @Composable
 fun TrailerInfoCard(trailer: Trailer) {
+    Text(
+        text = "Przyczepka:",
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.SemiBold,
+        modifier = Modifier.padding(1.dp)
+            .alpha(0.5f)
+    )
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+//            modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            trailer.images?.get("main")?.let { imageRes ->
-                Text("zdjęcie przyczepki")
-//                Image(
-//                    painter = painterResource(imageRes),
-//                    contentDescription = "Thumbnail przyczepy",
-//                    contentScale = ContentScale.Crop,
-//                    modifier = Modifier
-//                        .size(80.dp)
-//                        .clip(RoundedCornerShape(8.dp))
-//                        .padding(end = 16.dp)
-//                )
+            Column (
+                modifier = Modifier
+                    .padding(1.dp)
+                    .background(Color.Transparent),
+            ) {
+                KamelImage(
+                    resource = {
+                        trailer.images?.get("thumbnail")?.let { asyncPainterResource(it) }!!
+                    },
+                    contentDescription = "Przyczepka",
+                    contentScale = ContentScale.Crop,
+                    onLoading = {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp)
+                        )
+                    },
+                    onFailure = {
+                        Box(
+                            Modifier.matchParentSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.BrokenImage,
+                                contentDescription = "Błąd",
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    },
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                )
             }
+
             Column {
                 Text(
                     text = trailer.name ?: "",
@@ -313,27 +358,6 @@ fun TrailerInfoCard(trailer: Trailer) {
 }
 
 @Composable
-fun trailerMiniImage(thumbnail: DrawableResource?, name: String? = "", modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceAround,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        thumbnail?.let { thumbnail ->
-            Image(
-                painter = painterResource(thumbnail),
-                contentDescription = "thumbnail",
-                modifier = Modifier
-                    .size(72.dp)
-                    .padding(end = 8.dp)
-            )
-        }
-        Text(name!!, style = MaterialTheme.typography.titleMedium)
-
-    }
-}
-
-@Composable
 fun trailerReservationDates(
     from: LocalDate?,
     to: LocalDate?,
@@ -342,6 +366,14 @@ fun trailerReservationDates(
     val daysNumber = if(from != null && to != null) {
         from.daysUntil(to)
     } else 0
+
+    Text(
+        text = "Termin rezerwacji:",
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.SemiBold,
+        modifier = Modifier.padding(1.dp)
+            .alpha(0.5f)
+    )
 
     Column(modifier = modifier) {
 
@@ -422,6 +454,14 @@ fun trailerReservationPrices(
 ) {
     if (reservationPrice == null || reservationPrice.daysNumber == null) return
     var furtherInfo: Boolean by remember { mutableStateOf(false) }
+
+    Text(
+        text = "Ceny:",
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.SemiBold,
+        modifier = Modifier.padding(1.dp)
+            .alpha(0.5f)
+    )
 
     Column(modifier = modifier) {
         // Nagłówek sekcji
@@ -584,6 +624,7 @@ fun LoginModal(viewModel: AppViewModel) {
 //                .fillMaxHeight(0.9f)
         ) {
             LoginScreen(
+                viewModel,
                 state,
                 {},
                 {},
@@ -591,6 +632,31 @@ fun LoginModal(viewModel: AppViewModel) {
                 {},
                 {},
             )
+        }
+    }
+}
+
+@Composable
+fun CustomerErrorModal(viewModel: AppViewModel) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.45f))
+            .clickable { viewModel.closeModal() },
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(8.dp),
+            modifier = Modifier
+                .padding(24.dp)
+                .widthIn(max = 600.dp)
+//                .fillMaxHeight(0.9f)
+        ) {
+            Text("Error in customer seve")
         }
     }
 }

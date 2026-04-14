@@ -18,9 +18,8 @@ val base_url = getBaseUrl()
 
 object ApiClient {
     val client: HttpClient by lazy { createHttpClient() }
-
     val healthCheck by lazy { HealthCheck(client) }
-
     val trailerController by lazy { TrailerController(client) }
     val reservationController by lazy { ReservationController(client) }
+    val customerController by lazy { CustomerController(client) }
 }

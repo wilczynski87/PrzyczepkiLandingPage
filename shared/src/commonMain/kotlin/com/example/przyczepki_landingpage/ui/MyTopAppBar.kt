@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.filled.Person
 import com.example.przyczepki_landingpage.AppViewModel
 import com.example.przyczepki_landingpage.getEnvironment
 import com.example.przyczepki_landingpage.model.CurrentScreen
@@ -29,6 +30,13 @@ fun MyTopAppBar(viewModel: AppViewModel) {
     TopAppBar(
         title = { WebTitle() },
         actions = {
+            IconButton(onClick = { viewModel.navigateTo(CurrentScreen.LOGIN) }) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Profil",
+                    modifier = Modifier.size(24.dp)
+                )
+            }
             IconButton(onClick = { expanded = true }) {
                 Icon(
                     imageVector = Icons.Default.Menu,

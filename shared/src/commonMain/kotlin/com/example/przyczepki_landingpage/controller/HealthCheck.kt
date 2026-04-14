@@ -8,7 +8,7 @@ import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.request.get
 import io.ktor.util.network.UnresolvedAddressException
 
-class HealthCheck( private val client: HttpClient) {
+class HealthCheck( private val client: HttpClient ) {
 
     suspend fun healthCheck(): ServerResponse {
         return try {
