@@ -50,4 +50,11 @@ dependencies {
     // datetime
     implementation(libs.kotlinx.datetime)
 
+    // Auth
+    implementation(libs.jbcrypt)
+    implementation(libs.ktor.client.auth)
+    implementation(libs.ktor.server.auth)
+    implementation(libs.ktor.server.auth.jwt)
+
+
 }

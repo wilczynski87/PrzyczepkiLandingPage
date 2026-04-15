@@ -16,6 +16,7 @@ kotlinx-serialization-json = "1.10.0"
 mongodb = "5.1.0"
 kotlinx-browser = "0.5.0"
 kamel = "1.0.8"
+jbcrypt = "0.4"
 
 
 [libraries]
@@ -59,6 +60,9 @@ ktor-server-cors = { module = "io.ktor:ktor-server-cors", version.ref = "server-
 
 # Auth
 ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
+ktor-server-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
+ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
+jbcrypt = { module = "org.mindrot:jbcrypt", version.ref = "jbcrypt" }
 
 # Serialization
 jetbrains-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }

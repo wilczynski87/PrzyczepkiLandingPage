@@ -1,8 +1,8 @@
-package com.example.przyczepki_landingpage.service.trailer_service_impl
+package com.example.przyczepki_landingpage.service.impl
 
+import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.repo.TrailersRepo
 import com.example.przyczepki_landingpage.service.TrailersService
-import com.example.przyczepki_landingpage.data.Trailer
 
 class TrailersServiceImpl(
     private val trailersRepo: TrailersRepo,

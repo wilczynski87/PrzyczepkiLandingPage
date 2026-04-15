@@ -1,11 +1,14 @@
 package com.example.przyczepki_landingpage
 
+import com.example.przyczepki_landingpage.controller.authController
+import com.example.przyczepki_landingpage.controller.customerController
 import com.example.przyczepki_landingpage.controller.healthCheck
 import com.example.przyczepki_landingpage.controller.reservation
 import com.example.przyczepki_landingpage.controller.trailers
 import com.example.przyczepki_landingpage.di.appModule
 import com.example.przyczepki_landingpage.di.networkModule
 import com.example.przyczepki_landingpage.modules.config
+import com.example.przyczepki_landingpage.modules.configureSecurity
 
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -22,6 +25,8 @@ fun main() {
 
 fun Application.module() {
     println("\nServer started\n")
+
+    configureSecurity()
 
     configureDependencyInjection()
 
@@ -42,8 +47,10 @@ private fun Application.configureDependencyInjection() {
 private fun Application.routing() {
     routing {
         healthCheck()
+        authController()
         trailers()
         reservation()
+        customerController()
     }
 
 }

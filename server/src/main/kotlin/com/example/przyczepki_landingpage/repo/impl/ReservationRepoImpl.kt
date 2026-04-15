@@ -1,13 +1,11 @@
-package com.example.przyczepki_landingpage.repo.reservation_repo_impl
+package com.example.przyczepki_landingpage.repo.impl
 
 import com.example.przyczepki_landingpage.data.Customer
 import com.example.przyczepki_landingpage.data.Reservation
 import com.example.przyczepki_landingpage.data.ReservationPrice
 import com.example.przyczepki_landingpage.data.Trailer
-import com.example.przyczepki_landingpage.model.toLocalDate
 import com.example.przyczepki_landingpage.modules.MongoProvider.database
 import com.example.przyczepki_landingpage.repo.ReservationRepo
-import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Filters.and
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.Filters.gte
@@ -17,12 +15,10 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.serialization.Contextual
-import kotlinx.serialization.Serializable
 import org.bson.types.ObjectId
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinLocalDate
-import java.util.Date
 
 class ReservationRepoImpl : ReservationRepo {
 
@@ -49,7 +45,7 @@ class ReservationRepoImpl : ReservationRepo {
     }
 
     override suspend fun getReservationById(id: String): Reservation? {
-        return reservationCollection.find(Filters.eq("id", id)).firstOrNull()?.toReservation()
+        return reservationCollection.find(eq("id", id)).firstOrNull()?.toReservation()
     }
 
     override suspend fun createReservation(reservation: Reservation): Reservation? {
@@ -65,7 +61,7 @@ class ReservationRepoImpl : ReservationRepo {
     }
 
     override suspend fun deleteReservation(id: String): Boolean {
-        return reservationCollection.findOneAndDelete(Filters.eq("id", id)) != null
+        return reservationCollection.findOneAndDelete(eq("id", id)) != null
     }
 
     override suspend fun checkReservationDates(

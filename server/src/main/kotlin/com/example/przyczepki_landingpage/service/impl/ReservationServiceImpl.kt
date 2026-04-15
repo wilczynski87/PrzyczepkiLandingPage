@@ -1,4 +1,4 @@
-package com.example.przyczepki_landingpage.service.reservation_service_impl
+package com.example.przyczepki_landingpage.service.impl
 
 import com.example.przyczepki_landingpage.data.Customer
 import com.example.przyczepki_landingpage.data.Reservation
@@ -6,10 +6,8 @@ import com.example.przyczepki_landingpage.data.ReservationDto
 import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.repo.ReservationRepo
 import com.example.przyczepki_landingpage.repo.TrailersRepo
-import com.example.przyczepki_landingpage.repo.trailer_repo_impl.TrailerTable
 import com.example.przyczepki_landingpage.service.ReservationService
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.toJavaLocalDate
 
 class ReservationServiceImpl(
     private val reservationRepo: ReservationRepo,

@@ -2,6 +2,7 @@ package com.example.przyczepki_landingpage
 
 import com.example.przyczepki_landingpage.data.Company
 import com.example.przyczepki_landingpage.data.Customer
+import com.example.przyczepki_landingpage.data.CustomerDto
 import com.example.przyczepki_landingpage.data.LicenseCategory
 import com.example.przyczepki_landingpage.data.Prices
 import com.example.przyczepki_landingpage.data.Private
@@ -34,7 +35,7 @@ data class AppState(
     val trailers: List<Trailer> = emptyList(),
     val selectedTrailer: Trailer? = null,
 
-    val customer: Customer? = null,
+    val customer: CustomerDto? = null,
 )
 
 

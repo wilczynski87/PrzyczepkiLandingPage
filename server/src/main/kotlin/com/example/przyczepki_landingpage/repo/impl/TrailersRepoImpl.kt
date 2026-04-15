@@ -1,4 +1,4 @@
-package com.example.przyczepki_landingpage.repo.trailer_repo_impl
+package com.example.przyczepki_landingpage.repo.impl
 
 import com.example.przyczepki_landingpage.data.LicenseCategory
 import com.example.przyczepki_landingpage.data.Prices

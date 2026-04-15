@@ -2,6 +2,7 @@ package com.example.przyczepki_landingpage
 
 import com.example.przyczepki_landingpage.controller.ApiClient
 import com.example.przyczepki_landingpage.data.Customer
+import com.example.przyczepki_landingpage.data.CustomerDto
 import com.example.przyczepki_landingpage.model.CurrentScreen
 import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.data.ReservationDto
@@ -209,9 +210,9 @@ class AppViewModel(private val scope: CoroutineScope) {
 
     // CUSTOMER
     // State update
-    fun updateCustomer(transform: (Customer) -> Customer) {
+    fun updateCustomer(transform: (CustomerDto) -> CustomerDto) {
         _appState.update { state ->
-            val current = state.customer ?: Customer()
+            val current = state.customer ?: CustomerDto()
             state.copy(
                 customer = transform(current)
             )
