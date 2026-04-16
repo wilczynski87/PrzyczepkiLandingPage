@@ -7,6 +7,7 @@ import com.example.przyczepki_landingpage.service.auth.PasswordUtil.hash
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.plugins.BadRequestException
+import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.request.receive
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
@@ -27,24 +28,7 @@ fun Route.customerController() {
                 // TODO hasło początkowe + validaja (np powtarzanie email lub nip/pesel)
                 val customer = call.receive<Customer>()
                 val saved = customerService.save(customer)
-                call.respondNullable(saved?.toDto())
-            } catch (e: Exception) {
-                println("customerController, Error: ${e.message}")
-                call.respond(HttpStatusCode.BadRequest, e.message ?: "Unknown error")
-            }
-        }
-
-        post("/changePassword") {
-            try {
-                val request = call.receive<LoginRequest>()
-
-                val customer = customerService.getCustomerByEmail(request.email)
-                    ?: throw NullPointerException("Customer, with given email, not found: ${request.email}")
-
-                val updated = customerService.update(customer.copy(passwordHash = hash(request.password)))
-                    ?: throw NullPointerException("Bad Password for customer email: ${request.email}")
-
-                call.respondNullable(updated.id)
+                call.respondNullable(saved)
             } catch (e: Exception) {
                 println("customerController, Error: ${e.message}")
                 call.respond(HttpStatusCode.BadRequest, e.message ?: "Unknown error")
@@ -57,14 +41,25 @@ fun Route.customerController() {
                     val id = call.parameters["id"] ?: throw BadRequestException("Brak id")
 
                     val customer = customerService.get(id)
-                        ?: throw NullPointerException("Nie ma klienta o takim id: $id")
+                        ?: throw NotFoundException("Nie ma klienta o takim id: $id")
 
-                    call.respondNullable(customer.toDto())
+                    call.respondNullable(customer)
 
                 } catch (e: Exception) {
                     println("Error: ${e.message}")
                     call.respond(HttpStatusCode.BadRequest, e.message ?: "Unknown error")
                 }
+            }
+
+            put("/changePassword") {
+                val request = call.receive<LoginRequest>()
+
+                customerService.getCustomerByEmail(request.email)
+                    ?: throw NotFoundException("Customer, with given email, not found: ${request.email}")
+
+                val updated = customerService.updatePassword(request)
+
+                call.respondNullable(updated)
             }
 
             put {
@@ -73,7 +68,7 @@ fun Route.customerController() {
                 val updated = customerService.update(customer)
                     ?: return@put call.respond(HttpStatusCode.NotFound)
 
-                call.respondNullable(HttpStatusCode.OK, updated.toDto())
+                call.respondNullable(HttpStatusCode.OK, updated)
             }
 
             delete("/{id}") {

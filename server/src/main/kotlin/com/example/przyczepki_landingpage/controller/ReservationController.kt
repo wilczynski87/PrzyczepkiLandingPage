@@ -2,7 +2,9 @@ package com.example.przyczepki_landingpage.controller
 
 import com.example.przyczepki_landingpage.data.ReservationDto
 import com.example.przyczepki_landingpage.data.ReservationPrice
+import com.example.przyczepki_landingpage.service.CustomerService
 import com.example.przyczepki_landingpage.service.ReservationService
+import com.example.przyczepki_landingpage.service.TrailersService
 import com.example.przyczepki_landingpage.service.startOfTheDay
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
@@ -22,6 +24,8 @@ import kotlin.time.Clock
 
 fun Route.reservation() {
     val reservationService by inject<ReservationService>()
+    val customerService by inject<CustomerService>()
+    val trailersService by inject<TrailersService>()
 
     route("/reservation") {
         // zwraca listę rezerwacji (dni w których rezerwować nie można!
@@ -54,16 +58,19 @@ fun Route.reservation() {
 
         post("/create") {
             println("reservation, create")
-            try {
-                val reservationDto: ReservationDto = call.receive()
-                println("reservationDto: $reservationDto")
-                val reservation = reservationService.createReservation(reservationDto) ?: throw Exception("Reservation not created")
 
-                call.respond(reservation)
-            } catch (e: Exception) {
-                println("reservation, create error: $e")
-                call.respond(HttpStatusCode.Conflict ,e.message ?: "Reservation not created")
-            }
+            val reservationDto: ReservationDto = call.receive()
+            println("reservationDto: $reservationDto")
+
+            if(reservationDto.customerId.isNullOrBlank()) throw NullPointerException("CustomerId is wrong: ${reservationDto.customerId}")
+            if(reservationDto.trailerId.isNullOrBlank()) throw NullPointerException("TrailerId is wrong: ${reservationDto.trailerId}")
+
+            customerService.get(reservationDto.customerId!!) ?: call.respond(HttpStatusCode.NotAcceptable, "Nie znaleziono Klienta o takim id: ${reservationDto.customerId}")
+            trailersService.getTrailer(reservationDto.trailerId!!) ?: call.respond(HttpStatusCode.NotAcceptable, "Nie znaleziono sprzętu o takim id: ${reservationDto.trailerId}")
+
+            val reservation = reservationService.createReservation(reservationDto) ?: throw Exception("Reservation not created")
+
+            call.respond(reservation)
         }
 
     }

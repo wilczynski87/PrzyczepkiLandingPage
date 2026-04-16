@@ -11,11 +11,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import org.koin.ktor.ext.inject
 
-interface TrailersController {
-    suspend fun getTrailers(): List<Trailer>
-    suspend fun getTrailer(id: Int): Trailer?
-}
-
 fun Route.trailers() {
     val trailerService by inject<TrailersService>()
 
@@ -40,9 +35,9 @@ fun Route.trailers() {
         post("/save") {
             val trailer = call.receive<Trailer>()
 
-            trailerService.saveTrailer(trailer)
+            val savedTrailer = trailerService.saveTrailer(trailer) ?: throw NullPointerException("Trailer is null")
 
-            call.respond(trailer)
+            call.respond(savedTrailer)
         }
     }
 }

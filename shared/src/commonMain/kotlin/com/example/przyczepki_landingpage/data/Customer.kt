@@ -6,17 +6,11 @@ import kotlinx.serialization.Serializable
 data class Customer(
     val id: String? = null,
     val private: Private? = null,
-    val company: Company? = null,
-    val passwordHash: String? = null
+    val company: Company? = null
 ) {
     fun getName(): String = company?.name ?: "${private?.firstName} ${private?.lastName}"
     fun getEmail(): String? = company?.email ?: private?.email
 
-    fun toDto(): CustomerDto = CustomerDto(
-        id = id,
-        private = private,
-        company = company
-    )
 }
 
 

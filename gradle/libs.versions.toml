@@ -76,10 +76,8 @@ kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.re
 #kamel-image = { module = "io.kamel:kamel-image", version.ref = "kamel" }
 kamel-image-default = { module = "media.kamel:kamel-image-default", version.ref = "kamel" }
 
-
-
-
-
+# Status page
+ktor-server-status-pages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor" }
 
 [plugins]
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }

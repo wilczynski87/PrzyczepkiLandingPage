@@ -20,11 +20,10 @@ fun Route.authController() {
         post("/login") {
             try {
                 val request = call.receive<LoginRequest>()
-                val customer = customerService.getCustomerByEmail(request.email) ?: throw NullPointerException("Customer, with given email, not found: ${request.email}")
-                val hashed = BCrypt.hashpw(request.password, BCrypt.gensalt())
-                verify(request.password, hashed ?: throw Exception("Password do not match"))
+                val customer = customerService.getCustomerTableByEmail(request.email) ?: throw NullPointerException("Customer, with given email, not found: ${request.email}")
+                if(verify(request.password, customer.passwordHash?: throw Exception("No Password for customerId: ${customer.id}")).not()) call.respond(HttpStatusCode.Unauthorized, "Invalid password")
 
-                val token = JwtService.generate(customer)
+                val token = JwtService.generate(customer.toCustomer())
 
                 call.respond(
                     mapOf(

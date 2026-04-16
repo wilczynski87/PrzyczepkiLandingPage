@@ -4,7 +4,6 @@ import com.example.przyczepki_landingpage.data.LicenseCategory
 import com.example.przyczepki_landingpage.data.Prices
 import com.example.przyczepki_landingpage.repo.TrailersRepo
 import com.example.przyczepki_landingpage.data.Trailer
-import com.example.przyczepki_landingpage.modules.MongoProvider
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Updates
 import com.mongodb.kotlin.client.coroutine.MongoCollection
@@ -16,7 +15,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.bson.conversions.Bson
 
-class TrailersRepoImpl: TrailersRepo {
+class TrailersRepoImpl(
+    private val trailerCollection: MongoCollection<TrailerTable>
+): TrailersRepo {
 
     override suspend fun getTrailers(): List<Trailer> {
         return trailerCollection
@@ -30,26 +31,20 @@ class TrailersRepoImpl: TrailersRepo {
     }
 
     override suspend fun saveTrailer(trailer: Trailer): Trailer? {
-        val id = ObjectId()
-        val trailerTable = TrailerTable(trailer).copy(_id = id, id = id.toHexString(), prices = trailer.prices?.copy(trailerId = id.toHexString()))
-        return try {
-            val _id = trailerCollection.insertOne(trailerTable).insertedId
-            trailerCollection.find(Filters.eq("_id", _id)).firstOrNull()?.toTrailer()
-        } catch (e: Exception) {
-            println("TrailersRepoImpl: Error saving trailer: ${e.message}")
-            null
-        } finally {
-//            trailerCollection.
-        }
+        val trailerToSave = trailer.toTable()
+
+        val trailerId = trailerCollection.insertOne(trailerToSave).insertedId ?: throw NullPointerException("Id of Trailer is null: $trailer")
+
+        return trailerCollection.find(Filters.eq("_id", trailerId)).firstOrNull()?.toTrailer()
     }
 
     // zwraca true jeśli usunął
     override suspend fun deleteTrailer(id: String): Boolean {
-        return trailerCollection.findOneAndDelete(Filters.eq("id", id)) != null
+        return trailerCollection.deleteOne(Filters.eq("id", id)).deletedCount > 0
     }
 
     override suspend fun updateTrailer(trailer: Trailer): Trailer? {
-        val updated = TrailerTable(trailer)
+        val updated = trailer.toTable()
         val updates = mutableListOf<Bson>()
 
         updated.name?.let { updates.add(Updates.set("name", it)) }
@@ -75,29 +70,13 @@ class TrailersRepoImpl: TrailersRepo {
             return null
         }
     }
-
-//    private fun trailerToRepo(trailer: Trailer): TrailerRepo {
-//        return TrailerRepo(
-//            _id = ObjectId(),
-//            name = trailer.name,
-//            size = trailer.size,
-//            loadingMass = trailer.loadingMass,
-//            gvw = trailer.gvw,
-//            purpose = trailer.purpose,
-//            axles = trailer.axles,
-//            licenseCategory = trailer.licenseCategory,
-//            hasBreaks = trailer.hasBreaks,
-//            prices = trailer.prices,
-//            images = trailer.images
-//        )
-//    }
 }
 
 @Serializable
 data class TrailerTable(
     @Contextual
     val _id: ObjectId = ObjectId(),
-    val id: String? = _id.toHexString(),
+    val id: String? = null,
     val name: String? = null,
     val size: String? = null,
     val loadingMass: Double? = null,
@@ -109,24 +88,38 @@ data class TrailerTable(
     val prices: Prices? = null,
     val images: Map<String, String>? = null,
 ) {
-    constructor(trailer: Trailer) : this(
-        id = trailer.id,
-        name = trailer.name,
-        size = trailer.size,
-        loadingMass = trailer.loadingMass,
-        gvw = trailer.gvw,
-        purpose = trailer.purpose,
-        axles = trailer.axles,
-        licenseCategory = trailer.licenseCategory,
-        hasBreaks = trailer.hasBreaks,
-        prices = trailer.prices,
-        images = trailer.images,
-    )
+
     fun toTrailer(): Trailer {
-        return Trailer(this.id, this.name, this.size, this.loadingMass, this.gvw, this.purpose, this.axles, this.licenseCategory, this.hasBreaks, this.prices, this.images)
+        return Trailer(
+            id = id,
+            name = name,
+            size = size,
+            loadingMass = loadingMass,
+            gvw = gvw,
+            purpose = purpose,
+            axles = axles,
+            licenseCategory = licenseCategory,
+            hasBreaks = hasBreaks,
+            prices = prices,
+            images = images,
+        )
     }
 }
 
-
-val trailerCollection: MongoCollection<TrailerTable> =
-    MongoProvider.database.getCollection("trailer")
+fun Trailer.toTable(): TrailerTable {
+    val id = ObjectId()
+    return TrailerTable(
+        _id = id,
+        id = id.toHexString(),
+        name = name,
+        size = size,
+        loadingMass = loadingMass,
+        gvw = gvw,
+        purpose = purpose,
+        axles = axles,
+        licenseCategory = licenseCategory,
+        hasBreaks = hasBreaks,
+        prices = prices?.copy(trailerId = id.toHexString()),
+        images = images
+    )
+}

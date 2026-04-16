@@ -8,7 +8,9 @@ import com.example.przyczepki_landingpage.controller.trailers
 import com.example.przyczepki_landingpage.di.appModule
 import com.example.przyczepki_landingpage.di.networkModule
 import com.example.przyczepki_landingpage.modules.config
+import com.example.przyczepki_landingpage.modules.configureMongo
 import com.example.przyczepki_landingpage.modules.configureSecurity
+import com.example.przyczepki_landingpage.modules.configureStatusPages
 
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -26,12 +28,11 @@ fun main() {
 fun Application.module() {
     println("\nServer started\n")
 
+    configureStatusPages()
     configureSecurity()
-
     configureDependencyInjection()
-
+    configureMongo()
     config()
-
     routing()
 
 }

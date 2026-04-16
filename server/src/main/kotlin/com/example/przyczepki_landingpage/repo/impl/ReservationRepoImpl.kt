@@ -4,7 +4,6 @@ import com.example.przyczepki_landingpage.data.Customer
 import com.example.przyczepki_landingpage.data.Reservation
 import com.example.przyczepki_landingpage.data.ReservationPrice
 import com.example.przyczepki_landingpage.data.Trailer
-import com.example.przyczepki_landingpage.modules.MongoProvider.database
 import com.example.przyczepki_landingpage.repo.ReservationRepo
 import com.mongodb.client.model.Filters.and
 import com.mongodb.client.model.Filters.eq
@@ -20,7 +19,9 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinLocalDate
 
-class ReservationRepoImpl : ReservationRepo {
+class ReservationRepoImpl(
+    private val reservationCollection: MongoCollection<ReservationTable>
+) : ReservationRepo {
 
     override suspend fun getAllReservations(
         from: LocalDate,
@@ -111,5 +112,3 @@ data class ReservationTable(
        this.reservationPrice
    )
 }
-
-val reservationCollection: MongoCollection<ReservationTable> = database.getCollection("reservation")

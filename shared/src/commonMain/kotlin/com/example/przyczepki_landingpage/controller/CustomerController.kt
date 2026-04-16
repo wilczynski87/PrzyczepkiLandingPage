@@ -1,7 +1,6 @@
 package com.example.przyczepki_landingpage.controller
 
 import com.example.przyczepki_landingpage.data.Customer
-import com.example.przyczepki_landingpage.data.CustomerDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
@@ -12,31 +11,31 @@ import io.ktor.client.request.setBody
 
 data class CustomerController( private val client: HttpClient ) {
 
-    suspend fun saveCustomer(customer: CustomerDto): Result<CustomerDto?> {
+    suspend fun saveCustomer(customer: Customer): Result<Customer?> {
         return try {
             val response = client.post("$base_url/customer") {
                 setBody(customer)
-            }.body<CustomerDto?>()
+            }.body<Customer?>()
             Result.success(response)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    suspend fun getCustomer(clientId: String): Result<CustomerDto?> {
+    suspend fun getCustomer(clientId: String): Result<Customer?> {
         return try {
-            val customer = client.get("$base_url/customer/$clientId").body<CustomerDto?>()
+            val customer = client.get("$base_url/customer/$clientId").body<Customer?>()
             Result.success(customer)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    suspend fun updateCustomer(customer: CustomerDto): Result<CustomerDto?> {
+    suspend fun updateCustomer(customer: Customer): Result<Customer?> {
         return try {
             val response = client.put("$base_url/customer") {
                 setBody(customer)
-            }.body<CustomerDto?>()
+            }.body<Customer?>()
             Result.success(response)
         } catch (e: Exception) {
             Result.failure(e)
