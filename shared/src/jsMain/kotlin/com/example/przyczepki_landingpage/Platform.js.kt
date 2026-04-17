@@ -1,6 +1,7 @@
 package com.example.przyczepki_landingpage
 
 import androidx.compose.runtime.Composable
+import com.example.przyczepki_landingpage.auth.SecureTokenStorage
 import kotlinx.browser.window
 
 class JsPlatform: Platform {

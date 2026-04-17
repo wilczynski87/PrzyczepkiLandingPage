@@ -1,7 +1,9 @@
 package com.example.przyczepki_landingpage
 
 import com.example.przyczepki_landingpage.controller.ApiClient
+import com.example.przyczepki_landingpage.controller.LoginResponse
 import com.example.przyczepki_landingpage.data.Customer
+import com.example.przyczepki_landingpage.data.LoginRequest
 import com.example.przyczepki_landingpage.model.CurrentScreen
 import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.data.ReservationDto
@@ -301,6 +303,26 @@ class AppViewModel(private val scope: CoroutineScope) {
                         dialogText = it.message ?: "Unknown error")
                     )
                 }
+        }
+    }
+
+    // AUTH
+    fun login(loginRequest:LoginRequest) {
+        scope.launch {
+            try {
+                val result: Result<LoginResponse> = ApiClient.authController.login(loginRequest)
+
+                result.onSuccess { loginResponse ->
+
+                }.onFailure {
+                    println("Nie udało się zalogować: ${it.message}")
+                }
+
+            } catch (e: Exception) {
+                println("Nie udało się zalogować: ${e.message}")
+            }
+
+
         }
     }
 }

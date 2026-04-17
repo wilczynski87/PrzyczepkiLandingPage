@@ -24,11 +24,13 @@ fun Route.authController() {
                 if(verify(request.password, customer.passwordHash?: throw Exception("No Password for customerId: ${customer.id}")).not()) call.respond(HttpStatusCode.Unauthorized, "Invalid password")
 
                 val token = JwtService.generate(customer.toCustomer())
+                val refreshToken = JwtService.generateRefreshToken(customer.toCustomer())
 
                 call.respond(
                     mapOf(
                         "token" to token,
-                        "customerId" to customer.id
+                        "customerId" to customer.id,
+                        "refreshToken" to refreshToken
                     )
                 )
 

@@ -1,8 +1,10 @@
 package com.example.przyczepki_landingpage.controller
 
+import com.example.przyczepki_landingpage.auth.TokenManager
 import com.example.przyczepki_landingpage.createHttpClient
 import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.getBaseUrl
+import com.example.przyczepki_landingpage.provideSecureTokenStorage
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.api.Send.install
@@ -17,9 +19,11 @@ import kotlinx.serialization.json.Json
 val base_url = getBaseUrl()
 
 object ApiClient {
-    val client: HttpClient by lazy { createHttpClient() }
+    private val tokenManager by lazy { TokenManager(provideSecureTokenStorage()) }
+    val client: HttpClient by lazy { createHttpClient(tokenManager) }
     val healthCheck by lazy { HealthCheck(client) }
     val trailerController by lazy { TrailerController(client) }
     val reservationController by lazy { ReservationController(client) }
     val customerController by lazy { CustomerController(client) }
+    val authController by lazy { AuthController(client) }
 }

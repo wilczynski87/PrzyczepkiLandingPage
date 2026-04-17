@@ -625,7 +625,6 @@ fun LoginModal(viewModel: AppViewModel) {
         ) {
             LoginScreen(
                 viewModel,
-                state,
                 {},
                 {},
                 {},

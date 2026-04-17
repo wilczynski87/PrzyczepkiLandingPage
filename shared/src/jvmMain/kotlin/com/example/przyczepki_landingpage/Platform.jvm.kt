@@ -1,6 +1,8 @@
 package com.example.przyczepki_landingpage
 
 import androidx.compose.runtime.Composable
+import com.example.przyczepki_landingpage.auth.SecureTokenStorage
+import com.example.przyczepki_landingpage.auth.TokenManager
 import io.ktor.client.HttpClient
 
 class JVMPlatform: Platform {
@@ -20,11 +22,6 @@ actual fun openNavigationApp(
     mapsProvider: String?
 ) {
 }
-
-actual fun createHttpClient(): HttpClient {
-   return HttpClient()
-}
-
 actual fun getEnvironment(): String = System.getenv("APP_ENV") ?: "prod"
 actual fun openEmail(email: String) {
 }
@@ -35,4 +32,12 @@ actual fun callPhone(phone: String) {
 actual fun getBaseUrl(): String {
     return if(getEnvironment() == "prod") "/api"
         else "http://localhost:8090"
+}
+
+actual fun createHttpClient(tokenManager: TokenManager): HttpClient {
+    TODO("Not yet implemented")
+}
+
+actual fun provideSecureTokenStorage(): SecureTokenStorage {
+    TODO("Not yet implemented")
 }

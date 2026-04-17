@@ -32,12 +32,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
+import com.example.przyczepki_landingpage.data.LoginRequest
 import com.example.przyczepki_landingpage.model.LoginUiState
 
 @Composable
 fun LoginScreen(
     viewModel: AppViewModel,
-    state: LoginUiState,
     onLoginChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onLoginClick: () -> Unit,
@@ -45,6 +45,7 @@ fun LoginScreen(
     onAppleClick: () -> Unit
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
+    var loginState by remember { mutableStateOf(LoginUiState()) }
 
     Column(
         modifier = Modifier
@@ -62,8 +63,8 @@ fun LoginScreen(
 
         // EMAIL / PHONE
         OutlinedTextField(
-            value = state.login,
-            onValueChange = onLoginChange,
+            value = loginState.login,
+            onValueChange = { loginState = loginState.copy(login = it) },
             label = { Text("Email lub telefon") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
@@ -73,8 +74,8 @@ fun LoginScreen(
 
         // PASSWORD
         OutlinedTextField(
-            value = state.password,
-            onValueChange = onPasswordChange,
+            value = loginState.password,
+            onValueChange = { loginState = loginState.copy(password = it) },
             label = { Text("Hasło") },
             singleLine = true,
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -92,7 +93,7 @@ fun LoginScreen(
 
         Spacer(Modifier.height(8.dp))
 
-        state.error?.let {
+        loginState.error?.let {
             Text(
                 text = it,
                 color = MaterialTheme.colorScheme.error
@@ -103,9 +104,12 @@ fun LoginScreen(
 
         // LOGIN BUTTON
         Button(
-            onClick = onLoginClick,
+            onClick = {
+                loginState = loginState.copy(error = null, isLoading = true)
+                viewModel.login(LoginRequest(loginState.login, loginState.password))
+            },
             modifier = Modifier.fillMaxWidth(),
-            enabled = state.login.isNotBlank() && state.password.length >= 6
+            enabled = loginState.login.isNotBlank() && loginState.password.length >= 6
         ) {
             Text("Zaloguj")
         }

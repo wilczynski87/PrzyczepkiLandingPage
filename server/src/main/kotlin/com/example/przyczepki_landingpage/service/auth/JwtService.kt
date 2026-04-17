@@ -13,7 +13,14 @@ object JwtService {
         return JWT.create()
             .withIssuer(issuer)
             .withClaim("id", customer.id)
-            .withExpiresAt(Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
+            .withExpiresAt(Date(System.currentTimeMillis() + 1000 * 60 * 15))
+            .sign(Algorithm.HMAC256(secret))
+    }
+    fun generateRefreshToken(customer: Customer): String {
+        return JWT.create()
+            .withIssuer(issuer)
+            .withClaim("id", customer.id)
+            .withExpiresAt(Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7))
             .sign(Algorithm.HMAC256(secret))
     }
 }

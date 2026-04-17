@@ -1,6 +1,8 @@
 package com.example.przyczepki_landingpage
 
 import androidx.compose.runtime.Composable
+import com.example.przyczepki_landingpage.auth.SecureTokenStorage
+import com.example.przyczepki_landingpage.auth.TokenManager
 import io.ktor.client.HttpClient
 
 interface Platform {
@@ -8,7 +10,9 @@ interface Platform {
 }
 expect fun getPlatform(): Platform
 
-expect fun createHttpClient(): HttpClient
+expect fun provideSecureTokenStorage(): SecureTokenStorage
+
+expect fun createHttpClient(tokenManager: TokenManager): HttpClient
 
 expect fun getEnvironment(): String
 
