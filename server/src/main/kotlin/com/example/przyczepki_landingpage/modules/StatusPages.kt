@@ -17,5 +17,12 @@ fun Application.configureStatusPages() {
         exception<BadRequestException> { call, cause ->
             call.respond(HttpStatusCode.BadRequest, cause.message ?: "Bad request")
         }
+
+        status(HttpStatusCode.Unauthorized) { call, _ ->
+            call.respond(
+                HttpStatusCode.Unauthorized,
+                mapOf("error" to "Unauthorized")
+            )
+        }
     }
 }

@@ -34,11 +34,11 @@ actual fun callPhone(phone: String) {
     window.open("tel:$phone", "_self")
 }
 
-@OptIn(ExperimentalWasmJsInterop::class)
-fun hostname(): String = js("window.location.hostname")
-
-actual fun getBaseUrl(): String =
-    if (hostname() == "localhost")
-        "http://localhost:8090"
-    else
-        "/api"
+//@OptIn(ExperimentalWasmJsInterop::class)
+//fun hostname(): String = js("window.location.hostname")
+//
+//actual fun getBaseUrl(): String =
+//    if (hostname() == "localhost")
+//        "http://localhost:8090"
+//    else
+//        "/api"

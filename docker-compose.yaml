@@ -38,7 +38,22 @@ services:
     container_name: przyczepki_api
     environment:
       - TZ=Europe/Warsaw
-      - MONGO_URI=mongodb://admin:admin@przyczepki_db:27017/przyczepki?authSource=admin
+      - db.host=przyczepki_db
+      - db.port=27017
+      - db.name=przyczepki
+      - db.user=admin
+      - db.password=admin
+      - db.authSource=admin
+      - api.env=dev
+      - auth.secretAuth=secretAuth
+      - auth.secretRefresh=secretRefresh
+      - auth.issuer=ktor
+      - auth.audience=ktor
+      - auth.realm=ktor
+      - auth.accessTokenExpiry=3600000
+      - auth.refreshTokenExpiry=2592000000
+      - auth.googleClientId=
+      - auth.claim=userId
     networks:
       - przyczepki-network
     restart: unless-stopped

@@ -1,5 +1,7 @@
 package com.example.przyczepki_landingpage.auth
 
+import kotlinx.serialization.Serializable
+
 interface SecureTokenStorage {
     suspend fun saveAccessToken(token: String)
     suspend fun saveRefreshToken(token: String?)
@@ -48,3 +50,9 @@ class TokenManager(
         return getAccessToken() != null
     }
 }
+
+
+@Serializable
+data class RefreshTokenRequest(
+    val refreshToken: String
+)

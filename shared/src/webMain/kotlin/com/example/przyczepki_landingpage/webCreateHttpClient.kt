@@ -1,5 +1,6 @@
 package com.example.przyczepki_landingpage
 
+import com.example.przyczepki_landingpage.auth.RefreshTokenRequest
 import com.example.przyczepki_landingpage.auth.TokenManager
 import com.example.przyczepki_landingpage.controller.LoginResponse
 import com.example.przyczepki_landingpage.controller.base_url
@@ -121,8 +122,3 @@ fun webCreateHttpClient(tokenManager: TokenManager): HttpClient {
         }
     }
 }
-
-@Serializable
-data class RefreshTokenRequest(
-    val refreshToken: String
-)

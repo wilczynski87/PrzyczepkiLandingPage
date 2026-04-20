@@ -16,6 +16,17 @@ actual fun createHttpClient(tokenManager: TokenManager): HttpClient {
 private external fun getEnvFromProcess(): String?
 
 actual fun getEnvironment(): String = getEnvFromProcess() ?: "prod"
+
+expect fun jsSecureTokenStorage(): SecureTokenStorage
 actual fun provideSecureTokenStorage(): SecureTokenStorage {
-    TODO("Not yet implemented")
+    return jsSecureTokenStorage()
 }
+
+@OptIn(ExperimentalWasmJsInterop::class)
+fun hostname(): String = js("window.location.hostname")
+
+actual fun getBaseUrl(): String =
+    if (hostname() == "localhost")
+        "http://localhost:8090"
+    else
+        "/api"

@@ -7,6 +7,7 @@ import com.example.przyczepki_landingpage.controller.reservation
 import com.example.przyczepki_landingpage.controller.trailers
 import com.example.przyczepki_landingpage.di.appModule
 import com.example.przyczepki_landingpage.di.networkModule
+import com.example.przyczepki_landingpage.modules.ApiConfig
 import com.example.przyczepki_landingpage.modules.config
 import com.example.przyczepki_landingpage.modules.configureMongo
 import com.example.przyczepki_landingpage.modules.configureSecurity
@@ -29,8 +30,8 @@ fun Application.module() {
     println("\nServer started\n")
 
     configureStatusPages()
-    configureSecurity()
     configureDependencyInjection()
+    configureSecurity()
     configureMongo()
     config()
     routing()
@@ -42,7 +43,13 @@ private fun Application.configureDependencyInjection() {
     install(Koin) {
         slf4jLogger()
         modules(appModule, networkModule)
+        properties(
+            mapOf(
+                "ktor.environment" to environment
+            )
+        )
     }
+    println(ApiConfig)
 }
 
 private fun Application.routing() {
