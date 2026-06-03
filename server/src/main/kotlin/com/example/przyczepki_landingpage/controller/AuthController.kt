@@ -12,7 +12,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import org.koin.ktor.ext.inject
-import kotlin.jvm.Throws
 
 fun Route.authController() {
     val customerService by inject<CustomerService>()
@@ -23,7 +22,10 @@ fun Route.authController() {
             try {
                 val request = call.receive<LoginRequest>()
                 val customer = customerService.getCustomerTableByEmail(request.email) ?: throw NullPointerException("Customer, with given email, not found: ${request.email}")
-                if(verify(request.password, customer.passwordHash?: throw Exception("No Password for customerId: ${customer.id}")).not()) call.respond(HttpStatusCode.Unauthorized, "Invalid password")
+                if (verify(request.password, customer.passwordHash ?: throw Exception("No Password for customerId: ${customer.id}")).not()) {
+                    call.respond(HttpStatusCode.Unauthorized, "Invalid password")
+                    return@post
+                }
 
                 val token = authService.generateToken(customer.toCustomer())
                 val refreshToken = authService.generateRefreshToken(customer.toCustomer())
@@ -48,15 +50,9 @@ fun Route.authController() {
 //            println("request: $request")
 
             val principal = authService.verifyRefreshToken(request.refreshToken)
-//            println("principal: $principal")
 
-            if (principal == null) {
-                call.respond(HttpStatusCode.Unauthorized, "Invalid refresh token")
-                return@post
-            }
-
-            if (principal.userId == null) {
-                call.respond(HttpStatusCode.Unauthorized, "User ID not found in token")
+            if (!principal.isValid || principal.userId.isNullOrBlank()) {
+                call.respond(HttpStatusCode.Unauthorized, principal.error ?: "Invalid refresh token")
                 return@post
             }
 

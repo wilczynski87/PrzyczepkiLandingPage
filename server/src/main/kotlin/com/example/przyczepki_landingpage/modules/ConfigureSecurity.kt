@@ -15,7 +15,7 @@ fun Application.configureSecurity() {
     val koin = getKoin()
     val config = koin.get<ApiConfig>().auth
 
-    val algorithm = Algorithm.HMAC256(config.secretAuth)
+    val algorithm = Algorithm.HMAC256(requireNotNull(config.secretAuth) { "AUTH_SECRET_LOGIN is not set" })
 
     install(Authentication) {
         jwt {

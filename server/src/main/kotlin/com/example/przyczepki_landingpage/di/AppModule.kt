@@ -20,16 +20,13 @@ import com.example.przyczepki_landingpage.service.impl.ReservationServiceImpl
 import com.example.przyczepki_landingpage.service.impl.TrailersServiceImpl
 import com.mongodb.kotlin.client.coroutine.MongoClient
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
-import io.ktor.server.application.ApplicationEnvironment
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 // KOIN
 val appModule = module {
     single<ApiConfig> {
-        val env = getProperty<ApplicationEnvironment>("ktor.environment")
-        println("ApiConfig: ${env.config.toApiConfig()}")
-        env.config.toApiConfig()
+        toApiConfig()
     }
 
     single {
@@ -43,7 +40,10 @@ val appModule = module {
 
         MongoClient.create(connectionString)
     }
-    single<MongoDatabase> { get<MongoClient>().getDatabase("przyczepki") }
+    single<MongoDatabase> {
+        val cfg = get<ApiConfig>().db
+        get<MongoClient>().getDatabase(cfg.name)
+    }
 
     single(named("trailerCollection")) {
         val db: MongoDatabase = get()

@@ -1,6 +1,5 @@
 package com.example.przyczepki_landingpage.modules
 
-import io.ktor.server.config.ApplicationConfig
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -41,39 +40,41 @@ data class ApiConfig(
     val auth: AuthConfig,
 )
 
-fun ApplicationConfig.toApiConfig(): ApiConfig {
-    fun str(path: String) = propertyOrNull(path)?.getString()
-    fun int(path: String) = str(path)?.toIntOrNull()
-    fun long(path: String) = str(path)?.toLongOrNull()
+/**
+ * Źródło konfiguracji: zmienne środowiskowe (patrz docker-compose.yaml).
+ * API_ENV, EMAIL_HOST, EMAIL_PORT, DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD, DB_AUTH_SOURCE,
+ * AUTH_SECRET_LOGIN, AUTH_SECRET_REFRESH, AUTH_ISSUER, AUTH_AUDIENCE, AUTH_REALM,
+ * AUTH_ACCESS_TOKEN_EXPIRY, AUTH_REFRESH_TOKEN_EXPIRY, AUTH_GOOGLE_CLIENT_ID, AUTH_CLAIM
+ */
+fun toApiConfig(): ApiConfig {
 
     return ApiConfig(
-        env = str("api.env") ?: "DEV",
+        env = System.getenv("API_ENV") ?: "DEV",
 
         email = EmailConfig(
-            host = str("api.email.host") ?: "localhost",
-            port = int("api.email.port") ?: 8200
+            host = System.getenv("EMAIL_HOST") ?: "localhost",
+            port = System.getenv("EMAIL_PORT")?.toIntOrNull() ?: 8200
         ),
 
         db = DbConfig(
-            host = str("db.host") ?: "localhost", //""przyczepki_db",
-            port = int("db.port") ?: 27017,
-            name = str("db.name") ?: "przyczepki",
-            user = str("db.user") ?: "admin",
-            password = str("db.password") ?: "admin",
-            authSource = str("db.authSource") ?: "admin"
-
+            host = System.getenv("DB_HOST") ?: "localhost", //""przyczepki_db",
+            port = System.getenv("DB_PORT")?.toIntOrNull() ?: 27017,
+            name = System.getenv("DB_NAME") ?: "przyczepki",
+            user = System.getenv("DB_USER") ?: "admin",
+            password = System.getenv("DB_PASSWORD") ?: "admin",
+            authSource = System.getenv("DB_AUTH_SOURCE") ?: "admin"
         ),
 
         auth = AuthConfig(
-            secretAuth = str("auth.secretAuth") ?: "secretAuth",
-            secretRefresh = str("auth.secretRefresh") ?: "secretRefresh",
-            issuer = str("auth.issuer") ?: "ktor",
-            audience = str("auth.audience") ?: "ktor",
-            realm = str("auth.realm") ?: "ktor",
-            accessTokenExpiry = long("auth.accessTokenExpiry") ?: 3600000,
-            refreshTokenExpiry = long("auth.refreshTokenExpiry") ?: 2592000000,
-            googleClientId = str("auth.googleClientId") ?: "",
-            claim = str("auth.claim") ?: "userId"
+            secretAuth = System.getenv("AUTH_SECRET_LOGIN") ?: "secretAuth",
+            secretRefresh = System.getenv("AUTH_SECRET_REFRESH") ?: "secretRefresh",
+            issuer = System.getenv("AUTH_ISSUER") ?: "ktor",
+            audience = System.getenv("AUTH_AUDIENCE") ?: "ktor",
+            realm = System.getenv("AUTH_REALM") ?: "ktor",
+            accessTokenExpiry = System.getenv("AUTH_ACCESS_TOKEN_EXPIRY")?.toLongOrNull() ?: 3600000,
+            refreshTokenExpiry = System.getenv("AUTH_REFRESH_TOKEN_EXPIRY")?.toLongOrNull() ?: 2592000000,
+            googleClientId = System.getenv("AUTH_GOOGLE_CLIENT_ID") ?: "",
+            claim = System.getenv("AUTH_CLAIM") ?: "userId"
         )
     )
 }
