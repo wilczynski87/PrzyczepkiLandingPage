@@ -61,20 +61,20 @@ fun toApiConfig(): ApiConfig {
             port = System.getenv("DB_PORT")?.toIntOrNull() ?: 27017,
             name = System.getenv("DB_NAME") ?: "przyczepki",
             user = System.getenv("DB_USER") ?: "admin",
-            password = System.getenv("DB_PASSWORD") ?: "admin",
-            authSource = System.getenv("DB_AUTH_SOURCE") ?: "admin"
+            password = System.getenv("DB_PASSWORD") ?: throw NullPointerException("DB_PASSWORD is missing"),
+            authSource = System.getenv("DB_AUTH_SOURCE") ?: throw NullPointerException("DB_AUTH_SOURCE is missing"),
         ),
 
         auth = AuthConfig(
-            secretAuth = System.getenv("AUTH_SECRET_LOGIN") ?: "secretAuth",
-            secretRefresh = System.getenv("AUTH_SECRET_REFRESH") ?: "secretRefresh",
-            issuer = System.getenv("AUTH_ISSUER") ?: "ktor",
-            audience = System.getenv("AUTH_AUDIENCE") ?: "ktor",
-            realm = System.getenv("AUTH_REALM") ?: "ktor",
+            secretAuth = System.getenv("AUTH_SECRET_LOGIN") ?: throw NullPointerException("AUTH_SECRET_LOGIN is missing"),
+            secretRefresh = System.getenv("AUTH_SECRET_REFRESH") ?: throw NullPointerException("AUTH_SECRET_REFRESH is missing"),
+            issuer = System.getenv("AUTH_ISSUER") ?: throw NullPointerException("AUTH_ISSUER is missing"),
+            audience = System.getenv("AUTH_AUDIENCE") ?: throw NullPointerException("AUTH_AUDIENCE is missing"),
+            realm = System.getenv("AUTH_REALM") ?: throw NullPointerException("AUTH_REALM is missing"),
             accessTokenExpiry = System.getenv("AUTH_ACCESS_TOKEN_EXPIRY")?.toLongOrNull() ?: 3600000,
             refreshTokenExpiry = System.getenv("AUTH_REFRESH_TOKEN_EXPIRY")?.toLongOrNull() ?: 2592000000,
             googleClientId = System.getenv("AUTH_GOOGLE_CLIENT_ID") ?: "",
-            claim = System.getenv("AUTH_CLAIM") ?: "userId"
+            claim = System.getenv("AUTH_CLAIM") ?: throw NullPointerException("AUTH_CLAIM is missing"),
         )
     )
 }
