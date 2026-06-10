@@ -20,6 +20,11 @@ import io.ktor.server.routing.routing
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
 
+private val SERVER_PORT: Int =
+    System.getenv("API_PORT")?.toIntOrNull()
+        ?: System.getenv("PORT")?.toIntOrNull()
+        ?: 8090
+
 fun main() {
     embeddedServer(Netty, port = SERVER_PORT, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
