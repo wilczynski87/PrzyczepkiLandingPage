@@ -77,9 +77,14 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
     ports:
       - "${DB_PORT:-27017}:${DB_PORT:-27017}"
+    volumes:
+      - przyczepki_mongo_data:/data/db
 
 networks:
   przyczepki-network:
     driver: bridge
+
+volumes:
+  przyczepki_mongo_data:
 
 
