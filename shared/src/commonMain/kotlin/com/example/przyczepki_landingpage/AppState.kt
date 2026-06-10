@@ -12,7 +12,6 @@ import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.model.ServerResponse
 import kotlinx.datetime.LocalDate
-import kotlinx.serialization.Serializable
 
 data class AppState(
     val currentScreen: CurrentScreen = CurrentScreen.LANDING,
@@ -37,6 +36,15 @@ data class AppState(
     val customer: Customer? = null,
 )
 
+val ikona = mapOf<String, String>(
+    "thumbnail" to "https://i.postimg.cc/2qc864bS/ikona-przyczepkifat.png",
+    "icon" to "https://i.postimg.cc/rmcdfjqx/ikona-przyczepkifat.png"
+)
+
+val logo = mapOf(
+    "thumbnail" to "https://i.postimg.cc/yWHwwDrt/logo-przyczepkifat-kadr.png",
+    "logo" to "https://i.postimg.cc/2jbrLvdk/logo-przyczepkifat-kadr.png"
+)
 
 val vesta = mapOf<String, String>(
     "thumbnail" to "https://i.postimg.cc/t1FRyJMH/vesta4.webp",

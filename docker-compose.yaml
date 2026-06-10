@@ -18,7 +18,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-#    image: wilczynski87/przyczepki-web
+    image: wilczynski87/przyczepki-web:latest
     environment:
       - TZ=Europe/Warsaw
       - APP_ENV=${APP_ENV:-dev}
@@ -32,7 +32,7 @@ services:
     build:
       context: .
       dockerfile: server/DockerfileServer
-#    image: wilczynski87/przyczepki-api
+    image: wilczynski87/przyczepki-api:latest
     container_name: przyczepki_api
     environment:
       - TZ=Europe/Warsaw
