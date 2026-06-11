@@ -25,8 +25,8 @@ services:
     networks:
       - przyczepki-network
     restart: unless-stopped
-    ports:
-      - "${WEB_PORT:-80}:${WEB_PORT:-80}"
+    expose:
+      - "80"
 
   przyczepki_api:
     build:
@@ -63,8 +63,8 @@ services:
     restart: unless-stopped
     depends_on:
       - przyczepki_db
-    ports:
-      - "${API_PORT:-8090}:${API_PORT:-8090}"
+    expose:
+      - "${API_PORT:-8090}"
 
   przyczepki_db:
     image: mongo
@@ -75,8 +75,8 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "${DB_PORT:-27017}:${DB_PORT:-27017}"
+    expose:
+      - "${DB_PORT:-27017}"
     volumes:
       - przyczepki_mongo_data:/data/db
 
