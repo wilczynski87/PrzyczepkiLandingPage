@@ -1,17 +1,17 @@
 services:
-#  npm:
-#    image: jc21/nginx-proxy-manager:latest
-#    container_name: nginx-proxy-manager
-#    ports:
-#      - "80:80"
-#      - "81:81"    # panel admina
-#      - "443:443"
-#    volumes:
-#      - ./npm/data:/data
-#      - ./npm/letsencrypt:/etc/letsencrypt
-#    networks:
-#      - przyczepki-network
-#    restart: unless-stopped
+  npm:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-proxy-manager
+    ports:
+      - "80:80"
+      - "81:81"    # panel admina
+      - "443:443"
+    volumes:
+      - ./npm/data:/data
+      - ./npm/letsencrypt:/etc/letsencrypt
+    networks:
+      - przyczepki-network
+    restart: unless-stopped
 
   przyczepki_web:
     container_name: przyczepki_web
