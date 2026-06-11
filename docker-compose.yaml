@@ -40,7 +40,7 @@ services:
       - DB_HOST=${DB_HOST:-przyczepki_db}
       - DB_PORT=${DB_PORT:-27017}
       - DB_NAME=${DB_NAME:-przyczepki}
-      - DB_USER=${DB_USER:-admin}
+      - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_AUTH_SOURCE=${DB_AUTH_SOURCE:-admin}
       - AUTH_SECRET_LOGIN=${AUTH_SECRET_LOGIN}
