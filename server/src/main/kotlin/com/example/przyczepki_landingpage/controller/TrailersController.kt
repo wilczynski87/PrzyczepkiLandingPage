@@ -34,6 +34,7 @@ fun Route.trailers() {
         // zwraca informacje o danej przyczepce
         post("/save") {
             val trailer = call.receive<Trailer>()
+            println("trailer: $trailer")
 
             val savedTrailer = trailerService.saveTrailer(trailer) ?: throw NullPointerException("Trailer is null")
 

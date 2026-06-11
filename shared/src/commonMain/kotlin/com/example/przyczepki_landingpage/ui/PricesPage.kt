@@ -17,17 +17,23 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
+import com.example.przyczepki_landingpage.data.Trailer
+import com.example.przyczepki_landingpage.model.asPrice
 
 @Composable
 fun PricesPage(
     widthSizeClass: WindowWidthSizeClass,
     viewModel: AppViewModel
 ) {
+    val state by viewModel.appState.collectAsState()
+    val trailers = state.trailers
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter
@@ -44,43 +50,41 @@ fun PricesPage(
                 text = "Cennik przyczepek",
                 style = MaterialTheme.typography.headlineMedium
             )
-
-            // Jednoosiowe
-            PriceSection(
-                title = "Przyczepki jednoosiowe",
-                description = "Lekkie – do 750kg (kat. B)",
-                prices = listOf(
-                    "Rezerwacja" to "40 zł",
-                    "Pierwsza doba" to "60 zł",
-                    "Druga doba" to "50 zł",
-                    "Każda kolejna doba" to "40 zł",
-                    "Do 12h" to "40 zł"
-                )
-            )
-
-            // Dwuosiowe
-            PriceSection(
-                title = "Przyczepki dwuosiowe",
-                description = "Lekkie – do 750kg (kat. B)",
-                prices = listOf(
-                    "Rezerwacja" to "40 zł",
-                    "Pierwsza doba" to "70 zł",
-                    "Druga doba" to "60 zł",
-                    "Każda kolejna doba" to "50 zł",
-                    "Do 12h" to "50 zł"
-                )
-            )
+            for (trailer in trailers) {
+                PriceSection(trailer)
+            }
+//            // Jednoosiowe
+//            PriceSection(
+//                title = "Przyczepki jednoosiowe",
+//                description = "Lekkie – do 750kg (kat. B)",
+//                prices = listOf(
+//                    "Rezerwacja" to "40 zł",
+//                    "Pierwsza doba" to "60 zł",
+//                    "Druga doba" to "50 zł",
+//                    "Każda kolejna doba" to "40 zł",
+//                    "Do 12h" to "40 zł"
+//                )
+//            )
+//
+//            // Dwuosiowe
+//            PriceSection(
+//                title = "Przyczepki dwuosiowe",
+//                description = "Lekkie – do 750kg (kat. B)",
+//                prices = listOf(
+//                    "Rezerwacja" to "40 zł",
+//                    "Pierwsza doba" to "70 zł",
+//                    "Druga doba" to "60 zł",
+//                    "Każda kolejna doba" to "50 zł",
+//                    "Do 12h" to "50 zł"
+//                )
+//            )
         }
     }
 }
 
 
 @Composable
-fun PriceSection(
-    title: String,
-    description: String,
-    prices: List<Pair<String, String>>
-) {
+fun PriceSection(trailer: Trailer) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large
@@ -90,33 +94,92 @@ fun PriceSection(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = title,
+                text = trailer.name ?: "brak nazwy",
                 style = MaterialTheme.typography.titleLarge
             )
 
             Text(
-                text = description,
+                text = trailer.purpose ?: "brak przeznaczenia",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            prices.forEach { (label, value) ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        text = value,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
+            // Pierwsza doba:
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Pierwsza doba:",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = trailer.prices?.firstDay?.asPrice() ?: "brak informacji",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            // Druga doba:
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Druga doba:",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = trailer.prices?.secondDay?.asPrice() ?: "brak informacji",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            // Kolejna doba:
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Kolejna doba:",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = trailer.prices?.otherDays?.asPrice() ?: "brak informacji",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            // Do 6h:
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Do 6h:",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = trailer.prices?.halfDay?.asPrice() ?: "brak informacji",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            // Rezerwacja:
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Rezerwacja:",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = trailer.prices?.reservation?.asPrice() ?: "brak informacji",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }
