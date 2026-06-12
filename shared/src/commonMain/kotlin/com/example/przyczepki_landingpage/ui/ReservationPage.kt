@@ -1,6 +1,5 @@
 package com.example.przyczepki_landingpage.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -42,20 +40,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
 import com.example.przyczepki_landingpage.data.ReservationDto
-import com.example.przyczepki_landingpage.model.ModalType
-import com.example.przyczepki_landingpage.model.todayUtcMillis
-import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.model.CurrentScreen
+import com.example.przyczepki_landingpage.model.ModalData
+import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.model.ServerStatus
+import com.example.przyczepki_landingpage.model.todayUtcMillis
 import com.example.przyczepki_landingpage.ui.reservation.TrailerSelectionList
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.compose.resources.painterResource
-import kotlin.ranges.rangeTo
 import kotlin.time.Clock
-import kotlin.time.Instant
 
 @Composable
 fun ReservationPage(
@@ -68,13 +63,15 @@ fun ReservationPage(
 
     if(widthSizeClass != WindowWidthSizeClass.Compact) {
         Row {
+            // Przyczepki
             Column(
                 modifier = Modifier
                     .sizeIn(maxWidth = 450.dp)
             ) {
-                TrailerSelectionList( viewModel )
+                TrailerSelectionList(viewModel)
             }
 
+            // Kalendarz
             Column(
                 modifier = Modifier
                     .sizeIn(maxWidth = 450.dp)
@@ -177,7 +174,7 @@ fun ReservationPage(
                 modifier = Modifier
 //                    .weight(1f)
             ) {
-                TrailerSelectionList(viewModel)
+                TrailerSelectionList(viewModel, maxHeight = 420.dp)
             }
         }
     }

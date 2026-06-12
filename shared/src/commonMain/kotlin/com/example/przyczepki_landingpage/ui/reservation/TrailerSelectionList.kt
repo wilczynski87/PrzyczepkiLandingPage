@@ -2,7 +2,6 @@ package com.example.przyczepki_landingpage.ui.reservation
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,30 +30,29 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
-import org.jetbrains.compose.resources.painterResource
 import com.example.przyczepki_landingpage.data.Trailer
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 
 @Composable
 fun TrailerSelectionList(
-    viewModel: AppViewModel
+    viewModel: AppViewModel,
+    maxHeight: Dp = Dp.Infinity
 ) {
     val state by viewModel.appState.collectAsState()
     val trailers: List<Trailer> = state.trailers
     val selectedTrailer: Trailer? = state.selectedTrailer
     val onSelect: (Trailer) -> Unit = { viewModel.onTrailerSelected(it) }
 
-
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(
-                min = 300.dp,   // ⬅️ MIN: 3 karty
-                max = 420.dp    // ⬅️ MAX: nie zdominuje ekranu
+                min = 300.dp,
+                max = maxHeight
             )
         , contentPadding = PaddingValues(bottom = 16.dp)
     ) {

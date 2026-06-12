@@ -24,10 +24,10 @@ jobs:
           fi
 
       - name: Set up Docker Builds
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to DockerHub
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         env:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
           DOCKER_PAT: ${{ secrets.DOCKER_PAT }}
@@ -38,7 +38,7 @@ jobs:
           command: echo "$DOCKER_PAT" | docker login -u "$DOCKER_USER" --password-stdin
 
       - name: Build and push frontend image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: Dockerfile
@@ -48,7 +48,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Build and push backend image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: server/DockerfileServer
@@ -60,11 +60,11 @@ jobs:
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v1.0.3
         env:
-          APP_ENV: ${{ secrets.APP_ENV }}
-          WEB_PORT: ${{ secrets.WEB_PORT }}
+          APP_ENV: ${{ vars.APP_ENV }}
+          WEB_PORT: ${{ vars.WEB_PORT }}
           DB_HOST: przyczepki_db
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_PORT: ${{ vars.DB_PORT }}
+          DB_NAME: ${{ vars.DB_NAME }}
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_AUTH_SOURCE: ${{ secrets.DB_AUTH_SOURCE }}
@@ -77,15 +77,15 @@ jobs:
           AUTH_REFRESH_TOKEN_EXPIRY: ${{ secrets.AUTH_REFRESH_TOKEN_EXPIRY }}
           AUTH_GOOGLE_CLIENT_ID: ${{ secrets.AUTH_GOOGLE_CLIENT_ID }}
           AUTH_CLAIM: ${{ secrets.AUTH_CLAIM }}
-          EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
-          EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
-          WEB_HOST: przyczepki_web
-          API_HOST: przyczepki_api
-          API_PORT: ${{ secrets.API_PORT }}
+          EMAIL_HOST: ${{ vars.EMAIL_HOST }}
+          EMAIL_PORT: ${{ vars.EMAIL_PORT }}
+          WEB_HOST: ${{ vars.WEB_HOST }}
+          API_HOST: ${{ vars.API_HOST }}
+          API_PORT: ${{ vars.API_PORT }}
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          port: ${{ secrets.VPS_PORT || 22 }}
+          host: ${{ vars.VPS_HOST }}
+          username: ${{ vars.VPS_USER }}
+          port: ${{ secrets.VPS_PORT }}
           key: ${{ secrets.PRZYCZEPKI_WEB }}
           envs: APP_ENV,WEB_PORT,DB_HOST,DB_PORT,DB_NAME,DB_USER,DB_PASSWORD,DB_AUTH_SOURCE,AUTH_SECRET_LOGIN,AUTH_SECRET_REFRESH,AUTH_ISSUER,AUTH_AUDIENCE,AUTH_REALM,AUTH_ACCESS_TOKEN_EXPIRY,AUTH_REFRESH_TOKEN_EXPIRY,AUTH_GOOGLE_CLIENT_ID,AUTH_CLAIM,EMAIL_HOST,EMAIL_PORT,WEB_HOST,API_HOST,API_PORT
           script: |
