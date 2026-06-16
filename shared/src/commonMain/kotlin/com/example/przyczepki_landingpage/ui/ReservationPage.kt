@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.outlined.Today
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.DateRangePickerState
@@ -36,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
@@ -46,7 +49,10 @@ import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.model.ServerStatus
 import com.example.przyczepki_landingpage.model.todayUtcMillis
+import com.example.przyczepki_landingpage.ui.reservation.TrailerCard
 import com.example.przyczepki_landingpage.ui.reservation.TrailerSelectionList
+import io.kamel.image.KamelImage
+import io.kamel.image.asyncPainterResource
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -79,7 +85,7 @@ fun ReservationPage(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Rezerwacja przyczepek",
+                    text = "Kalendarz rezerwacji",
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -88,20 +94,22 @@ fun ReservationPage(
                     , verticalAlignment = Alignment.CenterVertically
                     , horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    if(trailer?.images?.get("main") == null) {
+                    if(trailer?.images?.get("thumbnail") == null) {
                         Icon(
                             Icons.Default.BrokenImage,
                             contentDescription = "Brak zdjęcia"
                         )
                     } else {
-//                        Image(
-//                            painter = painterResource(trailer.image),
-//                            contentDescription = trailer.name,
-//                            modifier = Modifier
-//                                .size(72.dp)
-//                                .clip(RoundedCornerShape(12.dp)),
-//                            contentScale = ContentScale.Crop
-//                        )
+                        val resource = trailer.images["thumbnail"]?.let { asyncPainterResource(it) }
+                        KamelImage(
+                            { resource!! },
+                            contentDescription = "Przyczepka",
+                            onLoading = { CircularProgressIndicator() },
+                            onFailure = { Icon(Icons.Default.BrokenImage, "brak zdjęcia") },
+                            modifier = Modifier
+                                .size(140.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                        )
                     }
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
@@ -126,7 +134,7 @@ fun ReservationPage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Rezerwacja przyczepek",
+                text = "Kalendarz rezerwacji:",
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -136,29 +144,16 @@ fun ReservationPage(
                 , verticalAlignment = Alignment.CenterVertically
                 , horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                if(trailer?.images?.get("main") == null) {
+                if(trailer == null) {
+                    Text("Wybierz Przyczepkę")
+                } else if(trailer.images?.get("thumbnail") == null) {
                     Icon(
                         Icons.Default.BrokenImage,
                         contentDescription = "Brak zdjęcia"
                     )
                 } else {
-                    Text("obraz przyczepki")
-//                    Image(
-//                        painter = painterResource(trailer.image),
-//                        contentDescription = trailer.name,
-//                        modifier = Modifier
-//                            .size(72.dp)
-//                            .clip(RoundedCornerShape(12.dp)),
-//                        contentScale = ContentScale.Crop
-//                    )
+                    TrailerCard(trailer = trailer, selected = false, onClick = {})
                 }
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = trailer?.name ?: "Wybierz Przyczepkę",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Center,
-                )
             }
             Spacer(modifier = Modifier.height(16.dp))
 

@@ -44,10 +44,11 @@ fun Route.reservation() {
                 println("reservationDto: $reservationDto")
 
                 // reservation validation
-
+                println("TODO!!! - napisać validację rezerwacji")
 
                 // calculate prices
-                val reservationToConfirm = testReservations2
+//                val reservationToConfirm = testReservations2
+                val reservationToConfirm = reservationDto
 
                 call.respond(reservationToConfirm)
             } catch (e: Exception) {
