@@ -16,11 +16,7 @@ import io.ktor.server.routing.route
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
-import kotlinx.datetime.toLocalDate
-import kotlinx.serialization.json.Json
 import org.koin.ktor.ext.inject
-import kotlin.getValue
-import kotlin.time.Clock
 
 fun Route.reservation() {
     val reservationService by inject<ReservationService>()
@@ -37,7 +33,7 @@ fun Route.reservation() {
             call.respond(reservations)
         }
 
-        // oblicza koszt wynajmu ( ale jeszcze nie rezerwuje )
+        // oblicza koszt wynajmu (ale jeszcze nie rezerwuje)
         post("/check") {
             val reservationDto: ReservationDto = call.receive()
             println("reservationDto: $reservationDto")
@@ -46,7 +42,10 @@ fun Route.reservation() {
                 ?: return@post call.respond(HttpStatusCode.NotAcceptable, "Nie znaleziono sprzętu o takim id: ${reservationDto.trailerId}")
 
             val reservationToConfirm = reservationService.checkReservation(reservationDto)
-            call.respond(reservationToConfirm)
+
+            val finalReservation = reservationService.calculatePrice(reservationToConfirm)
+
+            call.respond(finalReservation)
         }
 
         post("/create") {
@@ -65,31 +64,7 @@ fun Route.reservation() {
 
             call.respond(reservation)
         }
-
     }
-
 }
-
-val testReservations: List<ReservationDto> = listOf(
-    ReservationDto(
-        id = "1",
-        trailerId = "1",
-        startDate = startOfTheDay(),
-        endDate = startOfTheDay().plus(2, DateTimeUnit.DAY)
-    )
-)
-
-val testReservations2: ReservationDto = ReservationDto(
-        id = "2",
-        trailerId = "2",
-        startDate = startOfTheDay().plus(2, DateTimeUnit.DAY),
-        endDate = startOfTheDay().plus(3, DateTimeUnit.DAY),
-        reservationPrice = ReservationPrice(
-            trailerId = "2",
-            reservation = 50.00,
-            daysNumber = 1,
-            sum = 70.0,
-        )
-)
 
 

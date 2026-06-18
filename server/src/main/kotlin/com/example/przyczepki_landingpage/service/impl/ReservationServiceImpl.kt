@@ -3,6 +3,7 @@ package com.example.przyczepki_landingpage.service.impl
 import com.example.przyczepki_landingpage.data.Customer
 import com.example.przyczepki_landingpage.data.Reservation
 import com.example.przyczepki_landingpage.data.ReservationDto
+import com.example.przyczepki_landingpage.data.ReservationPrice
 import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.repo.ReservationRepo
 import com.example.przyczepki_landingpage.repo.TrailersRepo
@@ -32,6 +33,28 @@ class ReservationServiceImpl(
             throw Exception("Dates are not available, in collision: ${conflictingReservation.toDto()}")
         }
         return reservation
+    }
+
+    override suspend fun calculatePrice(reservation: ReservationDto): ReservationDto {
+        val trailer = trailersRepo.getTrailer(reservation.trailerId!!) ?: throw Exception("Trailer not found")
+        val days = reservation.endDate!!.dayOfYear - reservation.startDate!!.dayOfYear + 1
+        val prices = trailer.prices ?: throw Exception("Trailer prices not found")
+
+        val sum = (0..days).sumOf { day ->
+            when (day) {
+                0 -> prices.firstDay ?: throw Exception("Trailer first day price not found")
+                1 -> prices.secondDay ?: throw Exception("Trailer second day price not found")
+                else -> prices.otherDays ?: throw Exception("Trailer other day price not found")
+            }
+        }
+
+        val reservationPrice: ReservationPrice = ReservationPrice(
+            trailerId = reservation.trailerId,
+            reservation = trailer.prices!!.reservation,
+            daysNumber = days.toLong(),
+            sum = sum,
+        )
+        return reservation.copy(reservationPrice = reservationPrice)
     }
 
     override suspend fun createReservation(reservation: ReservationDto): ReservationDto? {

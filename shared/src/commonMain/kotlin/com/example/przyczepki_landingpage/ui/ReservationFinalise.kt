@@ -16,24 +16,18 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -46,14 +40,10 @@ import com.example.przyczepki_landingpage.AppViewModel
 import com.example.przyczepki_landingpage.callPhone
 import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.model.CurrentScreen
-import com.example.przyczepki_landingpage.model.ModalData
-import com.example.przyczepki_landingpage.model.ModalType
-import com.example.przyczepki_landingpage.model.ServerResponse
 import com.example.przyczepki_landingpage.model.ServerStatus
 import com.example.przyczepki_landingpage.model.asPrice
 import com.example.przyczepki_landingpage.openEmail
 import com.example.przyczepki_landingpage.seller
-import com.example.przyczepki_landingpage.ui.modal.ReservationHeader
 import com.example.przyczepki_landingpage.ui.modal.ReservationTotalPrice
 import com.example.przyczepki_landingpage.ui.modal.TrailerInfoCard
 import com.example.przyczepki_landingpage.ui.modal.trailerReservationDates
@@ -216,7 +206,7 @@ fun NavigationBackBar(onClick: () -> Unit = {}, title: String = "Powrót") {
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-        IconButton(onClick = { onClick }) {
+        IconButton(onClick = onClick ) {
             Icon(
                 Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Powrót do rezerwacji"
