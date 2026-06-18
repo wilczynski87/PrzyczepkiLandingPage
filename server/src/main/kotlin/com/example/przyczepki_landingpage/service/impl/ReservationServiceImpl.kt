@@ -22,10 +22,16 @@ class ReservationServiceImpl(
         return reservationRepo.getAllReservations(from, to).map { it.toDto() }
     }
 
-    override suspend fun checkReservation(reservation: ReservationDto): ReservationDto? {
-
-
-        TODO("Not yet implemented")
+    override suspend fun checkReservation(reservation: ReservationDto): ReservationDto {
+        val conflictingReservation = reservationRepo.checkReservationDates(
+            reservation.trailerId!!,
+            reservation.startDate!!,
+            reservation.endDate!!,
+        )
+        if (conflictingReservation != null) {
+            throw Exception("Dates are not available, in collision: ${conflictingReservation.toDto()}")
+        }
+        return reservation
     }
 
     override suspend fun createReservation(reservation: ReservationDto): ReservationDto? {

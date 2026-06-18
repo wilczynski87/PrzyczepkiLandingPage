@@ -39,22 +39,14 @@ fun Route.reservation() {
 
         // oblicza koszt wynajmu ( ale jeszcze nie rezerwuje )
         post("/check") {
-            try {
-                val reservationDto: ReservationDto = call.receive()
-                println("reservationDto: $reservationDto")
+            val reservationDto: ReservationDto = call.receive()
+            println("reservationDto: $reservationDto")
 
-                // reservation validation
-                println("TODO!!! - napisać validację rezerwacji")
+            trailersService.getTrailer(reservationDto.trailerId!!)
+                ?: return@post call.respond(HttpStatusCode.NotAcceptable, "Nie znaleziono sprzętu o takim id: ${reservationDto.trailerId}")
 
-                // calculate prices
-//                val reservationToConfirm = testReservations2
-                val reservationToConfirm = reservationDto
-
-                call.respond(reservationToConfirm)
-            } catch (e: Exception) {
-                println("reservation, check error: $e")
-            }
-
+            val reservationToConfirm = reservationService.checkReservation(reservationDto)
+            call.respond(reservationToConfirm)
         }
 
         post("/create") {

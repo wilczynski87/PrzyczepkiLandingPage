@@ -75,8 +75,8 @@ class ReservationRepoImpl(
 
         val filters = and(
             eq("trailer.id", trailerId),
-            lte("startDate", from),
-            gte("endDate", to)
+            lte("startDate", to),
+            gte("endDate", from),
         )
         return reservationCollection.find(filters).firstOrNull()?.toReservation()
     }
