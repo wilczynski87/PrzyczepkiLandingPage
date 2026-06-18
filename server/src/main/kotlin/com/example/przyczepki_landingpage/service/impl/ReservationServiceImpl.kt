@@ -37,7 +37,7 @@ class ReservationServiceImpl(
 
     override suspend fun calculatePrice(reservation: ReservationDto): ReservationDto {
         val trailer = trailersRepo.getTrailer(reservation.trailerId!!) ?: throw Exception("Trailer not found")
-        val days = reservation.endDate!!.dayOfYear - reservation.startDate!!.dayOfYear + 1
+        val days = reservation.endDate!!.dayOfYear - reservation.startDate!!.dayOfYear
         val prices = trailer.prices ?: throw Exception("Trailer prices not found")
 
         val sum = (0..days).sumOf { day ->
