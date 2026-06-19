@@ -6,7 +6,6 @@ import com.example.przyczepki_landingpage.data.LoginRequest
 import com.example.przyczepki_landingpage.data.Private
 import com.example.przyczepki_landingpage.repo.CustomerRepo
 import com.example.przyczepki_landingpage.service.auth.PasswordUtil.hash
-import com.mongodb.client.model.Aggregates.set
 import com.mongodb.client.model.Filters.and
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.Filters.or
@@ -89,6 +88,6 @@ fun Customer.toTable(): CustomerTable {
         id = _id.toHexString(),
         private = private,
         company = company,
-        passwordHash = company?.nip ?: private?.pesel ?: ""
+        passwordHash = hash(company?.nip ?: private?.pesel ?: "")
     )
 }

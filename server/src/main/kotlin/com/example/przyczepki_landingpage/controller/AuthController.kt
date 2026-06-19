@@ -2,6 +2,7 @@ package com.example.przyczepki_landingpage.controller
 
 import com.example.przyczepki_landingpage.auth.RefreshTokenRequest
 import com.example.przyczepki_landingpage.data.LoginRequest
+import com.example.przyczepki_landingpage.data.LoginResponse
 import com.example.przyczepki_landingpage.service.CustomerService
 import com.example.przyczepki_landingpage.service.auth.JwtService
 import com.example.przyczepki_landingpage.service.auth.PasswordUtil.verify
@@ -31,10 +32,10 @@ fun Route.authController() {
                 val refreshToken = authService.generateRefreshToken(customer.toCustomer())
 
                 call.respond(
-                    mapOf(
-                        "token" to token,
-                        "customerId" to customer.id,
-                        "refreshToken" to refreshToken
+                    LoginResponse(
+                        token = token,
+                        customerId = customer.id ?: throw IllegalStateException("Brak customer ID: $customer"),
+                        refreshToken = refreshToken
                     )
                 )
 
@@ -62,10 +63,10 @@ fun Route.authController() {
             val refreshToken = authService.generateRefreshToken(customer)
 
             call.respond(
-                mapOf(
-                    "token" to token,
-                    "customerId" to customer.id,
-                    "refreshToken" to refreshToken
+                LoginResponse(
+                    token = token,
+                    customerId = customer.id ?: throw IllegalStateException("Brak customer ID: $customer"),
+                    refreshToken = refreshToken
                 )
             )
         }

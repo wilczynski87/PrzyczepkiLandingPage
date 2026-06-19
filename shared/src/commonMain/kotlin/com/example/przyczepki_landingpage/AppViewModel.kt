@@ -1,9 +1,9 @@
 package com.example.przyczepki_landingpage
 
 import com.example.przyczepki_landingpage.controller.ApiClient
-import com.example.przyczepki_landingpage.controller.LoginResponse
 import com.example.przyczepki_landingpage.data.Customer
 import com.example.przyczepki_landingpage.data.LoginRequest
+import com.example.przyczepki_landingpage.data.LoginResponse
 import com.example.przyczepki_landingpage.model.CurrentScreen
 import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.data.ReservationDto
@@ -313,6 +313,17 @@ class AppViewModel(private val scope: CoroutineScope) {
                 val result: Result<LoginResponse> = ApiClient.authController.login(loginRequest)
 
                 result.onSuccess { loginResponse ->
+
+                    // zapisz tokeny
+                    _appState.update { state ->
+                        state.copy(
+                            accessToken = loginResponse.token,
+                            refreshToken = loginResponse.refreshToken
+                        )
+                    }
+
+                    // przy sukcesie pobierz dane klienta
+                    fetchCustomer(loginResponse.customerId)
 
                 }.onFailure {
                     println("Nie udało się zalogować: ${it.message}")

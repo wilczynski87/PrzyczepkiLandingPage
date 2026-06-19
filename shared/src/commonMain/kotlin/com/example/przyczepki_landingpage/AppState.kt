@@ -33,6 +33,9 @@ data class AppState(
     val trailers: List<Trailer> = emptyList(),
     val selectedTrailer: Trailer? = null,
 
+    val accessToken: String? = null,
+    val refreshToken: String? = null,
+
     val customer: Customer? = null,
 )
 
