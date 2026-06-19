@@ -334,6 +334,7 @@ fun TrailerInfoCard(trailer: Trailer) {
                     },
                     modifier = Modifier
                         .size(64.dp)
+                        .padding(start = 4.dp, end = 8.dp)
                         .clip(RoundedCornerShape(10.dp))
                 )
             }
@@ -492,16 +493,15 @@ fun trailerReservationPrices(
 
                 // Pierwszy dzień
                 PriceRow(
-                    label = if (reservationPrice.daysNumber == 1L) "Wynajem 1 dnia"
-                    else "Pierwszy dzień",
+                    label = "Pierwsza doba:",
                     amount = prices?.firstDay ?: throw NullPointerException("Brak 1 dnia rezerwacji"),
                 )
 
                 // Drugi dzień
-                if (reservationPrice.daysNumber > 1 && prices.secondDay != null) {
+                if (reservationPrice.daysNumber >= 1 && prices.secondDay != null) {
                     prices.secondDay
                     PriceRow(
-                        label = "Drugi dzień",
+                        label = "Druga doba",
                         amount = prices.secondDay,
                         showInfo = true,
                         infoText = "${prices.secondDay.asPrice()} za dzień"
@@ -509,7 +509,7 @@ fun trailerReservationPrices(
                 }
 
                 // Kolejne dni (jeśli więcej niż 1 dzień)
-                if (reservationPrice.daysNumber > 2) {
+                if (reservationPrice.daysNumber >= 2) {
                     prices.otherDays ?: throw NullPointerException("Brak kolejnych dni rezerwacji")
                     val subsequentDays = reservationPrice.daysNumber - 2
                     PriceRow(
@@ -544,7 +544,7 @@ fun trailerReservationPrices(
 
                 // Informacja o sposobie płatności
                 Text(
-                    text = "Kaucja rezerwacyjna płatna od razu, pozostała kwota przy odbiorze",
+                    text = "Kaucja rezerwacyjna płatna przy rezerwacji, pozostała kwota (${(reservationPrice.sum - (reservationPrice.reservation ?: 0.0)).asPrice()} zł) przy odbiorze",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp)

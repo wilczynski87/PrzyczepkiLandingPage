@@ -11,6 +11,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
@@ -56,13 +57,14 @@ fun AppMainScreen() {
     val modal: ModalType = currentState.modalType
     val visible: Boolean = currentState.modalVisible
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxSize()) {
         MyTopAppBar(viewModel)
 
         Box(
             modifier = Modifier
-                .padding(4.dp)
-                .fillMaxWidth(),
+                .weight(1f)
+                .fillMaxWidth()
+                .padding(4.dp),
             contentAlignment = Alignment.TopCenter
         ) {
             Image(

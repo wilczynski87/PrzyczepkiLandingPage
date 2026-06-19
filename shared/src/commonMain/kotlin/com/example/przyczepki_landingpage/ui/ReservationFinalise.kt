@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
@@ -60,10 +62,11 @@ fun ReservationFinaliseMain(
     val serverStatus: ServerStatus = state.serverStatus?.status ?: ServerStatus.UNEXPECTED_STATUS
 
 
-    if(serverStatus != ServerStatus.OK) {
+    if (serverStatus != ServerStatus.OK) {
         ReservationServerProblemScreen(viewModel)
-    } else PaymentForReservation(widthSizeClass, viewModel)
-
+    } else {
+        PaymentForReservation(widthSizeClass, viewModel, modifier)
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -146,54 +149,55 @@ fun ReservationServerProblemScreen(
 @Composable
 fun PaymentForReservation(
     widthSizeClass: WindowWidthSizeClass,
-    viewModel: AppViewModel
+    viewModel: AppViewModel,
+    modifier: Modifier = Modifier,
 ) {
-
     val state by viewModel.appState.collectAsState()
     val reservationToMake = state.reservationToMake
     val trailer = state.selectedTrailer
     val from = reservationToMake?.startDate
     val to = reservationToMake?.endDate
     val reservationPrices = reservationToMake?.reservationPrice
-    // TODO powórt do rezerwacji
-    Text("PaymentForReservation")
 
-    Column(
-        modifier = Modifier
-            .padding(24.dp)
-//                    .verticalScroll(rememberScrollState())
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter,
     ) {
-        NavigationBackBar({ viewModel.navigateTo(CurrentScreen.RESERVATION) }, "Powrót do rezerwacji")
-        //    ReservationHeader(modal?.dialogTitle, modal?.dialogText)
+        Column(
+            modifier = Modifier
+                .widthIn(max = 600.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
+        ) {
+            NavigationBackBar(
+                { viewModel.navigateTo(CurrentScreen.RESERVATION) },
+                "Powrót do rezerwacji",
+            )
 
-        TitleForSection("Dla kogo rezerwacja:")
-        LoggingOptions(widthSizeClass, viewModel)
+            TitleForSection("Dla kogo rezerwacja:")
+            LoggingOptions(widthSizeClass, viewModel)
 
-        // Trailer info
-        trailer?.let { currentTrailer ->
-            TrailerInfoCard(currentTrailer)
+            trailer?.let { currentTrailer ->
+                TrailerInfoCard(currentTrailer)
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            trailerReservationDates(from, to)
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            if (reservationPrices != null) {
+                trailerReservationPrices(reservationPrices, trailer?.prices)
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            ReservationTotalPrice(
+                trailer?.prices?.reservation?.asPrice(),
+                reservationToMake?.reservationPrice?.sum?.asPrice(),
+            )
         }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Dates
-        // Nagłówek sekcji
-        trailerReservationDates(from, to)
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Prices
-        if (reservationPrices != null) trailerReservationPrices(reservationPrices, trailer?.prices)
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Total price
-        ReservationTotalPrice(
-            trailer?.prices?.reservation?.asPrice(),
-            reservationToMake?.reservationPrice?.sum?.asPrice()
-        )
-
-
     }
 }
 
