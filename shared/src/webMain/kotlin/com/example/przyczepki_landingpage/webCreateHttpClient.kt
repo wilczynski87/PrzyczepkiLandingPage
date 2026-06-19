@@ -2,7 +2,7 @@ package com.example.przyczepki_landingpage
 
 import com.example.przyczepki_landingpage.auth.RefreshTokenRequest
 import com.example.przyczepki_landingpage.auth.TokenManager
-import com.example.przyczepki_landingpage.controller.LoginResponse
+import com.example.przyczepki_landingpage.data.LoginResponse
 import com.example.przyczepki_landingpage.controller.base_url
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -114,9 +114,10 @@ fun webCreateHttpClient(tokenManager: TokenManager): HttpClient {
                 }
 
                 sendWithoutRequest { request ->
-                    // Zawsze wysyłaj token (oprócz endpointów auth)
-                    !request.url.encodedPath.contains("/auth/login") &&
-                            !request.url.encodedPath.contains("/auth/register")
+                    val path = request.url.encodedPath
+                    !path.contains("/auth/login") &&
+                            !path.contains("/auth/register") &&
+                            !path.contains("/auth/refresh")
                 }
             }
         }

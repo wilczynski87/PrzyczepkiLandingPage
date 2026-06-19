@@ -313,8 +313,11 @@ class AppViewModel(private val scope: CoroutineScope) {
                 val result: Result<LoginResponse> = ApiClient.authController.login(loginRequest)
 
                 result.onSuccess { loginResponse ->
+                    ApiClient.tokenManager.setTokens(
+                        loginResponse.token,
+                        loginResponse.refreshToken
+                    )
 
-                    // zapisz tokeny
                     _appState.update { state ->
                         state.copy(
                             accessToken = loginResponse.token,
@@ -322,7 +325,6 @@ class AppViewModel(private val scope: CoroutineScope) {
                         )
                     }
 
-                    // przy sukcesie pobierz dane klienta
                     fetchCustomer(loginResponse.customerId)
 
                 }.onFailure {

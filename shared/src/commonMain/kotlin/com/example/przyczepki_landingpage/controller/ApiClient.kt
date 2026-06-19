@@ -19,7 +19,7 @@ import kotlinx.serialization.json.Json
 val base_url = getBaseUrl()
 
 object ApiClient {
-    private val tokenManager by lazy { TokenManager(provideSecureTokenStorage()) }
+    val tokenManager by lazy { TokenManager(provideSecureTokenStorage()) }
     val client: HttpClient by lazy { createHttpClient(tokenManager) }
     val healthCheck by lazy { HealthCheck(client) }
     val trailerController by lazy { TrailerController(client) }

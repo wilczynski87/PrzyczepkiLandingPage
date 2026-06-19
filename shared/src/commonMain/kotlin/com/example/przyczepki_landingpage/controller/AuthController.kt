@@ -9,7 +9,14 @@ import io.ktor.client.request.setBody
 
 class AuthController(private val client: HttpClient) {
 
-    suspend fun login(loginRequest: LoginRequest): Result<LoginResponse> = client.post("/auth/login") {
-        setBody(loginRequest)
-    }.body()
+    suspend fun login(loginRequest: LoginRequest): Result<LoginResponse> {
+        return try {
+            val response = client.post("$base_url/auth/login") {
+                setBody(loginRequest)
+            }.body<LoginResponse>()
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
