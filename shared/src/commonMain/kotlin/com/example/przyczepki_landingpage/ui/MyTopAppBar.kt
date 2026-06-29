@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.Color
 import com.example.przyczepki_landingpage.AppViewModel
 import com.example.przyczepki_landingpage.getEnvironment
 import com.example.przyczepki_landingpage.model.CurrentScreen
@@ -26,6 +28,8 @@ import com.example.przyczepki_landingpage.model.CurrentScreen
 @Composable
 fun MyTopAppBar(viewModel: AppViewModel) {
     var expanded by remember { mutableStateOf(false) }
+    val state by viewModel.appState.collectAsState()
+    val customer = state.customer
 
     TopAppBar(
         title = { WebTitle() },
@@ -34,7 +38,8 @@ fun MyTopAppBar(viewModel: AppViewModel) {
                 Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = "Profil",
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
+                    tint = if(customer?.id != null) Color.Green else Color.Unspecified
                 )
             }
             IconButton(onClick = { expanded = true }) {

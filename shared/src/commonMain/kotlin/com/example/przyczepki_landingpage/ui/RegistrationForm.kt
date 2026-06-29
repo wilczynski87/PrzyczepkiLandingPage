@@ -468,12 +468,15 @@ private fun CustomerRegistrationContent(
             onClick = {
                 // TODO wysłanie danych do serwera w celu walidacji
                 // jeśli ok to rejestracja klienta -> email z potwierdzeniem
-                viewModel.saveCustomer()
+                if(customer?.id != null) viewModel.putCustomer()
+                    else viewModel.saveCustomer()
+
             },
             enabled = canSubmit,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Zarejestruj")
+            if(customer?.id != null) Text("Aktualizuj dane")
+            else Text("Zarejestruj")
         }
     }
 }
@@ -913,5 +916,109 @@ fun validateCustomerForm(
             pesel = validatePesel(pesel),
             privateAddress = validateRequired(privateAddress, "Adres")
         )
+    }
+}
+
+//@Composable
+//fun CustomerDataFront(viewModel: AppViewModel) {
+//    val state by viewModel.appState.collectAsState()
+//    val customer = state.customer
+//    Text("Witam ${customer?.private?.firstName ?: "Drogi kliencie"}")
+//    Text("Złe dane logowanie? ")
+//    TextButton(onClick = {
+//        viewModel.logout()
+//    }) {
+//        Text("Zaloguj ponownie")
+//    }
+//}
+
+@Composable
+fun CustomerDataFront(
+    viewModel: AppViewModel,
+    modifier: Modifier = Modifier
+) {
+    val state by viewModel.appState.collectAsState()
+    val customer = state.customer
+    val isCompany = customer?.company != null
+
+    val displayName = if (isCompany) {
+        customer.company.name?.takeIf { it.isNotBlank() }
+    } else {
+        listOfNotNull(
+            customer?.private?.firstName?.takeIf { it.isNotBlank() },
+            customer?.private?.lastName?.takeIf { it.isNotBlank() }
+        ).joinToString(" ").takeIf { it.isNotBlank() }
+    }
+
+    val email = if (isCompany) customer.company.email else customer?.private?.email
+    val phone = if (isCompany) customer.company.phoneNumber else customer?.private?.phoneNumber
+
+    Card(modifier = modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (isCompany) Icons.Filled.Business else Icons.Filled.Person,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        text = "Zalogowano jako",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = displayName ?: "Brak danych",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            if (!email.isNullOrBlank() || !phone.isNullOrBlank()) {
+                HorizontalDivider()
+
+                if (!email.isNullOrBlank()) {
+                    CustomerPreviewRow(
+                        icon = Icons.Filled.Email,
+                        label = "Email",
+                        value = email
+                    )
+                }
+                if (!phone.isNullOrBlank()) {
+                    CustomerPreviewRow(
+                        icon = Icons.Filled.Phone,
+                        label = "Telefon",
+                        value = phone
+                    )
+                }
+            }
+
+            TextButton(
+                onClick = { viewModel.logout() },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                if(customer?.id == null) Text("Wyloguj")
+                else Text("To nie Ty? Zaloguj ponownie")
+            }
+        }
     }
 }

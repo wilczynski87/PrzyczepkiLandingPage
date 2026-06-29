@@ -25,6 +25,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -158,6 +159,7 @@ fun PaymentForReservation(
     val from = reservationToMake?.startDate
     val to = reservationToMake?.endDate
     val reservationPrices = reservationToMake?.reservationPrice
+    val customer = state.customer
 
     Box(
         modifier = modifier.fillMaxSize(),
@@ -175,7 +177,10 @@ fun PaymentForReservation(
             )
 
             TitleForSection("Dla kogo rezerwacja:")
-            LoggingOptions(widthSizeClass, viewModel)
+            if(customer?.id == null) LoggingOptions(widthSizeClass, viewModel)
+            else CustomerDataFront(viewModel)
+
+            HorizontalDivider(modifier.padding(4.dp), thickness = 0.dp)
 
             trailer?.let { currentTrailer ->
                 TrailerInfoCard(currentTrailer)

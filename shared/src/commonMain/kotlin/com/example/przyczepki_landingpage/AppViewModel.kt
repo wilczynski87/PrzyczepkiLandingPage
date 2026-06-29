@@ -341,4 +341,12 @@ class AppViewModel(private val scope: CoroutineScope) {
 
         }
     }
+
+    fun logout() {
+        _appState.update { state ->
+            state.copy(
+                customer = null
+            )
+        }
+    }
 }

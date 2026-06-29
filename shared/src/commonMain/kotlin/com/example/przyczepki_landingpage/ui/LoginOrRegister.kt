@@ -9,6 +9,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -30,12 +32,20 @@ fun LoggingOptions(
     widthSizeClass: WindowWidthSizeClass = WindowWidthSizeClass.Compact,
     viewModel: AppViewModel
 ) {
+    val state by viewModel.appState.collectAsState()
+    val customer = state.customer
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        CustomerDataFront(viewModel)
+
+        HorizontalDivider(thickness = 0.dp, modifier = Modifier.padding(4.dp))
+
         Button(onClick = {
             viewModel.openModal(
                 ModalType.LOGIN,
@@ -53,7 +63,8 @@ fun LoggingOptions(
         Button(onClick = {
             viewModel.navigateTo(CurrentScreen.SIGN_UP)
         }) {
-            Text("Podaj dane")
+            if(customer?.id != null) Text("Aktualizuj dane")
+            else Text("Podaj dane")
         }
     }
 
