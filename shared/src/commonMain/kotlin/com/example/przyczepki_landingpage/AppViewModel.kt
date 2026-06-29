@@ -5,7 +5,9 @@ import com.example.przyczepki_landingpage.data.Customer
 import com.example.przyczepki_landingpage.data.LoginRequest
 import com.example.przyczepki_landingpage.data.LoginResponse
 import com.example.przyczepki_landingpage.model.CurrentScreen
+import com.example.przyczepki_landingpage.model.LoginUiState
 import com.example.przyczepki_landingpage.model.ModalType
+import com.example.przyczepki_landingpage.model.validateLoginInput
 import com.example.przyczepki_landingpage.data.ReservationDto
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
@@ -153,7 +155,8 @@ class AppViewModel(private val scope: CoroutineScope) {
         _appState.update { it.copy(
             modal = null,
             modalType = ModalType.NONE,
-            modalVisible = false
+            modalVisible = false,
+            loginUiState = LoginUiState()
         ) }
     }
 
@@ -309,10 +312,51 @@ class AppViewModel(private val scope: CoroutineScope) {
     }
 
     // AUTH
-    fun login(loginRequest:LoginRequest) {
+    fun onLoginInputChange(value: String) {
+        _appState.update { state ->
+            state.copy(
+                loginUiState = state.loginUiState.copy(login = value, error = null)
+            )
+        }
+    }
+
+    fun onLoginPasswordChange(value: String) {
+        _appState.update { state ->
+            state.copy(
+                loginUiState = state.loginUiState.copy(password = value, error = null)
+            )
+        }
+    }
+
+    fun login() {
+        val loginState = appState.value.loginUiState
+        val loginInput = loginState.login.trim()
+        val password = loginState.password
+
+        // Walidacja danych wejściowych przed wysłaniem do serwera
+        val validationError = validateLoginInput(loginInput, password)
+        if (validationError != null) {
+            _appState.update { state ->
+                state.copy(
+                    loginUiState = state.loginUiState.copy(
+                        error = validationError,
+                        isLoading = false
+                    )
+                )
+            }
+            return
+        }
+
+        _appState.update { state ->
+            state.copy(
+                loginUiState = state.loginUiState.copy(isLoading = true, error = null)
+            )
+        }
+
         scope.launch {
             try {
-                val result: Result<LoginResponse> = ApiClient.authController.login(loginRequest)
+                val result: Result<LoginResponse> =
+                    ApiClient.authController.login(LoginRequest(loginInput, password))
 
                 result.onSuccess { loginResponse ->
                     println("Zalogowano: ${loginResponse.token}")
@@ -324,21 +368,36 @@ class AppViewModel(private val scope: CoroutineScope) {
                     _appState.update { state ->
                         state.copy(
                             accessToken = loginResponse.token,
-                            refreshToken = loginResponse.refreshToken
+                            refreshToken = loginResponse.refreshToken,
+                            loginUiState = LoginUiState()
                         )
                     }
 
                     fetchCustomer(loginResponse.customerId)
 
-                }.onFailure {
-                    println("Nie udało się zalogować: ${it.message}")
+                }.onFailure { error ->
+                    println("Nie udało się zalogować: ${error.message}")
+                    _appState.update { state ->
+                        state.copy(
+                            loginUiState = state.loginUiState.copy(
+                                isLoading = false,
+                                error = "Nieprawidłowy email/telefon lub hasło. Sprawdź dane i spróbuj ponownie."
+                            )
+                        )
+                    }
                 }
 
             } catch (e: Exception) {
                 println("Nie udało się zalogować: ${e.message}")
+                _appState.update { state ->
+                    state.copy(
+                        loginUiState = state.loginUiState.copy(
+                            isLoading = false,
+                            error = "Brak połączenia z serwerem. Spróbuj ponownie później."
+                        )
+                    )
+                }
             }
-
-
         }
     }
 

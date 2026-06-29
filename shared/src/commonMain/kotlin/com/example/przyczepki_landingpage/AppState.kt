@@ -10,6 +10,7 @@ import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.data.ReservationDto
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
+import com.example.przyczepki_landingpage.model.LoginUiState
 import com.example.przyczepki_landingpage.model.ServerResponse
 import kotlinx.datetime.LocalDate
 
@@ -37,6 +38,8 @@ data class AppState(
     val refreshToken: String? = null,
 
     val customer: Customer? = null,
+
+    val loginUiState: LoginUiState = LoginUiState(),
 )
 
 val ikona = mapOf<String, String>(

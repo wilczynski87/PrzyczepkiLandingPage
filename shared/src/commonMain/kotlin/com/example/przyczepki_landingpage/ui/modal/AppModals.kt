@@ -61,7 +61,6 @@ import com.example.przyczepki_landingpage.model.asPrice
 import com.example.przyczepki_landingpage.model.formatDatePl
 import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.model.CurrentScreen
-import com.example.przyczepki_landingpage.model.LoginUiState
 import com.example.przyczepki_landingpage.seller
 import com.example.przyczepki_landingpage.ui.LoadingScreen
 import com.example.przyczepki_landingpage.ui.LoginScreen
@@ -604,7 +603,6 @@ private fun PriceRow(
 
 @Composable
 fun LoginModal(viewModel: AppViewModel) {
-    val state: LoginUiState = LoginUiState()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -623,14 +621,7 @@ fun LoginModal(viewModel: AppViewModel) {
                 .widthIn(max = 600.dp)
 //                .fillMaxHeight(0.9f)
         ) {
-            LoginScreen(
-                viewModel,
-                {},
-                {},
-                {},
-                {},
-                {},
-            )
+            LoginScreen(viewModel)
         }
     }
 }

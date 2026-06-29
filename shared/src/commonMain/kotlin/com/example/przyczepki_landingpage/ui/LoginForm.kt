@@ -4,15 +4,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -22,6 +23,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,24 +34,24 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
-import com.example.przyczepki_landingpage.data.LoginRequest
-import com.example.przyczepki_landingpage.model.LoginUiState
 
 @Composable
 fun LoginScreen(
     viewModel: AppViewModel,
-    onLoginChange: (String) -> Unit,
-    onPasswordChange: (String) -> Unit,
-    onLoginClick: () -> Unit,
-    onGoogleClick: () -> Unit,
-    onAppleClick: () -> Unit
+    onGoogleClick: () -> Unit = {},
+    onAppleClick: () -> Unit = {}
 ) {
+    val state by viewModel.appState.collectAsState()
+    val loginState = state.loginUiState
     var passwordVisible by remember { mutableStateOf(false) }
-    var loginState by remember { mutableStateOf(LoginUiState()) }
+
+    val canSubmit = !loginState.isLoading &&
+        loginState.login.isNotBlank() &&
+        loginState.password.length >= 6
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(24.dp),
         verticalArrangement = Arrangement.Center
     ) {
@@ -64,9 +66,11 @@ fun LoginScreen(
         // EMAIL / PHONE
         OutlinedTextField(
             value = loginState.login,
-            onValueChange = { loginState = loginState.copy(login = it) },
+            onValueChange = viewModel::onLoginInputChange,
             label = { Text("Email lub telefon") },
             singleLine = true,
+            isError = loginState.error != null,
+            enabled = !loginState.isLoading,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -75,9 +79,11 @@ fun LoginScreen(
         // PASSWORD
         OutlinedTextField(
             value = loginState.password,
-            onValueChange = { loginState = loginState.copy(password = it) },
+            onValueChange = viewModel::onLoginPasswordChange,
             label = { Text("Hasło") },
             singleLine = true,
+            isError = loginState.error != null,
+            enabled = !loginState.isLoading,
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -91,27 +97,44 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(Modifier.height(8.dp))
-
-        loginState.error?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error
-            )
+        // KOMUNIKAT BŁĘDU
+        loginState.error?.let { error ->
+            Spacer(Modifier.height(8.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ErrorOutline,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Text(
+                    text = error,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
         }
 
         Spacer(Modifier.height(16.dp))
 
         // LOGIN BUTTON
         Button(
-            onClick = {
-                loginState = loginState.copy(error = null, isLoading = true)
-                viewModel.login(LoginRequest(loginState.login, loginState.password))
-            },
+            onClick = { viewModel.login() },
             modifier = Modifier.fillMaxWidth(),
-            enabled = loginState.login.isNotBlank() && loginState.password.length >= 6
+            enabled = canSubmit
         ) {
-            Text("Zaloguj")
+            if (loginState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text("Zaloguj")
+            }
         }
 
         Spacer(Modifier.height(16.dp))
@@ -123,6 +146,7 @@ fun LoginScreen(
         // GOOGLE
         OutlinedButton(
             onClick = onGoogleClick,
+            enabled = !loginState.isLoading,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Kontynuuj z Google")
@@ -133,6 +157,7 @@ fun LoginScreen(
         // APPLE (iOS / WASM Safari)
         OutlinedButton(
             onClick = onAppleClick,
+            enabled = !loginState.isLoading,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Kontynuuj z Apple")
@@ -161,11 +186,4 @@ fun DividerWithText(text: String) {
             color = DividerDefaults.color
         )
     }
-}
-
-fun isValidLogin(input: String): Boolean {
-    val emailRegex = Regex("^[A-Za-z0-9+_.-]+@(.+)$")
-    val phoneRegex = Regex("^\\+?[0-9]{7,15}$")
-
-    return emailRegex.matches(input) || phoneRegex.matches(input)
 }
