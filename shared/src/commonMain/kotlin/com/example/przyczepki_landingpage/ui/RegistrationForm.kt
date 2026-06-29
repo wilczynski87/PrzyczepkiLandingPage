@@ -1,10 +1,23 @@
 package com.example.przyczepki_landingpage.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Numbers
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.data.Company
 import com.example.przyczepki_landingpage.data.Customer
@@ -50,9 +63,12 @@ fun CustomerRegistrationCompact(
     viewModel: AppViewModel,
     modifier: Modifier = Modifier
 ) {
+    var isCompany by rememberSaveable { mutableStateOf(false) }
     CustomerRegistrationContent(
         viewModel = viewModel,
         isTwoColumn = false,
+        isCompany = isCompany,
+        onIsCompanyChange = { isCompany = it },
         modifier = modifier
     )
 }
@@ -62,9 +78,12 @@ fun CustomerRegistrationMedium(
     viewModel: AppViewModel,
     modifier: Modifier = Modifier
 ) {
+    var isCompany by rememberSaveable { mutableStateOf(false) }
     CustomerRegistrationContent(
         viewModel = viewModel,
         isTwoColumn = true,
+        isCompany = isCompany,
+        onIsCompanyChange = { isCompany = it },
         modifier = modifier
     )
 }
@@ -74,6 +93,9 @@ fun CustomerRegistrationExpanded(
     viewModel: AppViewModel,
     modifier: Modifier = Modifier
 ) {
+    val state by viewModel.appState.collectAsState()
+    var isCompany by rememberSaveable { mutableStateOf(false) }
+
     Row(
         modifier = modifier.fillMaxSize().padding(24.dp),
         horizontalArrangement = Arrangement.spacedBy(24.dp)
@@ -81,30 +103,29 @@ fun CustomerRegistrationExpanded(
         CustomerRegistrationContent(
             viewModel = viewModel,
             isTwoColumn = true,
+            isCompany = isCompany,
+            onIsCompanyChange = { isCompany = it },
             modifier = Modifier.weight(1f)
         )
 
-        // opcjonalnie preview / info panel
-        Card(
+        CustomerPreviewCard(
+            customer = state.customer,
+            isCompany = isCompany,
             modifier = Modifier.weight(1f).fillMaxHeight()
-        ) {
-            Text(
-                "Podgląd klienta",
-                modifier = Modifier.padding(16.dp)
-            )
-        }
+        )
     }
 }
 @Composable
 private fun CustomerRegistrationContent(
     viewModel: AppViewModel,
     isTwoColumn: Boolean,
+    isCompany: Boolean,
+    onIsCompanyChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
         .fillMaxWidth()
 ) {
     val state by viewModel.appState.collectAsState()
     val customer = state.customer
-    var isCompany by rememberSaveable { mutableStateOf(false) }
 
     val firstName = customer?.private?.firstName ?: ""
     val lastName = customer?.private?.lastName ?: ""
@@ -150,12 +171,12 @@ private fun CustomerRegistrationContent(
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             FilterChip(
                 selected = !isCompany,
-                onClick = { isCompany = false },
+                onClick = { onIsCompanyChange(false) },
                 label = { Text("Osoba prywatna") }
             )
             FilterChip(
                 selected = isCompany,
-                onClick = { isCompany = true },
+                onClick = { onIsCompanyChange(true) },
                 label = { Text("Firma") }
             )
         }
@@ -453,6 +474,137 @@ private fun CustomerRegistrationContent(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Zarejestruj")
+        }
+    }
+}
+
+@Composable
+fun CustomerPreviewCard(
+    customer: Customer?,
+    isCompany: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val displayName = if (isCompany) {
+        customer?.company?.name?.takeIf { it.isNotBlank() }
+    } else {
+        listOfNotNull(
+            customer?.private?.firstName?.takeIf { it.isNotBlank() },
+            customer?.private?.lastName?.takeIf { it.isNotBlank() }
+        ).joinToString(" ").takeIf { it.isNotBlank() }
+    }
+
+    val email = if (isCompany) customer?.company?.email else customer?.private?.email
+    val phone = if (isCompany) customer?.company?.phoneNumber else customer?.private?.phoneNumber
+    val address = if (isCompany) customer?.company?.address else customer?.private?.address
+    val identifier = if (isCompany) customer?.company?.nip else customer?.private?.pesel
+
+    Card(modifier = modifier) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                "Podgląd klienta",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (isCompany) Icons.Filled.Business else Icons.Filled.Person,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        text = displayName ?: "Brak danych",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (displayName != null) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                    AssistChip(
+                        onClick = {},
+                        enabled = false,
+                        label = { Text(if (isCompany) "Firma" else "Osoba prywatna") }
+                    )
+                }
+            }
+
+            HorizontalDivider()
+
+            CustomerPreviewRow(
+                icon = Icons.Filled.Email,
+                label = "Email",
+                value = email
+            )
+            CustomerPreviewRow(
+                icon = Icons.Filled.Phone,
+                label = "Telefon",
+                value = phone
+            )
+            CustomerPreviewRow(
+                icon = Icons.Filled.LocationOn,
+                label = "Adres",
+                value = address
+            )
+            CustomerPreviewRow(
+                icon = if (isCompany) Icons.Filled.Numbers else Icons.Filled.Badge,
+                label = if (isCompany) "NIP" else "PESEL / nr paszportu",
+                value = identifier
+            )
+        }
+    }
+}
+
+@Composable
+private fun CustomerPreviewRow(
+    icon: ImageVector,
+    label: String,
+    value: String?,
+) {
+    val hasValue = !value.isNullOrBlank()
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Column {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = if (hasValue) value else "—",
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (hasValue) {
+                    MaterialTheme.colorScheme.onSurface
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                }
+            )
         }
     }
 }

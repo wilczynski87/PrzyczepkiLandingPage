@@ -286,6 +286,7 @@ class AppViewModel(private val scope: CoroutineScope) {
     }
 
     fun fetchCustomer(customerId: String? = null) {
+        println("fetchCustomer")
         scope.launch {
             val customerId: String = customerId ?: appState.value.customer?.id ?: return@launch
             ApiClient.customerController.getCustomer(customerId)
@@ -295,6 +296,7 @@ class AppViewModel(private val scope: CoroutineScope) {
                             customer = customer
                         )
                     }
+                    closeModal()
                 }
                 .onFailure {
                     println("Error: ${it.message}")
@@ -313,6 +315,7 @@ class AppViewModel(private val scope: CoroutineScope) {
                 val result: Result<LoginResponse> = ApiClient.authController.login(loginRequest)
 
                 result.onSuccess { loginResponse ->
+                    println("Zalogowano: ${loginResponse.token}")
                     ApiClient.tokenManager.setTokens(
                         loginResponse.token,
                         loginResponse.refreshToken
