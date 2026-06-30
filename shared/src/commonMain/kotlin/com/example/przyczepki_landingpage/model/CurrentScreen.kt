@@ -9,4 +9,5 @@ enum class CurrentScreen {
     LOGIN,
     SIGN_UP,
     RESERVATION_FINALISE,
+    PRIVACY_POLICY,
 }

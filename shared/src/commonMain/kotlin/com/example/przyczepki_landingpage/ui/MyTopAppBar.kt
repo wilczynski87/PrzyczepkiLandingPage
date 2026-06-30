@@ -78,6 +78,13 @@ fun MyTopAppBar(viewModel: AppViewModel) {
                     }
                 )
                 DropdownMenuItem(
+                    text = { Text("Polityka prywatności") },
+                    onClick = {
+                        expanded = false
+                        viewModel.navigateTo(CurrentScreen.PRIVACY_POLICY)
+                    }
+                )
+                DropdownMenuItem(
                     text = { Text("Cennik") },
                     onClick = {
                         expanded = false

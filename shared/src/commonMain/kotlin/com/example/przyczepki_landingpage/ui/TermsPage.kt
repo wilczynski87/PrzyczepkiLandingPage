@@ -99,6 +99,16 @@ fun TermsPage(
                     "W przypadku zamkniętej bramy – należy zadzwonić na numer na bramie."
                 )
             )
+
+            // Sekcja Dane firmy
+            TermsSection(
+                title = "Dane przedsiębiorstwa",
+                content = listOf(
+                    "Kontenery Magazynowe sp z o o",
+                    "nip: 8943278612",
+                    "krs: 0001220381"
+                )
+            )
         }
     }
 }

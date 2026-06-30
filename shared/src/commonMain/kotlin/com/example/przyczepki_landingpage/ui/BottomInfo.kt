@@ -107,6 +107,14 @@ fun BottomInfo(
                 Spacer(Modifier.width(8.dp))
                 Text("Nawiguj do biura")
             }
+            TextButton(
+                onClick = {
+                    viewModel.navigateTo(CurrentScreen.PRIVACY_POLICY)
+                },
+                modifier = Modifier.padding(0.dp)
+            ) {
+                Text("Polityka prywatności")
+            }
         }
     }
 }
