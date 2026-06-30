@@ -38,6 +38,13 @@ RUN ./gradlew --no-daemon help
 COPY --chown=gradle:gradle shared/ shared/
 COPY --chown=gradle:gradle composeApp/ composeApp/
 
+# 4.1. Ogranicz pamięć JVM na czas budowy w kontenerze.
+#      Runner CI (ubuntu-latest) ma ~7 GB RAM. Domyślne -Xmx6G z gradle.properties
+#      + osobny daemon Kotlina (-Xmx6G) => OOM podczas kompilacji/optymalizacji WASM.
+#      Nadpisujemy ustawienia tylko w obrazie (klucze z końca pliku wygrywają)
+#      i kompilujemy Kotlin w procesie Gradle (bez drugiej maszyny JVM).
+RUN printf '\n# --- Docker build overrides (mniej RAM) ---\norg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8\norg.gradle.workers.max=2\nkotlin.compiler.execution.strategy=in-process\n' >> gradle.properties
+
 # 5. Build KMP WASM (production)
 RUN ./gradlew \
     :shared:compileKotlinWasmJs \

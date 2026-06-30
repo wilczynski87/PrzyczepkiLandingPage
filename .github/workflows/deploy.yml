@@ -14,6 +14,19 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # Build WASM (Kotlin/Wasm + Binaryen wasm-opt) jest pamięciożerny i przy
+      # ~7 GB RAM runnera bywa zabijany przez OOM. Dodatkowy swap amortyzuje skok
+      # pamięci natywnej podczas optymalizacji WASM.
+      - name: Add swap space
+        run: |
+          sudo swapoff -a || true
+          sudo rm -f /swapfile
+          sudo fallocate -l 10G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
+
       - name: Validate deploy config
         run: |
           missing=()
