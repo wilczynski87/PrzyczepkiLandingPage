@@ -49,6 +49,7 @@ import com.example.przyczepki_landingpage.openEmail
 import com.example.przyczepki_landingpage.seller
 import com.example.przyczepki_landingpage.ui.modal.ReservationTotalPrice
 import com.example.przyczepki_landingpage.ui.modal.TrailerInfoCard
+import com.example.przyczepki_landingpage.ui.payment.Przelewy24Payment
 import com.example.przyczepki_landingpage.ui.modal.trailerReservationDates
 import com.example.przyczepki_landingpage.ui.modal.trailerReservationPrices
 
@@ -201,6 +202,16 @@ fun PaymentForReservation(
             ReservationTotalPrice(
                 trailer?.prices?.reservation?.asPrice(),
                 reservationToMake?.reservationPrice?.sum?.asPrice(),
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Przelewy24Payment(
+                depositAmount = reservationPrices?.reservation ?: trailer?.prices?.reservation,
+                totalAmount = reservationPrices?.sum,
+                onPay = {
+                    // TODO: podłączyć inicjację transakcji Przelewy24 (backend)
+                },
             )
         }
     }
