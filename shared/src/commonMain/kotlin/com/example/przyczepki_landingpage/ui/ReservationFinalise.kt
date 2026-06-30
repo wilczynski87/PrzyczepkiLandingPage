@@ -2,6 +2,7 @@ package com.example.przyczepki_landingpage.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,7 +26,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -171,48 +171,47 @@ fun PaymentForReservation(
                 .widthIn(max = 600.dp)
                 .verticalScroll(rememberScrollState())
                 .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             NavigationBackBar(
                 { viewModel.navigateTo(CurrentScreen.RESERVATION) },
                 "Powrót do rezerwacji",
             )
 
-            TitleForSection("Dla kogo rezerwacja:")
-            if(customer?.id == null) LoggingOptions(widthSizeClass, viewModel)
-            else CustomerDataFront(viewModel)
-
-            HorizontalDivider(modifier.padding(4.dp), thickness = 0.dp)
-
-            trailer?.let { currentTrailer ->
-                TrailerInfoCard(currentTrailer)
+            // Sekcja: dla kogo rezerwacja
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                TitleForSection("Dla kogo rezerwacja:")
+                if (customer?.id == null) LoggingOptions(widthSizeClass, viewModel)
+                else CustomerDataFront(viewModel)
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            trailerReservationDates(from, to)
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            if (reservationPrices != null) {
-                trailerReservationPrices(reservationPrices, trailer?.prices)
+            // Sekcja: podsumowanie rezerwacji
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                TitleForSection("Podsumowanie rezerwacji")
+                trailer?.let { currentTrailer ->
+                    TrailerInfoCard(currentTrailer)
+                }
+                trailerReservationDates(from, to)
+                if (reservationPrices != null) {
+                    trailerReservationPrices(reservationPrices, trailer?.prices)
+                }
+                ReservationTotalPrice(
+                    trailer?.prices?.reservation?.asPrice(),
+                    reservationToMake?.reservationPrice?.sum?.asPrice(),
+                )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            ReservationTotalPrice(
-                trailer?.prices?.reservation?.asPrice(),
-                reservationToMake?.reservationPrice?.sum?.asPrice(),
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Przelewy24Payment(
-                depositAmount = reservationPrices?.reservation ?: trailer?.prices?.reservation,
-                totalAmount = reservationPrices?.sum,
-                onPay = {
-                    // TODO: podłączyć inicjację transakcji Przelewy24 (backend)
-                },
-            )
+            // Sekcja: płatność
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                TitleForSection("Płatność")
+                Przelewy24Payment(
+                    depositAmount = reservationPrices?.reservation ?: trailer?.prices?.reservation,
+                    totalAmount = reservationPrices?.sum,
+                    onPay = {
+                        // TODO: podłączyć inicjację transakcji Przelewy24 (backend)
+                    },
+                )
+            }
         }
     }
 }
