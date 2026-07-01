@@ -58,6 +58,7 @@ import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.model.ServerStatus
 import com.example.przyczepki_landingpage.model.asPrice
+import com.example.przyczepki_landingpage.model.validateReservationPayment
 import com.example.przyczepki_landingpage.openEmail
 import com.example.przyczepki_landingpage.seller
 import com.example.przyczepki_landingpage.ui.modal.ReservationTotalPrice
@@ -175,6 +176,13 @@ fun PaymentForReservation(
     val reservationPrices = reservationToMake?.reservationPrice
     val customer = state.customer
     val isLoggedIn = customer?.id != null
+    val hasTrailer = trailer != null
+    val hasPeriod = from != null && to != null
+    val paymentValidation = validateReservationPayment(
+        isLoggedIn = isLoggedIn,
+        hasTrailer = hasTrailer,
+        hasPeriod = hasPeriod,
+    )
 
     Box(
         modifier = modifier.fillMaxSize(),
@@ -242,7 +250,10 @@ fun PaymentForReservation(
                 Przelewy24Payment(
                     depositAmount = reservationPrices?.reservation ?: trailer?.prices?.reservation,
                     totalAmount = reservationPrices?.sum,
+                    canPay = paymentValidation.canPay,
+                    paymentIssues = paymentValidation.issues.map { it.message },
                     onPay = {
+                        if (!paymentValidation.canPay) return@Przelewy24Payment
                         viewModel.changeServerStatus(ServerStatus.SERVER_ERROR)
                         // TODO: podłączyć inicjację transakcji Przelewy24 (backend)
                     },

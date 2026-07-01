@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -39,12 +41,16 @@ private val Przelewy24Dark = Color(0xFF1B1B1B)
  * @param totalAmount całkowity koszt rezerwacji (do wyliczenia kwoty płatnej przy odbiorze)
  * @param isProcessing czy trwa inicjowanie płatności (blokuje przycisk i pokazuje spinner)
  * @param onPay wywoływane po kliknięciu „Zapłać" — tutaj należy podłączyć inicjację transakcji P24
+ * @param canPay czy spełnione są warunki umożliwiające płatność (logowanie, przyczepka, termin)
+ * @param paymentIssues lista komunikatów blokujących płatność
  */
 @Composable
 fun Przelewy24Payment(
     depositAmount: Double?,
     totalAmount: Double? = null,
     isProcessing: Boolean = false,
+    canPay: Boolean = true,
+    paymentIssues: List<String> = emptyList(),
     onPay: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -125,9 +131,46 @@ fun Przelewy24Payment(
 
             Spacer(Modifier.height(20.dp))
 
+            if (paymentIssues.isNotEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.35f),
+                            shape = RoundedCornerShape(12.dp),
+                        )
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Filled.Warning,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = "Uzupełnij wymagane dane, aby opłacić rezerwację:",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            fontWeight = FontWeight.Medium,
+                        )
+                    }
+                    paymentIssues.forEach { issue ->
+                        Text(
+                            text = "• $issue",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                        )
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
+            }
+
             Button(
                 onClick = onPay,
-                enabled = depositAmount != null && !isProcessing,
+                enabled = depositAmount != null && !isProcessing && canPay,
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Przelewy24Red,
