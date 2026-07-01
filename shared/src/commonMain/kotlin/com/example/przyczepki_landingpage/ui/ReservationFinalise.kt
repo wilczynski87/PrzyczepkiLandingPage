@@ -44,6 +44,9 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -178,10 +181,12 @@ fun PaymentForReservation(
     val isLoggedIn = customer?.id != null
     val hasTrailer = trailer != null
     val hasPeriod = from != null && to != null
+    var termsAccepted by remember { mutableStateOf(false) }
     val paymentValidation = validateReservationPayment(
         isLoggedIn = isLoggedIn,
         hasTrailer = hasTrailer,
         hasPeriod = hasPeriod,
+        termsAccepted = termsAccepted,
     )
 
     Box(
@@ -252,6 +257,10 @@ fun PaymentForReservation(
                     totalAmount = reservationPrices?.sum,
                     canPay = paymentValidation.canPay,
                     paymentIssues = paymentValidation.issues.map { it.message },
+                    termsAccepted = termsAccepted,
+                    onTermsAcceptedChange = { termsAccepted = it },
+                    onOpenTerms = { viewModel.navigateTo(CurrentScreen.TERMS_AND_CONDITIONS) },
+                    onOpenPrivacyPolicy = { viewModel.navigateTo(CurrentScreen.PRIVACY_POLICY) },
                     onPay = {
                         if (!paymentValidation.canPay) return@Przelewy24Payment
                         viewModel.changeServerStatus(ServerStatus.SERVER_ERROR)

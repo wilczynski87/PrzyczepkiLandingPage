@@ -109,6 +109,22 @@ fun BottomInfo(
             }
             TextButton(
                 onClick = {
+                    viewModel.navigateTo(CurrentScreen.HOW_TO_RESERVE)
+                },
+                modifier = Modifier.padding(0.dp)
+            ) {
+                Text("Jak rezerwować?")
+            }
+            TextButton(
+                onClick = {
+                    viewModel.navigateTo(CurrentScreen.TERMS_AND_CONDITIONS)
+                },
+                modifier = Modifier.padding(0.dp)
+            ) {
+                Text("Regulamin")
+            }
+            TextButton(
+                onClick = {
                     viewModel.navigateTo(CurrentScreen.PRIVACY_POLICY)
                 },
                 modifier = Modifier.padding(0.dp)

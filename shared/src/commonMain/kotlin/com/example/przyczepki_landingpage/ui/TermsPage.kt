@@ -9,29 +9,31 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Text
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
-import com.example.przyczepki_landingpage.model.CurrentScreen
+
+private const val LAST_UPDATED = "01.07.2026"
+
+private const val PAYPRO_PAYMENT_OPERATOR_CLAUSE =
+    "Płatności online realizowane są za pośrednictwem systemu Przelewy24. " +
+        "Operatorem płatności jest PayPro S.A. z siedzibą w Poznaniu (ul. Pastelowa 8, 60-198 Poznań), " +
+        "wpisana do rejestru przedsiębiorców Krajowego Rejestru Sądowego prowadzonego przez Sąd Rejonowy " +
+        "Poznań–Nowe Miasto i Wilda w Poznaniu, VIII Wydział Gospodarczy KRS pod numerem 0000347935, " +
+        "NIP 7792369887, REGON 301345068. W przypadku aktywacji płatności kartami operatorem kart " +
+        "płatniczych jest PayPro S.A. Agent Rozliczeniowy."
 
 @Composable
 fun TermsPage(
     widthSizeClass: WindowWidthSizeClass,
-    viewModel: AppViewModel
+    viewModel: AppViewModel,
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -51,52 +53,58 @@ fun TermsPage(
                 style = MaterialTheme.typography.headlineMedium
             )
 
-            // Sekcja Rezerwacja z linkami
-            ElevatedCard(
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.large
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = "Rezerwacja",
-                        style = MaterialTheme.typography.titleLarge
-                    )
+            Text(
+                text = "Ostatnia aktualizacja: $LAST_UPDATED",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
 
-                    TermsWithLinks(
-                        onContactClick = { viewModel.navigateTo(CurrentScreen.CONTACT) },
-                        onPickupClick = { viewModel.navigateTo(CurrentScreen.CONTACT) }
-                    )
-                }
-            }
-
-            // Sekcja Odbiór przyczepki
             TermsSection(
-                title = "Odbiór przyczepki",
+                title = "Postanowienia ogólne",
                 content = listOf(
-                    "Pod bramą należy zadzwonić na numer widoczny na bramie (727 188 330).",
-                    "Po otwarciu bramy można podpiąć przyczepkę i odjechać.",
-                    "Jeśli brama jest zamknięta – prosimy o kontakt telefoniczny."
+                    "Regulamin określa zasady wypożyczania przyczep samochodowych przez stronę internetową.",
+                    "Złożenie rezerwacji i opłacenie kaucji rezerwacyjnej oznacza akceptację niniejszego Regulaminu.",
+                    "Usługodawcą jest Kontenery Magazynowe sp. z o.o., ul. Ostrowskiego 102, 53-238 Wrocław, " +
+                        "NIP 8943278612, KRS 0001220381, e-mail: parkingostrowskiego@gmail.com, tel.: +48 727 188 330.",
                 )
             )
 
-            // Sekcja W trakcie wynajmu
             TermsSection(
-                title = "W trakcie wynajmu",
+                title = "Płatności",
                 content = listOf(
-                    "W przypadku problemów z przyczepką prosimy o kontakt.",
-                    "Przejściówka znajduje się w czarnej skrzynce przy płocie."
+                    "Ceny wynajmu oraz kaucji rezerwacyjnej są podawane przed złożeniem rezerwacji na stronie.",
+                    "Kaucja rezerwacyjna jest pobierana online w momencie finalizacji rezerwacji. Pozostała część " +
+                        "wynagrodzenia płatna jest przy odbiorze przyczepy, o ile nie ustalono inaczej.",
+                    "Dostępne metody płatności online: szybkie przelewy i inne metody udostępnione w systemie Przelewy24.",
+                    PAYPRO_PAYMENT_OPERATOR_CLAUSE,
+                    "Po kliknięciu przycisku Zapłać Klient zostanie przekierowany na bezpieczną stronę operatora płatności.",
+                    "Rezerwacja zostaje potwierdzona po zaksięgowaniu płatności kaucji rezerwacyjnej.",
                 )
             )
 
-            // Sekcja Zwrot przyczepki
             TermsSection(
-                title = "Zwrot przyczepki",
+                title = "Prawo odstąpienia od umowy",
                 content = listOf(
-                    "Zwrot następuje na plac przy ul. Ostrowskiego 102.",
-                    "W przypadku zamkniętej bramy – należy zadzwonić na numer na bramie."
+                    "Konsument ma prawo odstąpić od umowy zawartej na odległość w terminie 14 dni od jej zawarcia, " +
+                        "bez podania przyczyny, z zastrzeżeniem wyjątków przewidzianych w ustawie o prawach konsumenta.",
+                    "Prawo odstąpienia nie przysługuje m.in. w odniesieniu do umów o świadczenie usług, jeżeli " +
+                        "przedsiębiorca wykonał w pełni usługę za wyraźną zgodą konsumenta, który został poinformowany " +
+                        "przed rozpoczęciem świadczenia, że po spełnieniu świadczenia przez przedsiębiorcę utraci prawo " +
+                        "odstąpienia od umowy.",
+                    "Oświadczenie o odstąpieniu można przesłać na adres e-mail: parkingostrowskiego@gmail.com " +
+                        "lub listownie na adres siedziby Usługodawcy.",
+                )
+            )
+
+            TermsSection(
+                title = "Reklamacje",
+                content = listOf(
+                    "Reklamacje dotyczące usługi wypożyczenia można składać telefonicznie, mailowo lub pisemnie " +
+                        "na dane kontaktowe Usługodawcy wskazane w Regulaminie.",
+                    "Reklamacja powinna zawierać opis problemu oraz dane umożliwiające identyfikację rezerwacji.",
+                    "Usługodawca rozpatruje reklamację w terminie 14 dni od jej otrzymania.",
+                    "Reklamacje dotyczące płatności online realizowanych przez Przelewy24 mogą być kierowane " +
+                        "również do operatora płatności PayPro S.A.",
                 )
             )
 
@@ -104,9 +112,12 @@ fun TermsPage(
             TermsSection(
                 title = "Dane przedsiębiorstwa",
                 content = listOf(
-                    "Kontenery Magazynowe sp z o o",
-                    "nip: 8943278612",
-                    "krs: 0001220381"
+                    "Kontenery Magazynowe sp. z o.o.",
+                    "ul. Ostrowskiego 102, 53-238 Wrocław",
+                    "NIP: 8943278612",
+                    "KRS: 0001220381",
+                    "E-mail: parkingostrowskiego@gmail.com",
+                    "Telefon: +48 727 188 330",
                 )
             )
         }
@@ -126,10 +137,12 @@ fun TermsSection(
             modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge
-            )
+            if (title.isNotBlank()) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
 
             content.forEach { paragraph ->
                 Row(
@@ -145,45 +158,5 @@ fun TermsSection(
             }
         }
     }
-}
-
-
-@Composable
-fun TermsWithLinks(
-    onContactClick: () -> Unit,
-    onPickupClick: () -> Unit
-) {
-    val annotatedText = buildAnnotatedString {
-        append("Rezerwacji można dokonać przez formularz na stronie lub telefonicznie / mailowo (zakładka ")
-
-        pushLink(LinkAnnotation.Clickable(tag = "CONTACT", linkInteractionListener = { onContactClick() }))
-        withStyle(
-            SpanStyle(
-                color = MaterialTheme.colorScheme.primary,
-                textDecoration = TextDecoration.Underline,
-                fontWeight = FontWeight.Medium
-            )
-        ) { append("Kontakt") }
-        pop()
-
-        append(").\n\nPo otrzymaniu potwierdzenia można dokonać ")
-
-        pushLink(LinkAnnotation.Clickable(tag = "PICKUP", linkInteractionListener = { onPickupClick() }))
-        withStyle(
-            SpanStyle(
-                color = MaterialTheme.colorScheme.primary,
-                textDecoration = TextDecoration.Underline,
-                fontWeight = FontWeight.Medium
-            )
-        ) { append("odbioru") }
-        pop()
-
-        append(" przyczepki w wybranym terminie.")
-    }
-
-    Text(
-        text = annotatedText,
-        style = MaterialTheme.typography.bodyLarge
-    )
 }
 

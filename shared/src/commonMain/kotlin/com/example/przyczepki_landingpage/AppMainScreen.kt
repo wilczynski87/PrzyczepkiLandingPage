@@ -33,6 +33,7 @@ import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.ui.ContactPage
 import com.example.przyczepki_landingpage.ui.CustomerRegistrationForm
 import com.example.przyczepki_landingpage.ui.LoginOrRegister
+import com.example.przyczepki_landingpage.ui.HowToReservePage
 import com.example.przyczepki_landingpage.ui.MainScreen
 import com.example.przyczepki_landingpage.ui.MyTopAppBar
 import com.example.przyczepki_landingpage.ui.PricesPage
@@ -100,6 +101,10 @@ fun AppMainScreen() {
 
                     CurrentScreen.CONTACT -> {
                         ContactPage(widthSizeClass, viewModel)
+                    }
+
+                    CurrentScreen.HOW_TO_RESERVE -> {
+                        HowToReservePage(widthSizeClass, viewModel)
                     }
 
                     CurrentScreen.TERMS_AND_CONDITIONS -> {

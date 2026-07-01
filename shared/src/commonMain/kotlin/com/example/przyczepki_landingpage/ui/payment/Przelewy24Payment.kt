@@ -41,8 +41,10 @@ private val Przelewy24Dark = Color(0xFF1B1B1B)
  * @param totalAmount całkowity koszt rezerwacji (do wyliczenia kwoty płatnej przy odbiorze)
  * @param isProcessing czy trwa inicjowanie płatności (blokuje przycisk i pokazuje spinner)
  * @param onPay wywoływane po kliknięciu „Zapłać" — tutaj należy podłączyć inicjację transakcji P24
- * @param canPay czy spełnione są warunki umożliwiające płatność (logowanie, przyczepka, termin)
- * @param paymentIssues lista komunikatów blokujących płatność
+ * @param termsAccepted czy użytkownik zaakceptował regulamin i politykę prywatności
+ * @param onTermsAcceptedChange callback zmiany akceptacji regulaminu
+ * @param onOpenTerms nawigacja do regulaminu
+ * @param onOpenPrivacyPolicy nawigacja do polityki prywatności
  */
 @Composable
 fun Przelewy24Payment(
@@ -51,6 +53,10 @@ fun Przelewy24Payment(
     isProcessing: Boolean = false,
     canPay: Boolean = true,
     paymentIssues: List<String> = emptyList(),
+    termsAccepted: Boolean = false,
+    onTermsAcceptedChange: (Boolean) -> Unit = {},
+    onOpenTerms: () -> Unit = {},
+    onOpenPrivacyPolicy: () -> Unit = {},
     onPay: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -130,6 +136,15 @@ fun Przelewy24Payment(
             }
 
             Spacer(Modifier.height(20.dp))
+
+            TermsAcceptanceCheckbox(
+                checked = termsAccepted,
+                onCheckedChange = onTermsAcceptedChange,
+                onTermsClick = onOpenTerms,
+                onPrivacyPolicyClick = onOpenPrivacyPolicy,
+            )
+
+            Spacer(Modifier.height(12.dp))
 
             if (paymentIssues.isNotEmpty()) {
                 Column(

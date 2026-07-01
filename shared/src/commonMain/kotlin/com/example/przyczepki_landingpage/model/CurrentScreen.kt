@@ -5,6 +5,7 @@ enum class CurrentScreen {
     RESERVATION,
     PRICES,
     CONTACT,
+    HOW_TO_RESERVE,
     TERMS_AND_CONDITIONS,
     LOGIN,
     SIGN_UP,
