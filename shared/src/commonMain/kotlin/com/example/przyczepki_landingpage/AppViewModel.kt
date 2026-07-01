@@ -11,6 +11,7 @@ import com.example.przyczepki_landingpage.model.validateLoginInput
 import com.example.przyczepki_landingpage.data.ReservationDto
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
+import com.example.przyczepki_landingpage.model.ServerResponse
 import com.example.przyczepki_landingpage.model.ServerStatus
 import com.example.przyczepki_landingpage.model.millisToLocalDate
 import kotlinx.coroutines.CoroutineScope
@@ -98,6 +99,14 @@ class AppViewModel(private val scope: CoroutineScope) {
                 println("Error healthcheck: ${e.message}")
             }
 
+        }
+    }
+
+    fun changeServerStatus(serverStatus: ServerStatus) {
+        _appState.update { state ->
+            state.copy(
+                serverStatus = ServerResponse(serverStatus, "Changed manually"),
+            )
         }
     }
 

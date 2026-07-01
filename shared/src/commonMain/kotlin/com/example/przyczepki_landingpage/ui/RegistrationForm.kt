@@ -935,7 +935,8 @@ fun validateCustomerForm(
 @Composable
 fun CustomerDataFront(
     viewModel: AppViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    useCard: Boolean = true,
 ) {
     val state by viewModel.appState.collectAsState()
     val customer = state.customer
@@ -953,9 +954,9 @@ fun CustomerDataFront(
     val email = if (isCompany) customer.company.email else customer?.private?.email
     val phone = if (isCompany) customer.company.phoneNumber else customer?.private?.phoneNumber
 
-    Card(modifier = modifier.fillMaxWidth()) {
+    val content: @Composable () -> Unit = {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(
@@ -1020,5 +1021,13 @@ fun CustomerDataFront(
                 else Text("To nie Ty? Zaloguj ponownie")
             }
         }
+    }
+
+    if (useCard) {
+        Card(modifier = modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp)) { content() }
+        }
+    } else {
+        Column(modifier = modifier.fillMaxWidth()) { content() }
     }
 }
