@@ -40,6 +40,7 @@ import com.example.przyczepki_landingpage.ui.PricesPage
 import com.example.przyczepki_landingpage.ui.PrivacyPolicyPage
 import com.example.przyczepki_landingpage.ui.ReservationFinaliseMain
 import com.example.przyczepki_landingpage.ui.ReservationPage
+import com.example.przyczepki_landingpage.ui.SiteFooter
 import com.example.przyczepki_landingpage.ui.TermsPage
 import com.example.przyczepki_landingpage.ui.modal.AppModals
 import kotlinx.coroutines.MainScope
@@ -130,6 +131,8 @@ fun AppMainScreen() {
             }
 
         }
+
+        SiteFooter()
     }
     AnimatedVisibility(
         visible = visible,

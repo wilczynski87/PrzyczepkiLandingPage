@@ -30,7 +30,6 @@ data class AuthConfig(
     val accessTokenExpiry: Long = 3600000,
     val refreshTokenExpiry: Long = 2592000000,
     val claim: String,
-    val internalApiKey: String,
 )
 @Serializable
 data class ApiConfig(
@@ -53,7 +52,7 @@ fun toApiConfig(): ApiConfig {
 
         email = EmailConfig(
             host = System.getenv("EMAIL_HOST") ?: "localhost",
-            port = System.getenv("EMAIL_PORT")?.toIntOrNull() ?: 8091
+            port = System.getenv("EMAIL_PORT")?.toIntOrNull() ?: 8200
         ),
 
         db = DbConfig(
@@ -73,7 +72,6 @@ fun toApiConfig(): ApiConfig {
             realm = System.getenv("AUTH_REALM") ?: throw NullPointerException("AUTH_REALM is missing"),
             accessTokenExpiry = System.getenv("AUTH_ACCESS_TOKEN_EXPIRY")?.toLongOrNull() ?: 3600000,
             refreshTokenExpiry = System.getenv("AUTH_REFRESH_TOKEN_EXPIRY")?.toLongOrNull() ?: 2592000000,
-            internalApiKey = System.getenv("INTERNAL_API_KEY") ?: throw NullPointerException("INTERNAL_API_KEY is missing"),
             claim = System.getenv("AUTH_CLAIM") ?: throw NullPointerException("AUTH_CLAIM is missing"),
         )
     )
