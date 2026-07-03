@@ -6,7 +6,8 @@ import kotlinx.serialization.Serializable
 data class Customer(
     val id: String? = null,
     val private: Private? = null,
-    val company: Company? = null
+    val company: Company? = null,
+    val confirmed: String? = null,
 ) {
     fun getName(): String = company?.name ?: "${private?.firstName} ${private?.lastName}"
     fun getEmail(): String? = company?.email ?: private?.email

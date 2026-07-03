@@ -48,7 +48,6 @@ fun MainScreen(
             }
         }
 
-        // ⭐ magia tutaj
         item {
             BottomInfo(
                 widthSizeClass,

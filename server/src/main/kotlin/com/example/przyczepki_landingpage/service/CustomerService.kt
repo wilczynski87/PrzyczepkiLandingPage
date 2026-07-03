@@ -6,6 +6,7 @@ import com.example.przyczepki_landingpage.repo.impl.CustomerTable
 
 interface CustomerService {
     suspend fun save(customer: Customer): Customer?
+    suspend fun confirm(id: String): Customer?
     suspend fun get(id: String): Customer?
     suspend fun getCustomerByEmail(email: String): Customer?
     suspend fun update(customer: Customer): Customer?

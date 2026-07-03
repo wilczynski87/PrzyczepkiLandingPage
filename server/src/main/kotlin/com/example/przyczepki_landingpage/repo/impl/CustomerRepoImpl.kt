@@ -73,12 +73,14 @@ data class CustomerTable(
     val id: String? = null,
     val private: Private? = null,
     val company: Company? = null,
+    val confirmed: String? = null,
     val passwordHash: String? = null
 ) {
     fun toCustomer(): Customer = Customer(
         id = id,
         private = private,
         company = company,
+        confirmed = confirmed
     )
 }
 fun Customer.toTable(): CustomerTable {
@@ -88,6 +90,7 @@ fun Customer.toTable(): CustomerTable {
         id = _id.toHexString(),
         private = private,
         company = company,
+        confirmed = confirmed,
         passwordHash = hash(company?.nip ?: private?.pesel ?: "")
     )
 }

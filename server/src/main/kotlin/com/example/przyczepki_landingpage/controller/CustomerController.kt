@@ -35,6 +35,14 @@ fun Route.customerController() {
             }
         }
 
+        // TODO wymyśleć co ma zwrócić w razie błędu (różne opcje) i na jaka stronę przekierować
+        get("/confirm/{id}") {
+            val id = call.parameters["id"] ?: throw BadRequestException("Brak id")
+            val customer = customerService.confirm(id)
+                ?: throw NotFoundException("Nie można potwierdzić maila tokenem: $id")
+            call.respondNullable(customer)
+        }
+
         authenticate {
             get("/{id}") {
                 try {

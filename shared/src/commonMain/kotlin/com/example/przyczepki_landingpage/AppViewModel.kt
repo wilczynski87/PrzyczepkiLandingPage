@@ -7,6 +7,7 @@ import com.example.przyczepki_landingpage.data.LoginResponse
 import com.example.przyczepki_landingpage.model.CurrentScreen
 import com.example.przyczepki_landingpage.model.LoginUiState
 import com.example.przyczepki_landingpage.model.ModalType
+import com.example.przyczepki_landingpage.model.mapLoginError
 import com.example.przyczepki_landingpage.model.validateLoginInput
 import com.example.przyczepki_landingpage.data.ReservationDto
 import com.example.przyczepki_landingpage.model.ModalData
@@ -390,19 +391,18 @@ class AppViewModel(private val scope: CoroutineScope) {
                         state.copy(
                             loginUiState = state.loginUiState.copy(
                                 isLoading = false,
-                                error = "Nieprawidłowy email/telefon lub hasło. Sprawdź dane i spróbuj ponownie."
+                                error = mapLoginError(error)
                             )
                         )
                     }
                 }
-
-            } catch (e: Exception) {
-                println("Nie udało się zalogować: ${e.message}")
+            } catch (error: Throwable) {
+                println("Nie udało się zalogować: ${error.message}")
                 _appState.update { state ->
                     state.copy(
                         loginUiState = state.loginUiState.copy(
                             isLoading = false,
-                            error = "Brak połączenia z serwerem. Spróbuj ponownie później."
+                            error = mapLoginError(error)
                         )
                     )
                 }
