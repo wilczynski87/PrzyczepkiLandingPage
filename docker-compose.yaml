@@ -80,6 +80,23 @@ services:
     volumes:
       - przyczepki_mongo_data:/data/db
 
+  przyczepki_email:
+    image: wilczynski87/przyczepki-email:latest
+    container_name: przyczepki_email
+    restart: unless-stopped
+    networks:
+      - przyczepki-network
+    environment:
+      - EMAIL_ENV=${EMAIL_ENV:-dev}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_REFRESH_TOKEN=${GOOGLE_REFRESH_TOKEN}
+      - GMAIL_SENDER_EMAIL=${GMAIL_SENDER_EMAIL}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+      - EMAIL_PORT=${DB_PORT:-8091}
+    expose:
+      - "${DB_PORT:-8091}"
+
 networks:
   przyczepki-network:
     driver: bridge
