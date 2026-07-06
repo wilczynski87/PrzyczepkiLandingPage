@@ -7,7 +7,9 @@ import com.example.przyczepki_landingpage.repo.CustomerRepo
 import com.example.przyczepki_landingpage.repo.impl.CustomerTable
 import com.example.przyczepki_landingpage.service.CustomerService
 import io.ktor.server.plugins.BadRequestException
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import org.koin.ktor.ext.inject
 import pl.przyczepki.email.api.dto.AccountConfirmationData
@@ -31,6 +33,7 @@ class CustomerServiceImpl(
             taxIdentifier = customer.company?.nip ?: customer.private?.pesel ?: throw BadRequestException("Brak nip lub pesel"),
             taxIdentifierLabel = if(customer.company == null) "PESEL" else "NIP",
             linkExpiresAt = Clock.System.now()
+                .plus(1, DateTimeUnit.HOUR)
                 .toLocalDateTime(TimeZone.currentSystemDefault())
                 .date
                 .toString(),

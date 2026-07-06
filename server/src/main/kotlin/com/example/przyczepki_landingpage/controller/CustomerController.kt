@@ -41,7 +41,7 @@ fun Route.customerController() {
                     body = accountConfirmationData,
                 )
 
-                call.respondNullable(saved)
+                call.respondNullable("Dziękujemy ${saved.getName()} za potwierdzenie maila")
             } catch (e: Exception) {
                 println("customerController, Error: ${e.message}")
                 call.respond(HttpStatusCode.BadRequest, e.message ?: "Unknown error")
