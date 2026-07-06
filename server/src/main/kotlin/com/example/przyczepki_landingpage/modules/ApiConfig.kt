@@ -35,6 +35,8 @@ data class AuthConfig(
 @Serializable
 data class ApiConfig(
     val env: String,
+    val apiPort: Int,
+    val apiHost: String,
     val email: EmailConfig,
     val db: DbConfig,
     val auth: AuthConfig,
@@ -50,6 +52,8 @@ fun toApiConfig(): ApiConfig {
 
     return ApiConfig(
         env = System.getenv("API_ENV") ?: "DEV",
+        apiPort = System.getenv("API_PORT")?.toIntOrNull() ?: 8090,
+        apiHost = System.getenv("API_HOST") ?: "localhost",
 
         email = EmailConfig(
             host = System.getenv("EMAIL_HOST") ?: "localhost",

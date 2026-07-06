@@ -10,12 +10,11 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.utils.EmptyContent.headers
 import io.ktor.http.headers
 import pl.przyczepki.email.api.dto.AccountConfirmationData
 
 class EmailServiceImpl(
-    private val client: HttpClient = HttpClient(),
+    private val client: HttpClient,
     private val cfgEmail: EmailConfig,
     private val cfgAuth: AuthConfig,
 ): EmailService {
@@ -32,7 +31,7 @@ class EmailServiceImpl(
                 append("X-Internal-Api-Key", cfgAuth.internalApiKey)
             }
             setBody(
-                SendEmailRequest(to, subject, EmailTemplate.ACCOUNT_CONFIRMATION.fileName, body)
+                SendEmailRequest(to, subject, EmailTemplate.ACCOUNT_CONFIRMATION.templateName, body)
             )
         }
         return response.body()

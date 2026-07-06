@@ -20,6 +20,7 @@ import com.example.przyczepki_landingpage.service.impl.CustomerServiceImpl
 import com.example.przyczepki_landingpage.service.impl.EmailServiceImpl
 import com.example.przyczepki_landingpage.service.impl.ReservationServiceImpl
 import com.example.przyczepki_landingpage.service.impl.TrailersServiceImpl
+import io.ktor.client.HttpClient
 import com.mongodb.kotlin.client.coroutine.MongoClient
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import org.koin.core.qualifier.named
@@ -30,7 +31,11 @@ val appModule = module {
     single<EmailService> {
         val authConfig = get<ApiConfig>().auth
         val cfgEmail = get<ApiConfig>().email
-        EmailServiceImpl(cfgEmail = cfgEmail, cfgAuth = authConfig)
+        EmailServiceImpl(
+            client = get<HttpClient>(),
+            cfgEmail = cfgEmail,
+            cfgAuth = authConfig,
+        )
     }
 
     single<ApiConfig> {
@@ -86,6 +91,7 @@ val appModule = module {
 
     single<CustomerService> {
         CustomerServiceImpl(
+            apiBaseUrl = "https://${get<ApiConfig>().apiHost}:${get<ApiConfig>().apiPort}/",
             customerRepo = get()
         )
     }
