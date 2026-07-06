@@ -7,6 +7,7 @@ import com.example.przyczepki_landingpage.service.CustomerService
 
 class FakeCustomerService : CustomerService {
     override suspend fun save(customer: Customer): Customer? = customer
+    override suspend fun confirm(id: String): Customer? = null
     override suspend fun get(id: String): Customer? = null
     override suspend fun getCustomerByEmail(email: String): Customer? = null
     override suspend fun update(customer: Customer): Customer? = customer

@@ -10,6 +10,8 @@ class CustomerServiceImpl(private val customerRepo: CustomerRepo): CustomerServi
     override suspend fun save(customer: Customer): Customer? =
         customerRepo.save(customer)
 
+    override suspend fun confirm(id: String): Customer? = customerRepo.confirm(id)
+
     override suspend fun get(id: String): Customer? = customerRepo.get(id)
 
     override suspend fun getCustomerByEmail(email: String): Customer? {
