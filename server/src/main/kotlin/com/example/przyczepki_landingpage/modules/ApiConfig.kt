@@ -32,6 +32,17 @@ data class AuthConfig(
     val claim: String,
     val internalApiKey: String,
 )
+
+@Serializable
+data class PaymentConfig(
+    val merchantId: Int,
+    val posId: Int,
+    val secretId: String,
+    val crc: String,
+    val urlReturn: String,
+    val urlStatus: String,
+)
+
 @Serializable
 data class ApiConfig(
     val env: String,
@@ -40,6 +51,7 @@ data class ApiConfig(
     val email: EmailConfig,
     val db: DbConfig,
     val auth: AuthConfig,
+    val paymentConfig: PaymentConfig,
 )
 
 /**
@@ -79,6 +91,28 @@ fun toApiConfig(): ApiConfig {
             refreshTokenExpiry = System.getenv("AUTH_REFRESH_TOKEN_EXPIRY")?.toLongOrNull() ?: 2592000000,
             internalApiKey = System.getenv("INTERNAL_API_KEY") ?: throw NullPointerException("INTERNAL_API_KEY is missing"),
             claim = System.getenv("AUTH_CLAIM") ?: throw NullPointerException("AUTH_CLAIM is missing"),
-        )
+        ),
+
+        paymentConfig = readPaymentConfig(),
+    )
+}
+
+private fun readPaymentConfig(): PaymentConfig {
+    val isDev = (System.getenv("API_ENV") ?: "DEV").equals("DEV", ignoreCase = true)
+
+    fun envOrDev(name: String, devDefault: String): String =
+        System.getenv(name) ?: if (isDev) devDefault else throw NullPointerException("$name is missing")
+
+    fun intEnvOrDev(name: String, devDefault: Int): Int =
+        System.getenv(name)?.toIntOrNull()
+            ?: if (isDev) devDefault else throw NullPointerException("$name is missing")
+
+    return PaymentConfig(
+        merchantId = intEnvOrDev("PAYMENT_MERCHANT_ID", 0),
+        posId = intEnvOrDev("PAYMENT_POS_ID", 0),
+        secretId = envOrDev("PAYMENT_SECRET_ID", "dev-secret"),
+        crc = envOrDev("PAYMENT_CRC", "dev-crc"),
+        urlReturn = envOrDev("PAYMENT_URL_RETURN", "https://przyczepkifat.pl/podsumowanieRezerwacji"),
+        urlStatus = envOrDev("PAYMENT_URL_STATUS", "https://przyczepkifat.pl/api/payment/notification"),
     )
 }

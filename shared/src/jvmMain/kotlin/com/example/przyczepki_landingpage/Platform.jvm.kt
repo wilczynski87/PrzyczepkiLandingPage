@@ -29,6 +29,10 @@ actual fun openEmail(email: String) {
 actual fun callPhone(phone: String) {
 }
 
+actual fun openExternalUrl(url: String) {
+    println("openExternalUrl: $url")
+}
+
 actual fun getBaseUrl(): String {
     return if(getEnvironment() == "prod") "/api"
         else "http://localhost:8090"

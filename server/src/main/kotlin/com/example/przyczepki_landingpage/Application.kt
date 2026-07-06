@@ -3,6 +3,7 @@ package com.example.przyczepki_landingpage
 import com.example.przyczepki_landingpage.controller.authController
 import com.example.przyczepki_landingpage.controller.customerController
 import com.example.przyczepki_landingpage.controller.healthCheck
+import com.example.przyczepki_landingpage.controller.payment
 import com.example.przyczepki_landingpage.controller.reservation
 import com.example.przyczepki_landingpage.controller.trailers
 import com.example.przyczepki_landingpage.di.appModule
@@ -58,6 +59,7 @@ private fun Application.routing() {
         trailers()
         reservation()
         customerController()
+        payment()
     }
 
 }

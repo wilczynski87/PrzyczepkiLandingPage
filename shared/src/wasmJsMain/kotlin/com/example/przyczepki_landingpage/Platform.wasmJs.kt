@@ -34,6 +34,10 @@ actual fun callPhone(phone: String) {
     window.open("tel:$phone", "_self")
 }
 
+actual fun openExternalUrl(url: String) {
+    window.open(url, "_self")
+}
+
 //@OptIn(ExperimentalWasmJsInterop::class)
 //fun hostname(): String = js("window.location.hostname")
 //

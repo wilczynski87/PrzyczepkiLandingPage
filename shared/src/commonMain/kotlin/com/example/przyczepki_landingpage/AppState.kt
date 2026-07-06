@@ -39,6 +39,8 @@ data class AppState(
 
     val customer: Customer? = null,
 
+    val paymentProcessing: Boolean = false,
+
     val loginUiState: LoginUiState = LoginUiState(),
 )
 

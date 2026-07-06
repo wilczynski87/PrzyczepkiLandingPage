@@ -321,6 +321,43 @@ class AppViewModel(private val scope: CoroutineScope) {
         }
     }
 
+    fun initiatePayment(depositAmount: Double) {
+        scope.launch {
+            val email = appState.value.customer?.getEmail()
+            if (email.isNullOrBlank()) {
+                openModal(
+                    ModalType.CUSTOMER_ERROR,
+                    ModalData(
+                        dialogTitle = "Brak adresu email",
+                        dialogText = "Zaloguj się lub podaj email klienta przed płatnością.",
+                    ),
+                )
+                return@launch
+            }
+
+            val amountInGrosze = kotlin.math.round(depositAmount * 100).toInt()
+            _appState.update { it.copy(paymentProcessing = true) }
+
+            ApiClient.paymentController.registerPayment(
+                amount = amountInGrosze,
+                email = email,
+            ).onSuccess { response ->
+                openExternalUrl(response.redirectUrl)
+            }.onFailure {
+                println("Payment error: ${it.message}")
+                openModal(
+                    ModalType.CUSTOMER_ERROR,
+                    ModalData(
+                        dialogTitle = "Błąd płatności",
+                        dialogText = it.message ?: "Nie udało się rozpocząć płatności",
+                    ),
+                )
+            }
+
+            _appState.update { it.copy(paymentProcessing = false) }
+        }
+    }
+
     // AUTH
     fun onLoginInputChange(value: String) {
         _appState.update { state ->

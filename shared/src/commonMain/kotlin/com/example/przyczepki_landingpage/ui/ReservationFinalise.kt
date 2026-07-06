@@ -255,6 +255,7 @@ fun PaymentForReservation(
                 Przelewy24Payment(
                     depositAmount = reservationPrices?.reservation ?: trailer?.prices?.reservation,
                     totalAmount = reservationPrices?.sum,
+                    isProcessing = state.paymentProcessing,
                     canPay = paymentValidation.canPay,
                     paymentIssues = paymentValidation.issues.map { it.message },
                     termsAccepted = termsAccepted,
@@ -263,8 +264,9 @@ fun PaymentForReservation(
                     onOpenPrivacyPolicy = { viewModel.navigateTo(CurrentScreen.PRIVACY_POLICY) },
                     onPay = {
                         if (!paymentValidation.canPay) return@Przelewy24Payment
-                        viewModel.changeServerStatus(ServerStatus.SERVER_ERROR)
-                        // TODO: podłączyć inicjację transakcji Przelewy24 (backend)
+                        val deposit = reservationPrices?.reservation ?: trailer?.prices?.reservation
+                            ?: return@Przelewy24Payment
+                        viewModel.initiatePayment(deposit)
                     },
                 )
             }

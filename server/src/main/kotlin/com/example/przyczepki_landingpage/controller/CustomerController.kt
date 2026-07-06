@@ -41,7 +41,7 @@ fun Route.customerController() {
                     body = accountConfirmationData,
                 )
 
-                call.respondNullable("Dziękujemy ${saved.getName()} za potwierdzenie maila")
+                call.respondNullable(saved)
             } catch (e: Exception) {
                 println("customerController, Error: ${e.message}")
                 call.respond(HttpStatusCode.BadRequest, e.message ?: "Unknown error")
@@ -53,7 +53,7 @@ fun Route.customerController() {
             val id = call.parameters["id"] ?: throw BadRequestException("Brak id")
             val customer = customerService.confirm(id)
                 ?: throw NotFoundException("Nie można potwierdzić maila tokenem: $id")
-            call.respondNullable(customer)
+            call.respondNullable("Dziękujemy ${customer.getName()} za potwierdzenie maila")
         }
 
         authenticate {

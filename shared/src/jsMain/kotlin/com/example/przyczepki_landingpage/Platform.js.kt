@@ -30,6 +30,10 @@ actual fun callPhone(phone: String) {
     window.open("tel:$phone", "_self")
 }
 
+actual fun openExternalUrl(url: String) {
+    window.open(url, "_self")
+}
+
 actual fun getBaseUrl(): String {
     val hostname = js("window.location.hostname") as String
 
