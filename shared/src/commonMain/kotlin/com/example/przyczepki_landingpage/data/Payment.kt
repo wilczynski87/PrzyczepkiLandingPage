@@ -9,13 +9,22 @@ data class P24TransactionRegisterRequest(
     val sessionId: String,
     val amount: Int,
     val currency: String = "PLN",
-    val description: String,
+    val description: String = "Rezerwacja przyczepki",
     val email: String,
+    val client: String? = null,
+    val address: String? = null,
     val country: String = "PL",
+    val phone: String? = null,
     val language: String = "pl",
-    val urlReturn: String,
-    val urlStatus: String,
-    val sign: String
+    val method: Int? = null,
+    val urlReturn: String = "https://przyczepki.pl/reservation/summary",
+    val urlStatus: String = "https://przyczepki.pl/payment/notification",
+    val timeLimit: Int? = 90,
+    val channel: Int? = 16,
+    val regulationAccept: Boolean? = true,
+    val transferLabel: String = "$email, $sessionId",
+    val sign: String,
+    val encoding: String = "UTF-8",
 )
 
 @Serializable

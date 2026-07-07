@@ -1,12 +1,14 @@
 package com.example.przyczepki_landingpage.service
 
+import com.example.przyczepki_landingpage.data.Customer
 import com.example.przyczepki_landingpage.data.P24Notification
 
 interface PaymentService {
     suspend fun registerTransaction(
         amount: Int,
-        email: String,
+        customer: Customer,
         description: String = "Wynajem przyczepki",
+        regulationAccept: Boolean,
     ): String
 
     suspend fun verifyTransaction(

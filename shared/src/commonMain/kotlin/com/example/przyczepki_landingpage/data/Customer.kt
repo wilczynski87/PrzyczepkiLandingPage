@@ -11,6 +11,7 @@ data class Customer(
 ) {
     fun getName(): String = company?.name ?: "${private?.firstName} ${private?.lastName}"
     fun getEmail(): String? = company?.email ?: private?.email
+    fun getAddress(): String? = company?.address ?: private?.address
 
 }
 

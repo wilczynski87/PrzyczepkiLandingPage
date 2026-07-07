@@ -1,5 +1,6 @@
 package com.example.przyczepki_landingpage.service.impl
 
+import com.example.przyczepki_landingpage.data.Customer
 import com.example.przyczepki_landingpage.data.P24Notification
 import com.example.przyczepki_landingpage.data.P24TransactionRegisterRequest
 import com.example.przyczepki_landingpage.data.P24TransactionRegisterResponse
@@ -17,7 +18,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.security.MessageDigest
 import java.util.UUID
@@ -31,11 +31,12 @@ class PaymentServiceImpl(
 
     override suspend fun registerTransaction(
         amount: Int,
-        email: String,
+        customer: Customer,
         description: String,
+        regulationAccept: Boolean,
     ): String {
         require(amount > 0) { "Kwota musi być większa od zera" }
-        require(email.isNotBlank()) { "Email jest wymagany" }
+        require(customer.getEmail()?.isNotBlank() ?: false) { "Email jest wymagany" }
 
         val sessionId = UUID.randomUUID().toString()
         val sign = signRegister(sessionId = sessionId, amount = amount, currency = CURRENCY)
@@ -51,12 +52,17 @@ class PaymentServiceImpl(
                     amount = amount,
                     currency = CURRENCY,
                     description = description,
-                    email = email.trim(),
+                    email = customer.getEmail()!!,
+                    client = customer.getName(),
+                    address = customer.getAddress(),
                     country = "PL",
                     language = "pl",
                     urlReturn = paymentConfig.urlReturn,
                     urlStatus = paymentConfig.urlStatus,
                     sign = sign,
+                    phone = customer.private?.phoneNumber,
+//                    channel = TODO(),
+                    regulationAccept = regulationAccept,
                 )
             )
         }
