@@ -67,8 +67,9 @@ data class P24Notification(
 @Serializable
 data class PaymentRegisterRequest(
     val amount: Int,
-    val email: String,
-    val description: String = "Kaucja rezerwacyjna",
+    val customer: Customer,
+    val description: String,
+    val regulationAccept: Boolean,
 )
 
 @Serializable

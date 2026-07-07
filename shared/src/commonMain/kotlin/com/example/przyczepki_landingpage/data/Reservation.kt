@@ -32,6 +32,7 @@ data class Reservation(
     val startDate: LocalDate? = null,
     val endDate: LocalDate? = null,
     val reservationPrice: ReservationPrice? = null,
+    val paymentToken: String? = null,
 ) {
     fun toDto(): ReservationDto = ReservationDto(
         id = id,

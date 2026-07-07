@@ -340,7 +340,9 @@ class AppViewModel(private val scope: CoroutineScope) {
 
             ApiClient.paymentController.registerPayment(
                 amount = amountInGrosze,
-                email = email,
+                customer = customer,
+                description = "Kaucja rezerwacyjna",
+                regulationAccept = true,
             ).onSuccess { response ->
                 openExternalUrl(response.redirectUrl)
             }.onFailure {

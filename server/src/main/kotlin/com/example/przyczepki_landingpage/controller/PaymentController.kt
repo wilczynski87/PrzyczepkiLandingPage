@@ -24,8 +24,9 @@ fun Route.payment() {
             val request = call.receive<PaymentRegisterRequest>()
             val token = paymentService.registerTransaction(
                 amount = request.amount,
-                email = request.email,
+                customer = request.customer,
                 description = request.description,
+                regulationAccept = request.regulationAccept,
             )
             call.respond(
                 PaymentRegisterResponse(
