@@ -27,7 +27,7 @@ class EmailServiceImpl(
         subject: String,
         body: AccountConfirmationData
     ): SendEmailResponse {
-        val emailUrl = "$emailUrlBase/emailConfirm"
+        val emailUrl = "$emailUrlBase/send"
         val response = client.post(emailUrl) {
             header("X-Internal-Api-Key", cfgAuth.internalApiKey)
             setBody(

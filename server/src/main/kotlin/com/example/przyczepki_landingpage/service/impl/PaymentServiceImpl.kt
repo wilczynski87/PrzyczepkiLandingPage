@@ -210,6 +210,6 @@ class PaymentServiceImpl(
         private const val baseUrl = "https://sandbox.przelewy24.pl/api/v1"
         private const val REGISTER_URL = "$baseUrl/transaction/register"
         private const val VERIFY_URL = "$baseUrl/transaction/verify"
-        private const val REDIRECT_URL = "https://przyczepkifat.pl"
+        private const val REDIRECT_URL = "https://secure.przelewy24.pl/trnRequest/"
     }
 }
