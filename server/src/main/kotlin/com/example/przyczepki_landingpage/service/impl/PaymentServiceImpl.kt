@@ -63,6 +63,7 @@ class PaymentServiceImpl(
                     phone = customer.private?.phoneNumber,
 //                    channel = TODO(),
                     regulationAccept = regulationAccept,
+                    transferLabel = "${customer.getEmail()}, $sessionId".substring(0,19),
                 )
             )
         }
@@ -205,8 +206,10 @@ class PaymentServiceImpl(
 
     companion object {
         private const val CURRENCY = "PLN"
-        private const val REGISTER_URL = "https://secure.przelewy24.pl/api/v1/transaction/register"
-        private const val VERIFY_URL = "https://secure.przelewy24.pl/api/v1/transaction/verify"
-        private const val REDIRECT_URL = "https://secure.przelewy24.pl/trnRequest/"
+        // TODO zmienić na produkcję!!!
+        private const val baseUrl = "https://sandbox.przelewy24.pl/api/v1"
+        private const val REGISTER_URL = "$baseUrl/transaction/register"
+        private const val VERIFY_URL = "$baseUrl/transaction/verify"
+        private const val REDIRECT_URL = "https://przyczepkifat.pl"
     }
 }

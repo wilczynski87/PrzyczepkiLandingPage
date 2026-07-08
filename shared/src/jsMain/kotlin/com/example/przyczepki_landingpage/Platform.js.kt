@@ -33,13 +33,3 @@ actual fun callPhone(phone: String) {
 actual fun openExternalUrl(url: String) {
     window.open(url, "_self")
 }
-
-actual fun getBaseUrl(): String {
-    val hostname = js("window.location.hostname") as String
-
-    return if (hostname == "localhost") {
-        "http://localhost:8090"
-    } else {
-        "/api"
-    }
-}

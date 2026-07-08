@@ -22,6 +22,7 @@ fun Route.payment() {
     route("/payment") {
         post("/register") {
             val request = call.receive<PaymentRegisterRequest>()
+            println("request payment register: $request")
             val token = paymentService.registerTransaction(
                 amount = request.amount,
                 customer = request.customer,
@@ -38,6 +39,7 @@ fun Route.payment() {
 
         post("/notification") {
             val notification = call.receiveParameters().toP24Notification()
+            println("notification: $notification")
             paymentService.handlePaymentNotification(notification)
             call.respondText("OK", status = HttpStatusCode.OK)
         }

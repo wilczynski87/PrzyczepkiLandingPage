@@ -216,7 +216,7 @@ class AppViewModel(private val scope: CoroutineScope) {
                     ?: throw NullPointerException("mapReservationsToBlockedDates: Brakuje daty zakończenia"))
             ) {
                 blockedDates.add(current)
-                current.plus(1, DateTimeUnit.DAY)
+                current = current.plus(1, DateTimeUnit.DAY)
             }
         }
         return blockedDates
@@ -323,8 +323,9 @@ class AppViewModel(private val scope: CoroutineScope) {
 
     fun initiatePayment(depositAmount: Double) {
         scope.launch {
-            val email = appState.value.customer?.getEmail()
-            if (email.isNullOrBlank()) {
+            val customer = appState.value.customer
+            val email = customer?.getEmail()
+            if (customer == null || email.isNullOrBlank()) {
                 openModal(
                     ModalType.CUSTOMER_ERROR,
                     ModalData(

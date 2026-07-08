@@ -19,4 +19,5 @@ captures
 node_modules/
 npm/data/
 npm/letsencrypt/
+.env
 docker-compose.dev.yaml

@@ -22,7 +22,7 @@ data class P24TransactionRegisterRequest(
     val timeLimit: Int? = 90,
     val channel: Int? = 16,
     val regulationAccept: Boolean? = true,
-    val transferLabel: String = "$email, $sessionId",
+    val transferLabel: String? = null,
     val sign: String,
     val encoding: String = "UTF-8",
 )
