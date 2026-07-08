@@ -62,6 +62,7 @@ services:
       - PAYMENT_POS_ID=${PAYMENT_POS_ID}
       - PAYMENT_SECRET_ID=${PAYMENT_SECRET_ID}
       - PAYMENT_CRC=${PAYMENT_CRC}
+      - PAYMENT_ENV=${PAYMENT_ENV:-production}
       - PAYMENT_URL_RETURN=${PAYMENT_URL_RETURN:-https://przyczepkifat.pl/podsumowanieRezerwacji}
       - PAYMENT_URL_STATUS=${PAYMENT_URL_STATUS:-https://przyczepkifat.pl/api/payment/notification}
     networks:

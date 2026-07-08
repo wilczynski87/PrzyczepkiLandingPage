@@ -41,6 +41,8 @@ data class PaymentConfig(
     val crc: String,
     val urlReturn: String,
     val urlStatus: String,
+    val apiBaseUrl: String,
+    val redirectBaseUrl: String,
 )
 
 @Serializable
@@ -107,6 +109,14 @@ private fun readPaymentConfig(): PaymentConfig {
         System.getenv(name)?.toIntOrNull()
             ?: if (isDev) devDefault else throw NullPointerException("$name is missing")
 
+    val paymentEnv = System.getenv("PAYMENT_ENV")
+        ?: if (isDev) "sandbox" else "production"
+    val paymentHost = when (paymentEnv.lowercase()) {
+        "sandbox", "dev", "test" -> "https://sandbox.przelewy24.pl"
+        "production", "prod", "live" -> "https://secure.przelewy24.pl"
+        else -> throw IllegalArgumentException("Nieprawidłowe PAYMENT_ENV: $paymentEnv (użyj: sandbox lub production)")
+    }
+
     return PaymentConfig(
         merchantId = intEnvOrDev("PAYMENT_MERCHANT_ID", 0),
         posId = intEnvOrDev("PAYMENT_POS_ID", 0),
@@ -114,5 +124,7 @@ private fun readPaymentConfig(): PaymentConfig {
         crc = envOrDev("PAYMENT_CRC", "dev-crc"),
         urlReturn = envOrDev("PAYMENT_URL_RETURN", "https://przyczepkifat.pl/podsumowanieRezerwacji"),
         urlStatus = envOrDev("PAYMENT_URL_STATUS", "https://przyczepkifat.pl/api/payment/notification"),
+        apiBaseUrl = "$paymentHost/api/v1",
+        redirectBaseUrl = "$paymentHost/trnRequest/",
     )
 }

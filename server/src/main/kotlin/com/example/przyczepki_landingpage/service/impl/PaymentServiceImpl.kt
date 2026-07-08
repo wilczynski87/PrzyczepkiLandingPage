@@ -41,7 +41,7 @@ class PaymentServiceImpl(
         val sessionId = UUID.randomUUID().toString()
         val sign = signRegister(sessionId = sessionId, amount = amount, currency = CURRENCY)
 
-        val response = client.post(REGISTER_URL) {
+        val response = client.post("${paymentConfig.apiBaseUrl}/transaction/register") {
             basicAuth(paymentConfig.posId.toString(), paymentConfig.secretId)
             contentType(ContentType.Application.Json)
             setBody(
@@ -90,7 +90,7 @@ class PaymentServiceImpl(
     ) {
         val sign = signVerify(sessionId = sessionId, orderId = orderId, amount = amount, currency = currency)
 
-        val response = client.put(VERIFY_URL) {
+        val response = client.put("${paymentConfig.apiBaseUrl}/transaction/verify") {
             basicAuth(paymentConfig.posId.toString(), paymentConfig.secretId)
             contentType(ContentType.Application.Json)
             setBody(
@@ -112,7 +112,7 @@ class PaymentServiceImpl(
         }
     }
 
-    override fun paymentRedirectUrl(token: String): String = "$REDIRECT_URL$token"
+    override fun paymentRedirectUrl(token: String): String = "${paymentConfig.redirectBaseUrl}$token"
 
     override suspend fun handlePaymentNotification(notification: P24Notification) {
         if (!verifyNotificationSign(notification)) {
@@ -206,10 +206,5 @@ class PaymentServiceImpl(
 
     companion object {
         private const val CURRENCY = "PLN"
-        // TODO zmienić na produkcję!!!
-        private const val baseUrl = "https://sandbox.przelewy24.pl/api/v1"
-        private const val REGISTER_URL = "$baseUrl/transaction/register"
-        private const val VERIFY_URL = "$baseUrl/transaction/verify"
-        private const val REDIRECT_URL = "https://secure.przelewy24.pl/trnRequest/"
     }
 }
