@@ -5,8 +5,11 @@ import com.example.przyczepki_landingpage.modules.toApiConfig
 import com.example.przyczepki_landingpage.repo.CustomerRepo
 import com.example.przyczepki_landingpage.repo.ReservationRepo
 import com.example.przyczepki_landingpage.repo.TrailersRepo
+import com.example.przyczepki_landingpage.repo.PendingPaymentRepo
 import com.example.przyczepki_landingpage.repo.impl.CustomerRepoImpl
 import com.example.przyczepki_landingpage.repo.impl.CustomerTable
+import com.example.przyczepki_landingpage.repo.impl.PendingPaymentRepoImpl
+import com.example.przyczepki_landingpage.repo.impl.PendingPaymentTable
 import com.example.przyczepki_landingpage.repo.impl.ReservationRepoImpl
 import com.example.przyczepki_landingpage.repo.impl.ReservationTable
 import com.example.przyczepki_landingpage.repo.impl.TrailerTable
@@ -44,6 +47,9 @@ val appModule = module {
         PaymentServiceImpl(
             client = get<HttpClient>(),
             paymentConfig = get<ApiConfig>().paymentConfig,
+            pendingPaymentRepo = get(),
+            reservationService = get(),
+            reservationRepo = get(),
         )
     }
 
@@ -77,11 +83,15 @@ val appModule = module {
     single(named("customerCollection")) {
         get<MongoDatabase>().getCollection<CustomerTable>("customer")
     }
+    single(named("pendingPaymentCollection")) {
+        get<MongoDatabase>().getCollection<PendingPaymentTable>("pending_payment")
+    }
 
     // Repositories
     single<TrailersRepo> { TrailersRepoImpl(get(named("trailerCollection"))) }
     single<ReservationRepo> { ReservationRepoImpl(get(named("reservationCollection"))) }
     single<CustomerRepo> { CustomerRepoImpl(get(named("customerCollection"))) }
+    single<PendingPaymentRepo> { PendingPaymentRepoImpl(get(named("pendingPaymentCollection"))) }
 
 
     // Services
@@ -94,7 +104,8 @@ val appModule = module {
     single<ReservationService> {
         ReservationServiceImpl(
             reservationRepo = get(),
-            trailersRepo = get()
+            trailersRepo = get(),
+            customerRepo = get(),
         )
     }
 

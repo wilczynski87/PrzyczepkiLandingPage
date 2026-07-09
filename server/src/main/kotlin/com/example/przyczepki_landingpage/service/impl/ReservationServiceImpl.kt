@@ -5,6 +5,7 @@ import com.example.przyczepki_landingpage.data.Reservation
 import com.example.przyczepki_landingpage.data.ReservationDto
 import com.example.przyczepki_landingpage.data.ReservationPrice
 import com.example.przyczepki_landingpage.data.Trailer
+import com.example.przyczepki_landingpage.repo.CustomerRepo
 import com.example.przyczepki_landingpage.repo.ReservationRepo
 import com.example.przyczepki_landingpage.repo.TrailersRepo
 import com.example.przyczepki_landingpage.service.ReservationService
@@ -13,7 +14,7 @@ import kotlinx.datetime.LocalDate
 class ReservationServiceImpl(
     private val reservationRepo: ReservationRepo,
     private val trailersRepo: TrailersRepo,
-//    private val customerRepo: CustomerRepo,
+    private val customerRepo: CustomerRepo,
 ): ReservationService {
 
     override suspend fun getReservations(from: LocalDate, to: LocalDate?): List<ReservationDto> {
@@ -61,7 +62,7 @@ class ReservationServiceImpl(
 //        println("createReservation in ReservationServiceImpl: $reservation")
 //        try {
             // check for Customer
-            val customer: Customer? = null
+            val customer: Customer? = reservation.customerId?.let { customerRepo.get(it) }
 
             // check for Trailer
             if(reservation.trailerId == null) throw Exception("Trailer id is null")

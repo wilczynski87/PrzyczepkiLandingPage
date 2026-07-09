@@ -14,6 +14,10 @@ fun Application.configureStatusPages() {
             call.respond(HttpStatusCode.InternalServerError, cause.message ?: "Unknown error")
         }
 
+        exception<IllegalArgumentException> { call, cause ->
+            call.respond(HttpStatusCode.BadRequest, cause.message ?: "Bad request")
+        }
+
         exception<BadRequestException> { call, cause ->
             call.respond(HttpStatusCode.BadRequest, cause.message ?: "Bad request")
         }

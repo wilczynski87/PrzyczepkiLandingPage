@@ -2,6 +2,25 @@ package com.example.przyczepki_landingpage.data
 
 import kotlinx.serialization.Serializable
 
+const val PAYMENT_SESSION_STORAGE_KEY = "pending_payment_session_id"
+const val PAYMENT_RETURN_PATH = "/podsumowanieRezerwacji"
+
+@Serializable
+enum class PaymentSessionStatus {
+    PENDING,
+    VERIFIED,
+    COMPLETED,
+    FAILED,
+}
+
+@Serializable
+data class PaymentStatusResponse(
+    val sessionId: String,
+    val status: PaymentSessionStatus,
+    val reservation: ReservationDto? = null,
+    val message: String? = null,
+)
+
 @Serializable
 data class P24TransactionRegisterRequest(
     val merchantId: Int,
@@ -68,6 +87,7 @@ data class P24Notification(
 data class PaymentRegisterRequest(
     val amount: Int,
     val customer: Customer,
+    val reservation: ReservationDto,
     val description: String,
     val regulationAccept: Boolean,
 )
@@ -76,4 +96,5 @@ data class PaymentRegisterRequest(
 data class PaymentRegisterResponse(
     val token: String,
     val redirectUrl: String,
+    val sessionId: String,
 )

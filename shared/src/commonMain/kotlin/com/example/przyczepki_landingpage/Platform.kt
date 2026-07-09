@@ -24,4 +24,10 @@ expect fun openEmail(email: String)
 expect fun callPhone(phone: String)
 expect fun openExternalUrl(url: String)
 
+expect fun getCurrentPath(): String
+expect fun replaceBrowserPath(path: String)
+expect fun getLocalStorageValue(key: String): String?
+expect fun setLocalStorageValue(key: String, value: String)
+expect fun removeLocalStorageValue(key: String)
+
 expect fun getBaseUrl(): String

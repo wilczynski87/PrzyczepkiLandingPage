@@ -9,7 +9,15 @@ import com.example.przyczepki_landingpage.model.LoginUiState
 import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.model.mapLoginError
 import com.example.przyczepki_landingpage.model.validateLoginInput
+import com.example.przyczepki_landingpage.data.PAYMENT_RETURN_PATH
+import com.example.przyczepki_landingpage.data.PAYMENT_SESSION_STORAGE_KEY
+import com.example.przyczepki_landingpage.data.PaymentSessionStatus
 import com.example.przyczepki_landingpage.data.ReservationDto
+import com.example.przyczepki_landingpage.getCurrentPath
+import com.example.przyczepki_landingpage.getLocalStorageValue
+import com.example.przyczepki_landingpage.removeLocalStorageValue
+import com.example.przyczepki_landingpage.replaceBrowserPath
+import com.example.przyczepki_landingpage.setLocalStorageValue
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.model.ServerResponse
@@ -21,6 +29,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
@@ -48,6 +57,7 @@ class AppViewModel(private val scope: CoroutineScope) {
                 }
                 fetchTrailers()
                 fetchReservations()
+                handlePaymentReturnIfNeeded()
             }
         }
     }
@@ -325,12 +335,25 @@ class AppViewModel(private val scope: CoroutineScope) {
         scope.launch {
             val customer = appState.value.customer
             val email = customer?.getEmail()
+            val reservation = appState.value.reservationToMake?.copy(customerId = customer?.id)
             if (customer == null || email.isNullOrBlank()) {
                 openModal(
                     ModalType.CUSTOMER_ERROR,
                     ModalData(
                         dialogTitle = "Brak adresu email",
                         dialogText = "Zaloguj się lub podaj email klienta przed płatnością.",
+                    ),
+                )
+                return@launch
+            }
+            if (reservation == null || reservation.trailerId.isNullOrBlank() ||
+                reservation.startDate == null || reservation.endDate == null
+            ) {
+                openModal(
+                    ModalType.CUSTOMER_ERROR,
+                    ModalData(
+                        dialogTitle = "Brak danych rezerwacji",
+                        dialogText = "Wybierz przyczepę i termin przed płatnością.",
                     ),
                 )
                 return@launch
@@ -342,9 +365,11 @@ class AppViewModel(private val scope: CoroutineScope) {
             ApiClient.paymentController.registerPayment(
                 amount = amountInGrosze,
                 customer = customer,
+                reservation = reservation,
                 description = "Kaucja rezerwacyjna",
                 regulationAccept = true,
             ).onSuccess { response ->
+                setLocalStorageValue(PAYMENT_SESSION_STORAGE_KEY, response.sessionId)
                 openExternalUrl(response.redirectUrl)
             }.onFailure {
                 println("Payment error: ${it.message}")
@@ -358,6 +383,110 @@ class AppViewModel(private val scope: CoroutineScope) {
             }
 
             _appState.update { it.copy(paymentProcessing = false) }
+        }
+    }
+
+    private fun handlePaymentReturnIfNeeded() {
+        if (!getCurrentPath().endsWith(PAYMENT_RETURN_PATH)) return
+
+        replaceBrowserPath("/")
+        navigateTo(CurrentScreen.RESERVATION_SUMMARY)
+
+        val sessionId = getLocalStorageValue(PAYMENT_SESSION_STORAGE_KEY)
+        if (sessionId.isNullOrBlank()) {
+            _appState.update {
+                it.copy(
+                    paymentStatusLoading = false,
+                    paymentStatusError = "Brak identyfikatora sesji płatności. Spróbuj ponownie lub skontaktuj się z nami.",
+                )
+            }
+            return
+        }
+
+        pollPaymentStatus(sessionId)
+    }
+
+    fun retryPaymentStatusCheck() {
+        val sessionId = getLocalStorageValue(PAYMENT_SESSION_STORAGE_KEY)
+        if (sessionId.isNullOrBlank()) {
+            _appState.update {
+                it.copy(
+                    paymentStatusLoading = false,
+                    paymentStatusError = "Brak identyfikatora sesji płatności. Spróbuj ponownie lub skontaktuj się z nami.",
+                )
+            }
+            return
+        }
+        pollPaymentStatus(sessionId)
+    }
+
+    private fun pollPaymentStatus(sessionId: String) {
+        scope.launch {
+            _appState.update {
+                it.copy(
+                    paymentStatusLoading = true,
+                    paymentStatusError = null,
+                    paymentStatus = null,
+                )
+            }
+
+            repeat(30) {
+                ApiClient.paymentController.getPaymentStatus(sessionId).onSuccess { status ->
+                    _appState.update { it.copy(paymentStatus = status) }
+
+                    when (status.status) {
+                        PaymentSessionStatus.PENDING,
+                        PaymentSessionStatus.VERIFIED -> {
+                            delay(2000)
+                            return@repeat
+                        }
+                        PaymentSessionStatus.COMPLETED -> {
+                            removeLocalStorageValue(PAYMENT_SESSION_STORAGE_KEY)
+                            status.reservation?.trailerId?.let { trailerId ->
+                                val trailer = appState.value.trailers.find {
+                                    it.id == trailerId || it.prices?.trailerId == trailerId
+                                } ?: trailers.find {
+                                    it.id == trailerId || it.prices?.trailerId == trailerId
+                                }
+                                trailer?.let { onTrailerSelected(it) }
+                            }
+                            _appState.update {
+                                it.copy(
+                                    reservationToMake = status.reservation,
+                                    paymentStatusLoading = false,
+                                )
+                            }
+                            fetchReservations()
+                            return@launch
+                        }
+                        PaymentSessionStatus.FAILED -> {
+                            removeLocalStorageValue(PAYMENT_SESSION_STORAGE_KEY)
+                            _appState.update {
+                                it.copy(
+                                    paymentStatusLoading = false,
+                                    paymentStatusError = status.message ?: "Płatność nie powiodła się.",
+                                )
+                            }
+                            return@launch
+                        }
+                    }
+                }.onFailure { error ->
+                    _appState.update {
+                        it.copy(
+                            paymentStatusLoading = false,
+                            paymentStatusError = error.message ?: "Nie udało się sprawdzić statusu płatności.",
+                        )
+                    }
+                    return@launch
+                }
+            }
+
+            _appState.update {
+                it.copy(
+                    paymentStatusLoading = false,
+                    paymentStatusError = "Przekroczono czas oczekiwania na potwierdzenie płatności. Jeśli opłaciłeś rezerwację, skontaktuj się z nami.",
+                )
+            }
         }
     }
 

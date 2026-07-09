@@ -33,3 +33,19 @@ actual fun callPhone(phone: String) {
 actual fun openExternalUrl(url: String) {
     window.open(url, "_self")
 }
+
+actual fun getCurrentPath(): String = window.location.pathname
+
+actual fun replaceBrowserPath(path: String) {
+    window.history.replaceState(null, "", path)
+}
+
+actual fun getLocalStorageValue(key: String): String? = kotlinx.browser.localStorage.getItem(key)
+
+actual fun setLocalStorageValue(key: String, value: String) {
+    kotlinx.browser.localStorage.setItem(key, value)
+}
+
+actual fun removeLocalStorageValue(key: String) {
+    kotlinx.browser.localStorage.removeItem(key)
+}

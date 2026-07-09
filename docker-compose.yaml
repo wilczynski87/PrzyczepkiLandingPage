@@ -25,6 +25,8 @@ services:
     networks:
       - przyczepki-network
     restart: unless-stopped
+    depends_on:
+      - przyczepki_api
     expose:
       - "80"
 

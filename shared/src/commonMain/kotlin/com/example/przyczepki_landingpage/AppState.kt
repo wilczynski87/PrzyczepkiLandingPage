@@ -8,6 +8,7 @@ import com.example.przyczepki_landingpage.data.Private
 import com.example.przyczepki_landingpage.model.CurrentScreen
 import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.data.ReservationDto
+import com.example.przyczepki_landingpage.data.PaymentStatusResponse
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.model.LoginUiState
@@ -40,6 +41,9 @@ data class AppState(
     val customer: Customer? = null,
 
     val paymentProcessing: Boolean = false,
+    val paymentStatus: PaymentStatusResponse? = null,
+    val paymentStatusLoading: Boolean = false,
+    val paymentStatusError: String? = null,
 
     val loginUiState: LoginUiState = LoginUiState(),
 )

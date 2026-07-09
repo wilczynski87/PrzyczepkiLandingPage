@@ -33,6 +33,16 @@ actual fun openExternalUrl(url: String) {
     println("openExternalUrl: $url")
 }
 
+actual fun getCurrentPath(): String = "/"
+
+actual fun replaceBrowserPath(path: String) = Unit
+
+actual fun getLocalStorageValue(key: String): String? = null
+
+actual fun setLocalStorageValue(key: String, value: String) = Unit
+
+actual fun removeLocalStorageValue(key: String) = Unit
+
 actual fun getBaseUrl(): String {
     return if(getEnvironment() == "prod") "/api"
         else "http://localhost:8090"

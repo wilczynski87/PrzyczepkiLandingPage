@@ -40,6 +40,7 @@ import com.example.przyczepki_landingpage.ui.PricesPage
 import com.example.przyczepki_landingpage.ui.PrivacyPolicyPage
 import com.example.przyczepki_landingpage.ui.ReservationFinaliseMain
 import com.example.przyczepki_landingpage.ui.ReservationPage
+import com.example.przyczepki_landingpage.ui.ReservationSummaryPage
 import com.example.przyczepki_landingpage.ui.SiteFooter
 import com.example.przyczepki_landingpage.ui.TermsPage
 import com.example.przyczepki_landingpage.ui.modal.AppModals
@@ -122,6 +123,10 @@ fun AppMainScreen() {
 
                     CurrentScreen.RESERVATION_FINALISE -> {
                         ReservationFinaliseMain(widthSizeClass, viewModel)
+                    }
+
+                    CurrentScreen.RESERVATION_SUMMARY -> {
+                        ReservationSummaryPage(widthSizeClass, viewModel)
                     }
 
                     CurrentScreen.PRIVACY_POLICY -> {
