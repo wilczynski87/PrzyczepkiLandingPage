@@ -14,6 +14,28 @@ application {
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }
 
+fun loadDotEnv(file: java.io.File): Map<String, String> {
+    if (!file.exists()) return emptyMap()
+    return file.readLines()
+        .map { it.trim() }
+        .filter { it.isNotEmpty() && !it.startsWith("#") }
+        .mapNotNull { line ->
+            val separator = line.indexOf('=')
+            if (separator <= 0) return@mapNotNull null
+            val key = line.substring(0, separator).trim()
+            val value = line.substring(separator + 1).trim()
+            key to value
+        }
+        .toMap()
+}
+
+tasks.named<JavaExec>("run") {
+    val dotEnv = loadDotEnv(rootProject.file(".env"))
+    dotEnv.forEach { (key, value) ->
+        environment(key, value)
+    }
+}
+
 dependencies {
     implementation(projects.shared)
     implementation(libs.logback)

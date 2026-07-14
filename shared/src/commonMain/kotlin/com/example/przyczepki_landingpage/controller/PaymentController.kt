@@ -10,6 +10,8 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.isSuccess
 
 class PaymentController(private val client: HttpClient) {
 
@@ -31,8 +33,12 @@ class PaymentController(private val client: HttpClient) {
                         regulationAccept = regulationAccept,
                     )
                 )
-            }.body<PaymentRegisterResponse>()
-            Result.success(response)
+            }
+            if (!response.status.isSuccess()) {
+                val errorBody = runCatching { response.bodyAsText() }.getOrDefault("")
+                return Result.failure(Exception(parseApiError(errorBody, response.status.value)))
+            }
+            Result.success(response.body<PaymentRegisterResponse>())
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -41,10 +47,18 @@ class PaymentController(private val client: HttpClient) {
     suspend fun getPaymentStatus(sessionId: String): Result<PaymentStatusResponse> {
         return try {
             val response = client.get("$base_url/payment/status/$sessionId")
-                .body<PaymentStatusResponse>()
-            Result.success(response)
+            if (!response.status.isSuccess()) {
+                val errorBody = runCatching { response.bodyAsText() }.getOrDefault("")
+                return Result.failure(Exception(parseApiError(errorBody, response.status.value)))
+            }
+            Result.success(response.body<PaymentStatusResponse>())
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    private fun parseApiError(body: String, statusCode: Int): String {
+        val jsonError = Regex(""""error"\s*:\s*"([^"]+)"""").find(body)?.groupValues?.get(1)
+        return jsonError ?: body.ifBlank { "Błąd płatności (HTTP $statusCode)" }
     }
 }

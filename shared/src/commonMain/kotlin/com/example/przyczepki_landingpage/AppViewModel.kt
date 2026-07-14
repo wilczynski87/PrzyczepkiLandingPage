@@ -202,8 +202,17 @@ class AppViewModel(private val scope: CoroutineScope) {
         scope.launch {
             try {
                 val reservations = ApiClient.reservationController.getReservations()
-                if (reservations.isNotEmpty()) {
-                    _appState.update { it.copy(reservations = reservations) }
+                val trailerId = appState.value.selectedTrailer?.id
+                val blockedDates = if (trailerId != null) {
+                    mapReservationsToBlockedDates(reservations, trailerId)
+                } else {
+                    appState.value.blockedDates
+                }
+                _appState.update {
+                    it.copy(
+                        reservations = reservations,
+                        blockedDates = blockedDates,
+                    )
                 }
             } catch (e: Exception) {
                 println("Error: ${e.message}")

@@ -9,12 +9,17 @@ import com.example.przyczepki_landingpage.service.auth.PasswordUtil.hash
 import com.mongodb.client.model.Filters.and
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.Filters.or
+import com.mongodb.client.model.FindOneAndUpdateOptions
+import com.mongodb.client.model.ReturnDocument
 import com.mongodb.client.model.Updates.set
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import org.bson.types.ObjectId
+import kotlin.time.Clock
 
 class CustomerRepoImpl(
     private val customerCollection: MongoCollection<CustomerTable>
@@ -26,6 +31,18 @@ class CustomerRepoImpl(
         val customerId = customerCollection.insertOne(toSave).insertedId
 
         return customerCollection.find(eq("_id", customerId)).firstOrNull()?.toCustomer()
+    }
+
+    override suspend fun confirm(id: String): Customer? {
+        val today = Clock.System.now()
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .date
+
+        return customerCollection.findOneAndUpdate(
+            eq("id", id),
+            set(Customer::confirmed.name, today.toString()),
+            FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER),
+        )?.toCustomer()
     }
 
     override suspend fun get(id: String): Customer? = customerCollection.find(eq("id", id)).firstOrNull()?.toCustomer()
@@ -73,12 +90,14 @@ data class CustomerTable(
     val id: String? = null,
     val private: Private? = null,
     val company: Company? = null,
+    val confirmed: String? = null,
     val passwordHash: String? = null
 ) {
     fun toCustomer(): Customer = Customer(
         id = id,
         private = private,
         company = company,
+        confirmed = confirmed
     )
 }
 fun Customer.toTable(): CustomerTable {
@@ -88,6 +107,7 @@ fun Customer.toTable(): CustomerTable {
         id = _id.toHexString(),
         private = private,
         company = company,
+        confirmed = confirmed,
         passwordHash = hash(company?.nip ?: private?.pesel ?: "")
     )
 }

@@ -30,13 +30,31 @@ data class AuthConfig(
     val accessTokenExpiry: Long = 3600000,
     val refreshTokenExpiry: Long = 2592000000,
     val claim: String,
+    val internalApiKey: String,
 )
+
+@Serializable
+data class PaymentConfig(
+    val merchantId: Int,
+    val posId: Int,
+    val secretId: String,
+    val crc: String,
+    val urlReturn: String,
+    val urlStatus: String,
+    val apiBaseUrl: String,
+    val redirectBaseUrl: String,
+    val mockMode: Boolean = false,
+)
+
 @Serializable
 data class ApiConfig(
     val env: String,
+    val apiPort: Int,
+    val apiHost: String,
     val email: EmailConfig,
     val db: DbConfig,
     val auth: AuthConfig,
+    val paymentConfig: PaymentConfig,
 )
 
 /**
@@ -49,10 +67,12 @@ fun toApiConfig(): ApiConfig {
 
     return ApiConfig(
         env = System.getenv("API_ENV") ?: "DEV",
+        apiPort = System.getenv("API_PORT")?.toIntOrNull() ?: 8090,
+        apiHost = System.getenv("API_HOST") ?: "localhost",
 
         email = EmailConfig(
             host = System.getenv("EMAIL_HOST") ?: "localhost",
-            port = System.getenv("EMAIL_PORT")?.toIntOrNull() ?: 8200
+            port = System.getenv("EMAIL_PORT")?.toIntOrNull() ?: 8091
         ),
 
         db = DbConfig(
@@ -72,7 +92,48 @@ fun toApiConfig(): ApiConfig {
             realm = System.getenv("AUTH_REALM") ?: throw NullPointerException("AUTH_REALM is missing"),
             accessTokenExpiry = System.getenv("AUTH_ACCESS_TOKEN_EXPIRY")?.toLongOrNull() ?: 3600000,
             refreshTokenExpiry = System.getenv("AUTH_REFRESH_TOKEN_EXPIRY")?.toLongOrNull() ?: 2592000000,
+            internalApiKey = System.getenv("INTERNAL_API_KEY") ?: throw NullPointerException("INTERNAL_API_KEY is missing"),
             claim = System.getenv("AUTH_CLAIM") ?: throw NullPointerException("AUTH_CLAIM is missing"),
-        )
+        ),
+
+        paymentConfig = readPaymentConfig(),
+    )
+}
+
+private fun readPaymentConfig(): PaymentConfig {
+    val isDev = (System.getenv("API_ENV") ?: "DEV").equals("DEV", ignoreCase = true)
+
+    fun envOrDev(name: String, devDefault: String): String =
+        System.getenv(name) ?: if (isDev) devDefault else throw NullPointerException("$name is missing")
+
+    fun intEnvOrDev(name: String, devDefault: Int): Int =
+        System.getenv(name)?.toIntOrNull()
+            ?: if (isDev) devDefault else throw NullPointerException("$name is missing")
+
+    val paymentEnv = System.getenv("PAYMENT_ENV")
+        ?: if (isDev) "sandbox" else "production"
+    val paymentHost = when (paymentEnv.lowercase()) {
+        "sandbox", "dev", "test" -> "https://sandbox.przelewy24.pl"
+        "production", "prod", "live" -> "https://secure.przelewy24.pl"
+        else -> throw IllegalArgumentException("Nieprawidłowe PAYMENT_ENV: $paymentEnv (użyj: sandbox lub production)")
+    }
+
+    val merchantId = intEnvOrDev("PAYMENT_MERCHANT_ID", 0)
+    val posId = intEnvOrDev("PAYMENT_POS_ID", 0)
+    val secretId = envOrDev("PAYMENT_SECRET_ID", "dev-secret")
+    val crc = envOrDev("PAYMENT_CRC", "dev-crc")
+    val mockMode = System.getenv("PAYMENT_MOCK")?.toBooleanStrictOrNull()
+        ?: (isDev && merchantId == 0 && secretId == "dev-secret" && crc == "dev-crc")
+
+    return PaymentConfig(
+        merchantId = merchantId,
+        posId = posId,
+        secretId = secretId,
+        crc = crc,
+        urlReturn = envOrDev("PAYMENT_URL_RETURN", "/podsumowanieRezerwacji"),
+        urlStatus = envOrDev("PAYMENT_URL_STATUS", "https://przyczepkifat.pl/api/payment/notification"),
+        apiBaseUrl = "$paymentHost/api/v1",
+        redirectBaseUrl = "$paymentHost/trnRequest/",
+        mockMode = mockMode,
     )
 }

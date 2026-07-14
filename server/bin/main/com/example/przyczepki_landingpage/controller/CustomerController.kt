@@ -1,8 +1,11 @@
 package com.example.przyczepki_landingpage.controller
 
 import com.example.przyczepki_landingpage.data.Customer
+import com.example.przyczepki_landingpage.data.EmailTemplate
 import com.example.przyczepki_landingpage.data.LoginRequest
+import com.example.przyczepki_landingpage.data.dto.SendEmailRequest
 import com.example.przyczepki_landingpage.service.CustomerService
+import com.example.przyczepki_landingpage.service.EmailService
 import com.example.przyczepki_landingpage.service.auth.PasswordUtil.hash
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
@@ -18,21 +21,39 @@ import io.ktor.server.routing.route
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondNullable
 import org.koin.ktor.ext.inject
+import pl.przyczepki.email.api.dto.AccountConfirmationData
 
 fun Route.customerController() {
     val customerService by inject<CustomerService>()
+    val emailService by inject<EmailService>()
 
     route("/customer") {
         post {
             try {
                 // TODO hasło początkowe + validaja (np powtarzanie email lub nip/pesel)
                 val customer = call.receive<Customer>()
-                val saved = customerService.save(customer)
+
+                val saved = customerService.save(customer) ?: throw BadRequestException("Nie udało się zapisać klienta")
+
+                val accountConfirmationData = customerService.accountConfirmationData(saved)
+                emailService.sendEmailConfirmationRequest(
+                    to = customer.getEmail() ?: throw BadRequestException("Brak adresu email"),
+                    body = accountConfirmationData,
+                )
+
                 call.respondNullable(saved)
             } catch (e: Exception) {
                 println("customerController, Error: ${e.message}")
                 call.respond(HttpStatusCode.BadRequest, e.message ?: "Unknown error")
             }
+        }
+
+        // TODO wymyśleć co ma zwrócić w razie błędu (różne opcje) i na jaka stronę przekierować
+        get("/confirm/{id}") {
+            val id = call.parameters["id"] ?: throw BadRequestException("Brak id")
+            val customer = customerService.confirm(id)
+                ?: throw NotFoundException("Nie można potwierdzić maila tokenem: $id")
+            call.respondNullable("Dziękujemy ${customer.getName()} za potwierdzenie maila")
         }
 
         authenticate {

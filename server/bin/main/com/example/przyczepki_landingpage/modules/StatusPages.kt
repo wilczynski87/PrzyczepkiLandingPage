@@ -9,9 +9,24 @@ import io.ktor.server.response.respond
 
 fun Application.configureStatusPages() {
     install(StatusPages) {
+        exception<IllegalStateException> { call, cause ->
+            println("Payment/upstream error: ${cause.message}")
+            call.respond(
+                HttpStatusCode.BadGateway,
+                mapOf("error" to (cause.message ?: "Błąd bramki płatności")),
+            )
+        }
+
         exception<Throwable> { call, cause ->
             println("Error: ${cause.message}")
-            call.respond(HttpStatusCode.InternalServerError, cause.message ?: "Unknown error")
+            call.respond(
+                HttpStatusCode.InternalServerError,
+                mapOf("error" to (cause.message ?: "Unknown error")),
+            )
+        }
+
+        exception<IllegalArgumentException> { call, cause ->
+            call.respond(HttpStatusCode.BadRequest, cause.message ?: "Bad request")
         }
 
         exception<BadRequestException> { call, cause ->

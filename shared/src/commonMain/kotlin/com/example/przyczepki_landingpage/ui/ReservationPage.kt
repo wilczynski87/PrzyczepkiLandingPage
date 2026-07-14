@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -48,6 +49,7 @@ import com.example.przyczepki_landingpage.model.CurrentScreen
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.model.ServerStatus
+import com.example.przyczepki_landingpage.model.millisToLocalDate
 import com.example.przyczepki_landingpage.model.todayUtcMillis
 import com.example.przyczepki_landingpage.ui.reservation.TrailerCard
 import com.example.przyczepki_landingpage.ui.reservation.TrailerSelectionList
@@ -195,10 +197,7 @@ fun ReservationCalendar(
                     return false
                 }
                 // b) Walidacja zablokowanych dat
-                if (blockedDates
-                        .map { it.toEpochDays() }
-                        .contains(utcTimeMillis)
-                    ) {
+                if (millisToLocalDate(utcTimeMillis) in blockedDates) {
                     return false
                 }
 
@@ -214,6 +213,7 @@ fun ReservationCalendar(
         }
     }
 
+    key(blockedDates) {
     val dateRangePickerState: DateRangePickerState = rememberDateRangePickerState(
         selectableDates = selectableDates
     )
@@ -277,6 +277,7 @@ fun ReservationCalendar(
             Order(viewModel, trailer, blockedDates, startDate, endDate)
         }
 
+    }
     }
 }
 

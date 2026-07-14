@@ -43,6 +43,7 @@ data class PaymentConfig(
     val urlStatus: String,
     val apiBaseUrl: String,
     val redirectBaseUrl: String,
+    val mockMode: Boolean = false,
 )
 
 @Serializable
@@ -117,14 +118,22 @@ private fun readPaymentConfig(): PaymentConfig {
         else -> throw IllegalArgumentException("Nieprawidłowe PAYMENT_ENV: $paymentEnv (użyj: sandbox lub production)")
     }
 
+    val merchantId = intEnvOrDev("PAYMENT_MERCHANT_ID", 0)
+    val posId = intEnvOrDev("PAYMENT_POS_ID", 0)
+    val secretId = envOrDev("PAYMENT_SECRET_ID", "dev-secret")
+    val crc = envOrDev("PAYMENT_CRC", "dev-crc")
+    val mockMode = System.getenv("PAYMENT_MOCK")?.toBooleanStrictOrNull()
+        ?: (isDev && merchantId == 0 && secretId == "dev-secret" && crc == "dev-crc")
+
     return PaymentConfig(
-        merchantId = intEnvOrDev("PAYMENT_MERCHANT_ID", 0),
-        posId = intEnvOrDev("PAYMENT_POS_ID", 0),
-        secretId = envOrDev("PAYMENT_SECRET_ID", "dev-secret"),
-        crc = envOrDev("PAYMENT_CRC", "dev-crc"),
-        urlReturn = envOrDev("PAYMENT_URL_RETURN", "https://przyczepkifat.pl/podsumowanieRezerwacji"),
+        merchantId = merchantId,
+        posId = posId,
+        secretId = secretId,
+        crc = crc,
+        urlReturn = envOrDev("PAYMENT_URL_RETURN", "/podsumowanieRezerwacji"),
         urlStatus = envOrDev("PAYMENT_URL_STATUS", "https://przyczepkifat.pl/api/payment/notification"),
         apiBaseUrl = "$paymentHost/api/v1",
         redirectBaseUrl = "$paymentHost/trnRequest/",
+        mockMode = mockMode,
     )
 }
