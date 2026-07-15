@@ -17,12 +17,14 @@ import com.example.przyczepki_landingpage.repo.impl.TrailersRepoImpl
 import com.example.przyczepki_landingpage.service.CustomerService
 import com.example.przyczepki_landingpage.service.EmailService
 import com.example.przyczepki_landingpage.service.PaymentService
+import com.example.przyczepki_landingpage.service.ReservationConfirmationService
 import com.example.przyczepki_landingpage.service.ReservationService
 import com.example.przyczepki_landingpage.service.TrailersService
 import com.example.przyczepki_landingpage.service.auth.JwtService
 import com.example.przyczepki_landingpage.service.impl.CustomerServiceImpl
 import com.example.przyczepki_landingpage.service.impl.EmailServiceImpl
 import com.example.przyczepki_landingpage.service.impl.PaymentServiceImpl
+import com.example.przyczepki_landingpage.service.impl.ReservationConfirmationServiceImpl
 import com.example.przyczepki_landingpage.service.impl.ReservationServiceImpl
 import com.example.przyczepki_landingpage.service.impl.TrailersServiceImpl
 import io.ktor.client.HttpClient
@@ -43,6 +45,13 @@ val appModule = module {
         )
     }
 
+    single<ReservationConfirmationService> {
+        ReservationConfirmationServiceImpl(
+            reservationRepo = get(),
+            emailService = get(),
+        )
+    }
+
     single<PaymentService> {
         PaymentServiceImpl(
             client = get<HttpClient>(),
@@ -50,6 +59,7 @@ val appModule = module {
             pendingPaymentRepo = get(),
             reservationService = get(),
             reservationRepo = get(),
+            reservationConfirmationService = get(),
         )
     }
 

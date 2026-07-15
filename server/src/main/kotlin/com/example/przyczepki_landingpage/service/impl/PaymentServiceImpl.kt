@@ -14,6 +14,7 @@ import com.example.przyczepki_landingpage.repo.ReservationRepo
 import com.example.przyczepki_landingpage.repo.impl.PendingPaymentTable
 import com.example.przyczepki_landingpage.service.PaymentRegistration
 import com.example.przyczepki_landingpage.service.PaymentService
+import com.example.przyczepki_landingpage.service.ReservationConfirmationService
 import com.example.przyczepki_landingpage.service.ReservationService
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -36,6 +37,7 @@ class PaymentServiceImpl(
     private val pendingPaymentRepo: PendingPaymentRepo,
     private val reservationService: ReservationService,
     private val reservationRepo: ReservationRepo,
+    private val reservationConfirmationService: ReservationConfirmationService,
 ) : PaymentService {
 
     private val signJson = Json { encodeDefaults = true }
@@ -207,12 +209,27 @@ class PaymentServiceImpl(
             val created = reservationService.createReservation(reservationDto)
                 ?: throw IllegalStateException("Nie udało się utworzyć rezerwacji")
 
+            val reservationId = created.id
+                ?: throw IllegalStateException("Utworzona rezerwacja nie ma identyfikatora")
+
             pendingPaymentRepo.updateStatus(
                 sessionId = pending.sessionId,
                 status = PaymentSessionStatus.COMPLETED,
                 orderId = orderId,
-                reservationId = created.id,
+                reservationId = reservationId,
             )
+
+            runCatching {
+                reservationConfirmationService.sendReservationConfirmation(
+                    reservationId = reservationId,
+                    paidAmountGrosze = pending.amount,
+                    orderId = orderId,
+                )
+            }.onFailure { e ->
+                println("Nie udało się wysłać maila z potwierdzeniem rezerwacji $reservationId: ${e.message}")
+            }
+
+            pendingPaymentRepo.findBySessionId(pending.sessionId)
         } catch (e: Exception) {
             pendingPaymentRepo.updateStatus(
                 sessionId = pending.sessionId,
@@ -238,7 +255,7 @@ class PaymentServiceImpl(
 
         val reservation = when {
             pending.status == PaymentSessionStatus.COMPLETED && pending.reservationId != null ->
-                reservationRepo.getReservationById(pending.reservationId!!)?.toDto()
+                reservationRepo.getReservationById(pending.reservationId)?.toDto()
             else -> pending.reservation.toDto()
         }
 

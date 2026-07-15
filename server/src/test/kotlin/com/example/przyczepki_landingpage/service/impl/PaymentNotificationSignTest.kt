@@ -8,7 +8,9 @@ import com.example.przyczepki_landingpage.modules.PaymentConfig
 import com.example.przyczepki_landingpage.repo.PendingPaymentRepo
 import com.example.przyczepki_landingpage.repo.ReservationRepo
 import com.example.przyczepki_landingpage.repo.impl.PendingPaymentTable
+import com.example.przyczepki_landingpage.service.ReservationConfirmationService
 import com.example.przyczepki_landingpage.service.ReservationService
+import com.example.przyczepki_landingpage.data.dto.SendEmailResponse
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
 import kotlin.test.Test
@@ -67,6 +69,12 @@ class PaymentNotificationSignTest {
       override suspend fun createReservation(reservation: Reservation) = reservation
       override suspend fun deleteReservation(id: String) = false
       override suspend fun checkReservationDates(trailerId: String, from: LocalDate, to: LocalDate) = null
+    },
+    reservationConfirmationService = object : ReservationConfirmationService {
+      override suspend fun reservationConfirmationData(reservationId: String, paidAmountGrosze: Int?, orderId: Long?) =
+        throw NotImplementedError()
+      override suspend fun sendReservationConfirmation(reservationId: String, paidAmountGrosze: Int?, orderId: Long?) =
+        SendEmailResponse(status = "ok", to = "test@example.com")
     },
   )
 
