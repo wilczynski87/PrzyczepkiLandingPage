@@ -51,6 +51,14 @@ in your IDE's toolbar or run it directly from the terminal:
     .\gradlew.bat :composeApp:jsBrowserDevelopmentRun
     ```
 
+The dev server runs on port **8080** by default. After payment, Przelewy24 redirects the user to
+`PAYMENT_URL_RETURN` (default in dev: `http://localhost:8080/podsumowanieRezerwacji`). The frontend
+must be running on that port — the API runs separately on **8090** (`./gradlew :server:run`).
+
+In production, nginx serves `index.html` for all SPA paths (`try_files ... /index.html`).
+In local dev, `composeApp/webpack.config.d/spa-routing.js` enables the same behaviour via
+`historyApiFallback`.
+
 ---
 
 Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
