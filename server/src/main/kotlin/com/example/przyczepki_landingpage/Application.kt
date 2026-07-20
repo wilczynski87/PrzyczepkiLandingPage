@@ -2,9 +2,11 @@ package com.example.przyczepki_landingpage
 
 import com.example.przyczepki_landingpage.controller.authController
 import com.example.przyczepki_landingpage.controller.customerController
+import com.example.przyczepki_landingpage.controller.gate
 import com.example.przyczepki_landingpage.controller.healthCheck
 import com.example.przyczepki_landingpage.controller.payment
 import com.example.przyczepki_landingpage.controller.reservation
+import com.example.przyczepki_landingpage.controller.suplaOAuth
 import com.example.przyczepki_landingpage.controller.trailers
 import com.example.przyczepki_landingpage.di.appModule
 import com.example.przyczepki_landingpage.di.networkModule
@@ -12,6 +14,7 @@ import com.example.przyczepki_landingpage.modules.config
 import com.example.przyczepki_landingpage.modules.configureMongo
 import com.example.przyczepki_landingpage.modules.configureSecurity
 import com.example.przyczepki_landingpage.modules.configureStatusPages
+import com.example.przyczepki_landingpage.modules.configureSuplaTokenRefresh
 
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -39,6 +42,7 @@ fun Application.module() {
     configureSecurity()
     configureMongo()
     config()
+    configureSuplaTokenRefresh()
     routing()
 
 }
@@ -60,6 +64,8 @@ private fun Application.routing() {
         reservation()
         customerController()
         payment()
+        gate()
+        suplaOAuth()
     }
 
 }

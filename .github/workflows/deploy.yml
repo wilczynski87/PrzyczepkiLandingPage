@@ -37,6 +37,16 @@ jobs:
           [ -z "${{ secrets.DOCKER_PAT }}" ] && missing+=("DOCKER_PAT (repository secret)")
           [ -z "${{ secrets.DB_USER }}" ] && missing+=("DB_USER (ENV environment secret)")
           [ -z "${{ secrets.DB_PASSWORD }}" ] && missing+=("DB_PASSWORD (ENV environment secret)")
+          [ -z "${{ secrets.AUTH_SECRET_LOGIN }}" ] && missing+=("AUTH_SECRET_LOGIN (ENV environment secret)")
+          [ -z "${{ secrets.AUTH_SECRET_REFRESH }}" ] && missing+=("AUTH_SECRET_REFRESH (ENV environment secret)")
+          [ -z "${{ secrets.INTERNAL_API_KEY }}" ] && missing+=("INTERNAL_API_KEY (ENV environment secret)")
+          [ -z "${{ secrets.GOOGLE_CLIENT_ID }}" ] && missing+=("GOOGLE_CLIENT_ID (ENV environment secret)")
+          [ -z "${{ secrets.GOOGLE_CLIENT_SECRET }}" ] && missing+=("GOOGLE_CLIENT_SECRET (ENV environment secret)")
+          [ -z "${{ secrets.GOOGLE_REFRESH_TOKEN }}" ] && missing+=("GOOGLE_REFRESH_TOKEN (ENV environment secret)")
+          [ -z "${{ secrets.PAYMENT_MERCHANT_ID }}" ] && missing+=("PAYMENT_MERCHANT_ID (ENV environment secret)")
+          [ -z "${{ secrets.PAYMENT_POS_ID }}" ] && missing+=("PAYMENT_POS_ID (ENV environment secret)")
+          [ -z "${{ secrets.PAYMENT_SECRET_ID }}" ] && missing+=("PAYMENT_SECRET_ID (ENV environment secret)")
+          [ -z "${{ secrets.PAYMENT_CRC }}" ] && missing+=("PAYMENT_CRC (ENV environment secret)")
           if [ "${#missing[@]}" -gt 0 ]; then
             echo "::error::Missing GitHub config: ${missing[*]}"
             exit 1
@@ -79,6 +89,7 @@ jobs:
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v1.0.3
         env:
+          TZ: Europe/Warsaw
           APP_ENV: ${{ secrets.APP_ENV }}
           WEB_PORT: 80
           DB_HOST: przyczepki_db
@@ -95,17 +106,45 @@ jobs:
           AUTH_ACCESS_TOKEN_EXPIRY: 3600000
           AUTH_REFRESH_TOKEN_EXPIRY: 2592000000
           AUTH_CLAIM: ${{ secrets.AUTH_CLAIM }}
+          INTERNAL_API_KEY: ${{ secrets.INTERNAL_API_KEY }}
           EMAIL_HOST: przyczepki_email
           EMAIL_PORT: 8200
+          EMAIL_ENV: prod
           WEB_HOST: przyczepki_web
           API_HOST: przyczepki_api
           API_PORT: 8090
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          GMAIL_SENDER_EMAIL: ${{ secrets.GMAIL_SENDER_EMAIL }}
+          BCC: ${{ secrets.BCC }}
+          PAYMENT_ENV: production
+          PAYMENT_MOCK: "false"
+          PAYMENT_MERCHANT_ID: ${{ secrets.PAYMENT_MERCHANT_ID }}
+          PAYMENT_POS_ID: ${{ secrets.PAYMENT_POS_ID }}
+          PAYMENT_SECRET_ID: ${{ secrets.PAYMENT_SECRET_ID }}
+          PAYMENT_CRC: ${{ secrets.PAYMENT_CRC }}
+          PAYMENT_URL_RETURN: https://przyczepkifat.pl/podsumowanieRezerwacji
+          PAYMENT_URL_STATUS: https://przyczepkifat.pl/api/payment/notification
+          GATE_OPEN_URL: ${{ secrets.GATE_OPEN_URL }}
+          GATE_OPEN_METHOD: ${{ secrets.GATE_OPEN_METHOD }}
+          GATE_ACCESS_TOKEN: ${{ secrets.GATE_ACCESS_TOKEN }}
+          GATE_API_KEY: ${{ secrets.GATE_API_KEY }}
+          GATE_REQUEST_BODY: ${{ secrets.GATE_REQUEST_BODY }}
+          GATE_MOCK: ${{ secrets.GATE_MOCK }}
+          GATE_COOLDOWN_SECONDS: ${{ secrets.GATE_COOLDOWN_SECONDS }}
+          SUPLA_ID: ${{ secrets.SUPLA_ID }}
+          SUPLA_SECRET: ${{ secrets.SUPLA_SECRET }}
+          SUPLA_TOKEN_URL: ${{ secrets.SUPLA_TOKEN_URL }}
+          SUPLA_REDIRECT_URI: ${{ secrets.SUPLA_REDIRECT_URI }}
+          SUPLA_REFRESH_TOKEN: ${{ secrets.SUPLA_REFRESH_TOKEN }}
+          SUPLA_OAUTH_HELPER: "false"
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           port: ${{ secrets.VPS_PORT || 22 }}
           key: ${{ secrets.PRZYCZEPKI_WEB }}
-          envs: APP_ENV,WEB_PORT,DB_HOST,DB_PORT,DB_NAME,DB_USER,DB_PASSWORD,DB_AUTH_SOURCE,AUTH_SECRET_LOGIN,AUTH_SECRET_REFRESH,AUTH_ISSUER,AUTH_AUDIENCE,AUTH_REALM,AUTH_ACCESS_TOKEN_EXPIRY,AUTH_REFRESH_TOKEN_EXPIRY,AUTH_CLAIM,EMAIL_HOST,EMAIL_PORT,WEB_HOST,API_HOST,API_PORT
+          envs: TZ,APP_ENV,WEB_PORT,DB_HOST,DB_PORT,DB_NAME,DB_USER,DB_PASSWORD,DB_AUTH_SOURCE,AUTH_SECRET_LOGIN,AUTH_SECRET_REFRESH,AUTH_ISSUER,AUTH_AUDIENCE,AUTH_REALM,AUTH_ACCESS_TOKEN_EXPIRY,AUTH_REFRESH_TOKEN_EXPIRY,AUTH_CLAIM,INTERNAL_API_KEY,EMAIL_HOST,EMAIL_PORT,EMAIL_ENV,WEB_HOST,API_HOST,API_PORT,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GOOGLE_REFRESH_TOKEN,GMAIL_SENDER_EMAIL,BCC,PAYMENT_ENV,PAYMENT_MOCK,PAYMENT_MERCHANT_ID,PAYMENT_POS_ID,PAYMENT_SECRET_ID,PAYMENT_CRC,PAYMENT_URL_RETURN,PAYMENT_URL_STATUS,GATE_OPEN_URL,GATE_OPEN_METHOD,GATE_ACCESS_TOKEN,GATE_API_KEY,GATE_REQUEST_BODY,GATE_MOCK,GATE_COOLDOWN_SECONDS,SUPLA_ID,SUPLA_SECRET,SUPLA_TOKEN_URL,SUPLA_REDIRECT_URI,SUPLA_REFRESH_TOKEN,SUPLA_OAUTH_HELPER
           script: |
             set -e
             mkdir -p /przyczepki-landing-page
@@ -118,6 +157,7 @@ jobs:
             git reset --hard ${{ github.sha }}
 
             {
+              echo "TZ=${TZ:-Europe/Warsaw}"
               echo "APP_ENV=${APP_ENV:-prod}"
               echo "WEB_PORT=${WEB_PORT:-80}"
               echo "DB_HOST=${DB_HOST:-przyczepki_db}"
@@ -134,19 +174,39 @@ jobs:
               echo "AUTH_ACCESS_TOKEN_EXPIRY=${AUTH_ACCESS_TOKEN_EXPIRY:-3600000}"
               echo "AUTH_REFRESH_TOKEN_EXPIRY=${AUTH_REFRESH_TOKEN_EXPIRY:-2592000000}"
               echo "AUTH_CLAIM=${AUTH_CLAIM:-userId}"
-              echo "EMAIL_HOST=${EMAIL_HOST:-localhost}"
+              echo "INTERNAL_API_KEY=${INTERNAL_API_KEY}"
+              echo "EMAIL_HOST=${EMAIL_HOST:-przyczepki_email}"
               echo "EMAIL_PORT=${EMAIL_PORT:-8200}"
+              echo "EMAIL_ENV=${EMAIL_ENV:-prod}"
               echo "WEB_HOST=${WEB_HOST:-przyczepki_web}"
               echo "API_HOST=${API_HOST:-przyczepki_api}"
               echo "API_PORT=${API_PORT:-8090}"
-            
               echo "GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}"
               echo "GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}"
               echo "GOOGLE_REFRESH_TOKEN=${GOOGLE_REFRESH_TOKEN}"
               echo "GMAIL_SENDER_EMAIL=${GMAIL_SENDER_EMAIL:-przyczepkifat@gmail.com}"
-              echo "INTERNAL_API_KEY=${INTERNAL_API_KEY}"
-              echo "EMAIL_PORT=${EMAIL_PORT:-8091}"
-              echo "EMAIL_ENV=${EMAIL_ENV:-prod}"
+              echo "BCC=${BCC:-}"
+              echo "PAYMENT_ENV=${PAYMENT_ENV:-production}"
+              echo "PAYMENT_MOCK=${PAYMENT_MOCK:-false}"
+              echo "PAYMENT_MERCHANT_ID=${PAYMENT_MERCHANT_ID}"
+              echo "PAYMENT_POS_ID=${PAYMENT_POS_ID}"
+              echo "PAYMENT_SECRET_ID=${PAYMENT_SECRET_ID}"
+              echo "PAYMENT_CRC=${PAYMENT_CRC}"
+              echo "PAYMENT_URL_RETURN=${PAYMENT_URL_RETURN:-https://przyczepkifat.pl/podsumowanieRezerwacji}"
+              echo "PAYMENT_URL_STATUS=${PAYMENT_URL_STATUS:-https://przyczepkifat.pl/api/payment/notification}"
+              echo "GATE_OPEN_URL=${GATE_OPEN_URL:-}"
+              echo "GATE_OPEN_METHOD=${GATE_OPEN_METHOD:-PATCH}"
+              echo "GATE_ACCESS_TOKEN=${GATE_ACCESS_TOKEN:-}"
+              echo "GATE_API_KEY=${GATE_API_KEY:-}"
+              echo "GATE_REQUEST_BODY=${GATE_REQUEST_BODY:-{\"action\":\"OPEN_CLOSE\"}}"
+              echo "GATE_MOCK=${GATE_MOCK:-}"
+              echo "GATE_COOLDOWN_SECONDS=${GATE_COOLDOWN_SECONDS:-60}"
+              echo "SUPLA_ID=${SUPLA_ID:-}"
+              echo "SUPLA_SECRET=${SUPLA_SECRET:-}"
+              echo "SUPLA_TOKEN_URL=${SUPLA_TOKEN_URL:-https://svr111.supla.org/oauth/v2/token}"
+              echo "SUPLA_REDIRECT_URI=${SUPLA_REDIRECT_URI:-}"
+              echo "SUPLA_REFRESH_TOKEN=${SUPLA_REFRESH_TOKEN:-}"
+              echo "SUPLA_OAUTH_HELPER=${SUPLA_OAUTH_HELPER:-false}"
             } > .env
 
             docker compose down --remove-orphans 2>/dev/null || true
