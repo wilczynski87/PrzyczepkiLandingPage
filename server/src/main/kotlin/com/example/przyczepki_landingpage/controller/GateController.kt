@@ -1,6 +1,7 @@
 package com.example.przyczepki_landingpage.controller
 
 import com.example.przyczepki_landingpage.data.OpenGateRequest
+import com.example.przyczepki_landingpage.data.Reservation
 import com.example.przyczepki_landingpage.service.GateAccessDeniedException
 import com.example.przyczepki_landingpage.service.GateService
 import io.ktor.http.HttpStatusCode
@@ -31,10 +32,11 @@ fun Route.gate() {
 
                 try {
                     val customerId = gateService.checkUserAuthenticated(jwtUserId)
-                    val reservation = gateService.checkUserHasReservation(
-                        customerId = customerId,
-                        reservationId = request.reservationId,
-                    )
+//                    val reservation = gateService.checkUserHasReservation(
+//                        customerId = customerId,
+//                        reservationId = request.reservationId,
+//                    )
+                    val reservation = Reservation("id")
                     gateService.ensureCooldown(customerId)
 
                     val response = gateService.openGate().copy(

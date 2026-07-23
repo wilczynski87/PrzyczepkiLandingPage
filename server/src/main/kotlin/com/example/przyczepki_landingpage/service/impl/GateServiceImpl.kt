@@ -92,10 +92,10 @@ class GateServiceImpl(
     }
 
     private suspend fun triggerGate() {
-        if (gateConfig.mockMode) {
-            println("Gate mock mode enabled – skipping hardware call")
-            return
-        }
+//        if (gateConfig.mockMode) {
+//            println("Gate mock mode enabled – skipping hardware call")
+//            return
+//        }
 
         require(gateConfig.openUrl.isNotBlank()) { "GATE_OPEN_URL is missing" }
 
