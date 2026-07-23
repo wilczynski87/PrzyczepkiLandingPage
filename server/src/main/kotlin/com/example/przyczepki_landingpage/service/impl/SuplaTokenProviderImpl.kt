@@ -16,6 +16,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.io.File
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -25,7 +26,7 @@ import kotlin.time.Instant
  * Automatyczne odświeżanie tokenów SUPLA OAuth:
  * 1. access token w cache (~1h), odnawiany przed wygaśnięciem
  * 2. refresh token rotowany przez SUPLA – zapisywany w MongoDB (przeżywa restart)
- * 3. fallback do SUPLA_REFRESH_TOKEN z env przy pierwszym starcie
+ * 3. przy invalid_grant: reload z Mongo → live odczyt .env → GATE_ACCESS_TOKEN
  */
 class SuplaTokenProviderImpl(
     private val client: HttpClient,
@@ -58,35 +59,8 @@ class SuplaTokenProviderImpl(
         }
 
         return when {
-            !refreshToken.isNullOrBlank() && canRefresh() -> {
-                runCatching { refreshAccessTokenLocked() }
-                    .recoverCatching { firstError ->
-                        // Mongo może mieć stary/zrotowany refresh – spróbuj fallback z .env
-                        val envRefresh = gateConfig.refreshToken
-                        if (!envRefresh.isNullOrBlank() && envRefresh != refreshToken) {
-                            println("SUPLA: refresh z DB nieudany, próbuję SUPLA_REFRESH_TOKEN z env")
-                            refreshToken = envRefresh
-                            refreshAccessTokenLocked()
-                        } else {
-                            throw firstError
-                        }
-                    }
-                    .getOrElse { e ->
-                        if (!gateConfig.accessToken.isNullOrBlank()) {
-                            println("SUPLA: refresh nieudany (${e.message}), używam GATE_ACCESS_TOKEN")
-                            cachedAccessToken = gateConfig.accessToken
-                            expiresAt = Instant.DISTANT_FUTURE
-                            gateConfig.accessToken!!
-                        } else {
-                            throw e
-                        }
-                    }
-            }
-            !gateConfig.accessToken.isNullOrBlank() -> {
-                cachedAccessToken = gateConfig.accessToken
-                expiresAt = Instant.DISTANT_FUTURE
-                gateConfig.accessToken
-            }
+            !refreshToken.isNullOrBlank() && canRefresh() -> refreshWithFallbackLocked()
+            !gateConfig.accessToken.isNullOrBlank() -> useStaticAccessTokenLocked()
             else -> throw IllegalStateException(
                 "Brak SUPLA tokenu. Ustaw SUPLA_REFRESH_TOKEN (OAuth z offline_access) " +
                     "lub użyj POST /gate/supla/exchange-code."
@@ -95,7 +69,7 @@ class SuplaTokenProviderImpl(
     }
 
     override suspend fun ensureFreshToken() {
-        if (!canRefresh() && gateConfig.refreshToken.isNullOrBlank() && refreshToken.isNullOrBlank()) {
+        if (!canRefresh() && readLiveRefreshToken().isNullOrBlank() && refreshToken.isNullOrBlank()) {
             return
         }
         val needsRefresh = mutex.withLock {
@@ -107,7 +81,6 @@ class SuplaTokenProviderImpl(
         }
         if (needsRefresh) {
             println("SUPLA: proaktywne odświeżenie access tokenu")
-            // getAccessToken ma fallback env / GATE_ACCESS_TOKEN – w przeciwieństwie do samego refreshAccessTokenLocked
             getAccessToken(forceRefresh = true)
         }
     }
@@ -126,8 +99,57 @@ class SuplaTokenProviderImpl(
         loadedFromStore = true
     }
 
+    private suspend fun refreshWithFallbackLocked(): String {
+        val firstError = runCatching { refreshAccessTokenLocked() }.exceptionOrNull()
+        if (firstError == null) {
+            return cachedAccessToken
+                ?: throw IllegalStateException("SUPLA refresh OK, ale brak access_token w cache")
+        }
+
+        // 1) Mongo mogło zostać zaktualizowane poza procesem (np. ręczna naprawa)
+        val previousRefresh = refreshToken
+        reloadFromStoreLocked()
+        if (!refreshToken.isNullOrBlank() && refreshToken != previousRefresh && canRefresh()) {
+            println("SUPLA: retry z refresh_token przeładowanym z Mongo")
+            runCatching { return refreshAccessTokenLocked() }
+        }
+
+        // 2) Ważny access z Mongo – użyj go zamiast padać na wygasłym refresh
+        val cached = cachedAccessToken
+        if (cached != null && Clock.System.now() < expiresAt) {
+            println("SUPLA: refresh nieudany, używam wciąż ważnego access tokenu z Mongo")
+            return cached
+        }
+
+        // 3) Live .env / getenv (gateConfig jest zamrożony od startu procesu)
+        val envRefresh = readLiveRefreshToken()
+        if (!envRefresh.isNullOrBlank() && envRefresh != refreshToken && canRefresh()) {
+            println("SUPLA: retry z SUPLA_REFRESH_TOKEN z .env/getenv")
+            refreshToken = envRefresh
+            runCatching { return refreshAccessTokenLocked() }
+        }
+
+        if (!gateConfig.accessToken.isNullOrBlank()) {
+            println("SUPLA: refresh nieudany (${firstError.message}), używam GATE_ACCESS_TOKEN")
+            return useStaticAccessTokenLocked()
+        }
+
+        throw firstError
+    }
+
+    private fun useStaticAccessTokenLocked(): String {
+        cachedAccessToken = gateConfig.accessToken
+        expiresAt = Instant.DISTANT_FUTURE
+        return gateConfig.accessToken!!
+    }
+
     private suspend fun ensureLoadedFromStore() {
         if (loadedFromStore) return
+        reloadFromStoreLocked()
+        loadedFromStore = true
+    }
+
+    private suspend fun reloadFromStoreLocked() {
         val stored = runCatching { tokenRepo.load() }.getOrNull()
         if (stored != null) {
             if (!stored.accessToken.isNullOrBlank()) {
@@ -140,11 +162,13 @@ class SuplaTokenProviderImpl(
                 expiresAt = Instant.fromEpochMilliseconds(it)
             }
             println("SUPLA: wczytano tokeny z bazy (refresh=${!stored.refreshToken.isNullOrBlank()})")
-        } else if (!gateConfig.refreshToken.isNullOrBlank()) {
-            refreshToken = gateConfig.refreshToken
-            println("SUPLA: używam SUPLA_REFRESH_TOKEN z env (pierwszy start)")
+        } else {
+            val envRefresh = readLiveRefreshToken()
+            if (!envRefresh.isNullOrBlank()) {
+                refreshToken = envRefresh
+                println("SUPLA: używam SUPLA_REFRESH_TOKEN z env (brak dokumentu w DB)")
+            }
         }
-        loadedFromStore = true
     }
 
     private fun canRefresh(): Boolean =
@@ -174,9 +198,9 @@ class SuplaTokenProviderImpl(
                 errorBody.contains("expired", ignoreCase = true)
             throw IllegalStateException(
                 if (expired) {
-                    "SUPLA refresh_token wygasł (~30 dni bez odświeżenia). " +
-                        "Wygeneruj nowy: włącz SUPLA_OAUTH_HELPER=true, " +
-                        "otwórz /oauth/v2/auth, potem POST /gate/supla/exchange-code. " +
+                    "SUPLA refresh_token wygasł lub został zrotowany. " +
+                        "Zrestartuj API po aktualizacji tokenów w Mongo/.env, " +
+                        "albo wygeneruj nowy (SUPLA_OAUTH_HELPER + exchange-code). " +
                         "Szczegóły: ${response.status} $errorBody".trim()
                 } else {
                     "SUPLA token refresh failed ${response.status}: $errorBody".trim()
@@ -215,6 +239,29 @@ class SuplaTokenProviderImpl(
     companion object {
         private const val SKEW_SECONDS = 60L
         private val REFRESH_AHEAD = 5.minutes
+
+        /**
+         * gateConfig/System.getenv są zamrożone od startu procesu (Gradle wstrzykuje .env raz).
+         * Przy awarii czytamy plik .env z dysku, żeby podjąć świeży SUPLA_REFRESH_TOKEN bez restartu.
+         */
+        fun readLiveRefreshToken(): String? {
+            val fromFile = sequenceOf(
+                File(".env"),
+                File("../.env"),
+                File("../../.env"),
+            ).mapNotNull { file ->
+                if (!file.isFile) return@mapNotNull null
+                file.readLines()
+                    .map { it.trim() }
+                    .firstOrNull { it.startsWith("SUPLA_REFRESH_TOKEN=") }
+                    ?.substringAfter("=", "")
+                    ?.trim()
+                    ?.takeIf { it.isNotBlank() }
+            }.firstOrNull()
+
+            return fromFile
+                ?: System.getenv("SUPLA_REFRESH_TOKEN")?.takeIf { it.isNotBlank() }
+        }
     }
 }
 
