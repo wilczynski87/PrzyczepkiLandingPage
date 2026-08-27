@@ -122,6 +122,12 @@ private fun BottomInfoLinks(
             }
         }
         TextButton(
+            onClick = { viewModel.navigateTo(CurrentScreen.TRAILERS) },
+            modifier = Modifier.padding(0.dp)
+        ) {
+            Text("Przyczepki")
+        }
+        TextButton(
             onClick = { viewModel.navigateTo(CurrentScreen.PRICES) },
             modifier = Modifier.padding(0.dp)
         ) {

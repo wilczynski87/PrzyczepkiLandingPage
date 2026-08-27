@@ -6,48 +6,57 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.runtime.Composable
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
-import com.example.przyczepki_landingpage.model.asPrice
 import com.example.przyczepki_landingpage.data.Prices
 import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.getEnvironment
-import org.jetbrains.compose.resources.painterResource
+import com.example.przyczepki_landingpage.model.CurrentScreen
+import com.example.przyczepki_landingpage.model.asPrice
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 
@@ -69,9 +78,21 @@ fun TrailerTable(
     ) {
         trailers.forEach { trailer ->
             if (widthSizeClass != WindowWidthSizeClass.Compact) {
-                TrailerCardBig(trailer) { appViewModel.reservationButtonClick(trailer) }
+                TrailerCardBig(
+                    trailer = trailer,
+                    rezerwuj = { appViewModel.reservationButtonClick(trailer) },
+                    onImageClick = {
+                        appViewModel.openTrailerDetail(trailer, CurrentScreen.LANDING)
+                    }
+                )
             } else {
-                TrailerCardSmall(trailer) { appViewModel.reservationButtonClick(trailer) }
+                TrailerCardSmall(
+                    trailer = trailer,
+                    rezerwuj = { appViewModel.reservationButtonClick(trailer) },
+                    onImageClick = {
+                        appViewModel.openTrailerDetail(trailer, CurrentScreen.LANDING)
+                    }
+                )
             }
         }
         Spacer(Modifier.height(4.dp))
@@ -79,7 +100,11 @@ fun TrailerTable(
 }
 
 @Composable
-fun TrailerCardBig(trailer: Trailer, rezerwuj: () -> Unit = {}) {
+fun TrailerCardBig(
+    trailer: Trailer,
+    rezerwuj: () -> Unit = {},
+    onImageClick: () -> Unit = {},
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
@@ -95,17 +120,22 @@ fun TrailerCardBig(trailer: Trailer, rezerwuj: () -> Unit = {}) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if(trailer.images.isNullOrEmpty() || trailer.images["thumbnail"] == null) {
-                    Icon(Icons.Default.BrokenImage, "brak zdjęcia")
+                    Icon(
+                        Icons.Default.BrokenImage,
+                        "brak zdjęcia",
+                        modifier = Modifier.clickable(onClick = onImageClick)
+                    )
                 } else {
                     val resource = trailer.images["thumbnail"]?.let { asyncPainterResource(it) }
                     KamelImage(
                         { resource!! },
-                        contentDescription = "Przyczepka",
+                        contentDescription = "Przyczepka — otwórz galerię",
                         onLoading = { CircularProgressIndicator() },
                         onFailure = { Icon(Icons.Default.BrokenImage, "brak zdjęcia") },
                         modifier = Modifier
                             .size(140.dp)
                             .clip(RoundedCornerShape(14.dp))
+                            .clickable(onClick = onImageClick)
                     )
                 }
                 Spacer(Modifier.width(20.dp))
@@ -159,7 +189,8 @@ fun TrailerCardBig(trailer: Trailer, rezerwuj: () -> Unit = {}) {
 @Composable
 fun TrailerCardSmall(
     trailer: Trailer,
-    rezerwuj: () -> Unit
+    rezerwuj: () -> Unit,
+    onImageClick: () -> Unit = {},
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -173,7 +204,11 @@ fun TrailerCardSmall(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(Modifier) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onImageClick)
+            ) {
                 if(trailer.images.isNullOrEmpty() || trailer.images["tyl"] == null) {
                     Icon(Icons.Default.BrokenImage, "brak zdjęcia")
                 } else {
@@ -181,7 +216,7 @@ fun TrailerCardSmall(
                         resource = {
                             asyncPainterResource(trailer.images["tyl"]!!)
                         },
-                        contentDescription = "Przyczepka",
+                        contentDescription = "Przyczepka — otwórz galerię",
                         contentScale = ContentScale.Fit,
                         onLoading = {
                             CircularProgressIndicator(
@@ -204,7 +239,6 @@ fun TrailerCardSmall(
                             .matchParentSize()
                             .clip(RoundedCornerShape(14.dp))
                             .alpha(0.5f)
-
                     )
                 }
 

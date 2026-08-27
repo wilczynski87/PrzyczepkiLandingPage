@@ -4,36 +4,30 @@ import com.example.przyczepki_landingpage.controller.ApiClient
 import com.example.przyczepki_landingpage.data.Customer
 import com.example.przyczepki_landingpage.data.LoginRequest
 import com.example.przyczepki_landingpage.data.LoginResponse
-import com.example.przyczepki_landingpage.model.CurrentScreen
-import com.example.przyczepki_landingpage.model.LoginUiState
-import com.example.przyczepki_landingpage.model.ModalType
-import com.example.przyczepki_landingpage.model.mapLoginError
-import com.example.przyczepki_landingpage.model.validateLoginInput
 import com.example.przyczepki_landingpage.data.PAYMENT_RETURN_PATH
 import com.example.przyczepki_landingpage.data.PAYMENT_SESSION_STORAGE_KEY
 import com.example.przyczepki_landingpage.data.PaymentSessionStatus
 import com.example.przyczepki_landingpage.data.ReservationDto
-import com.example.przyczepki_landingpage.getCurrentPath
-import com.example.przyczepki_landingpage.getLocalStorageValue
-import com.example.przyczepki_landingpage.removeLocalStorageValue
-import com.example.przyczepki_landingpage.replaceBrowserPath
-import com.example.przyczepki_landingpage.setLocalStorageValue
-import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.data.Trailer
+import com.example.przyczepki_landingpage.model.CurrentScreen
+import com.example.przyczepki_landingpage.model.LoginUiState
+import com.example.przyczepki_landingpage.model.ModalData
+import com.example.przyczepki_landingpage.model.ModalType
 import com.example.przyczepki_landingpage.model.ServerResponse
 import com.example.przyczepki_landingpage.model.ServerStatus
+import com.example.przyczepki_landingpage.model.mapLoginError
 import com.example.przyczepki_landingpage.model.millisToLocalDate
+import com.example.przyczepki_landingpage.model.validateLoginInput
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
-import kotlin.onSuccess
 
 class AppViewModel(private val scope: CoroutineScope) {
     private val _appState = MutableStateFlow(AppState())
@@ -161,6 +155,36 @@ class AppViewModel(private val scope: CoroutineScope) {
     fun reservationButtonClick(trailer: Trailer) {
         onTrailerSelected(trailer)
         navigateTo(CurrentScreen.RESERVATION)
+    }
+
+    fun openTrailerDetail(
+        trailer: Trailer,
+        returnScreen: CurrentScreen = CurrentScreen.LANDING,
+    ) {
+        _appState.update {
+            it.copy(
+                selectedTrailer = trailer,
+                trailerDetailReturnScreen = returnScreen,
+                currentScreen = CurrentScreen.TRAILER_DETAIL,
+            )
+        }
+    }
+
+    fun openNextTrailerDetail() {
+        val trailers = appState.value.trailers
+        if (trailers.isEmpty()) return
+        val current = appState.value.selectedTrailer
+        val currentIndex = trailers.indexOfFirst { trailer ->
+            when {
+                current?.id != null && trailer.id != null -> trailer.id == current.id
+                else -> trailer.name == current?.name
+            }
+        }
+        val nextIndex = if (currentIndex < 0) 0 else (currentIndex + 1) % trailers.size
+        openTrailerDetail(
+            trailer = trailers[nextIndex],
+            returnScreen = appState.value.trailerDetailReturnScreen,
+        )
     }
 
     fun openModal(modalType: ModalType, modal: ModalData? = null,) {

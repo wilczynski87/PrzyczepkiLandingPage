@@ -34,6 +34,7 @@ data class AppState(
 
     val trailers: List<Trailer> = emptyList(),
     val selectedTrailer: Trailer? = null,
+    val trailerDetailReturnScreen: CurrentScreen = CurrentScreen.LANDING,
 
     val accessToken: String? = null,
     val refreshToken: String? = null,
@@ -59,27 +60,27 @@ val logo = mapOf(
 )
 
 val vesta = mapOf<String, String>(
-    "thumbnail" to "https://i.postimg.cc/t1FRyJMH/vesta4.webp",
-    "plandeka" to "https://i.postimg.cc/YSsv6mNj/vesta4.webp",
-    "przod" to "https://i.postimg.cc/SKvn6zL2/vesta_przod.webp",
-    "bokPrzod" to "https://i.postimg.cc/28G8dZmP/vesta3.webp",
-    "tyl" to "https://i.postimg.cc/pd6mfnQp/vesta2.webp",
+    // Postimages: page-id URL = ~180px thumbnail; use website hotlink / original
+    "thumbnail" to "https://i.postimg.cc/YSsv6mNj/vesta4.webp",      // 1200x800
+    "przod" to "https://i.postimg.cc/SKvn6zL2/vesta-przod.webp",      // 1067x800
+    "tyl" to "https://i.postimg.cc/pd6mfnQp/vesta2.webp",             // 1200x800
+    "bok" to "https://i.postimg.cc/28G8dZmP/vesta3.webp",              // 1200x800
+    "plandeka" to "https://i.postimg.cc/YSsv6mNj/vesta4.webp",         // 1200x800
 )
 
 val zaslaw = mapOf<String, String>(
-    "thumbnail" to "https://i.postimg.cc/D8QF00rt/zaslaw1.webp",
-    "bokZamkniety" to "https://i.postimg.cc/zX6fdRVX/zaslaw1.webp",
-    "bokOtwarty" to "https://i.postimg.cc/YqZSXmhH/zaslaw_bok.webp",
-    "przod" to "https://i.postimg.cc/TYFPkWph/zaslaw4.webp",
-    "tyl" to "https://i.postimg.cc/kXz5jtB2/zaslaw2.webp",
+    "thumbnail" to "https://i.postimg.cc/zX6fdRVX/zaslaw1.webp",       // 1280x720 (card)
+    "bok" to "https://i.postimg.cc/YqZSXmhH/zaslaw-bok.webp",          // 1067x800
+    "bokZamkniety" to "https://i.postimg.cc/fDT0RcsX/zaslaw1.webp",    // 2048x1152 original
+    "tyl" to "https://i.postimg.cc/rMFtw1TN/zaslaw2.webp",             // 2048x1152 original
+    "przod" to "https://i.postimg.cc/7wYTZ341/zaslaw4.webp",           // 2048x1152 original
 )
 
 val carroDelta = mapOf<String, String>(
-    "thumbnail" to "https://i.postimg.cc/4YZNWpb0/Carro-Flat.webp",
-    "carroFlat" to "https://i.postimg.cc/13Vn5Hgy/Carro-Flat.webp",
-    "carroBack" to "https://i.postimg.cc/Dw4JygW2/Carro-Back.webp",
-    "carroFront" to "https://i.postimg.cc/cJqKKn3P/Carro-Front.webp",
-    "flat" to ""
+    "thumbnail" to "https://i.postimg.cc/13Vn5Hgy/Carro-Flat.webp",    // 1151x500
+    "carroFlat" to "https://i.postimg.cc/13Vn5Hgy/Carro-Flat.webp",    // 1151x500
+    "carroBack" to "https://i.postimg.cc/Dw4JygW2/Carro-Back.webp",    // 1080x617
+    "carroFront" to "https://i.postimg.cc/cJqKKn3P/Carro-Front.webp",  // 959x636
 )
 
 val trailers = listOf(
@@ -89,6 +90,7 @@ val trailers = listOf(
         loadingMass = 520.00,
         gvw = 750.00,
         purpose = "Towarowa",
+        zastosowanie = "Przewóz towarów, mebli i AGD w mieście (kat. B).",
         axles = 1,
         licenseCategory = LicenseCategory.B,
         hasBreaks = false,
@@ -101,6 +103,7 @@ val trailers = listOf(
         loadingMass = 465.00,
         gvw = 750.00,
         purpose = "Towarowa",
+        zastosowanie = "Przeprowadzki i większe ładunki (kat. B).",
         axles = 2,
         licenseCategory = LicenseCategory.B,
         hasBreaks = false,
@@ -113,10 +116,11 @@ val trailers = listOf(
         loadingMass = 413.00,
         gvw = 750.00,
         purpose = "Towarowa",
+        zastosowanie = "Platforma 4×2 m — palety, maszyny, długie elementy (kat. B).",
         axles = 2,
         licenseCategory = LicenseCategory.B,
         hasBreaks = false,
-        prices = Prices("2", 70.00, 60.00, 50.00, 50.00, reservation = 50.00),
+        prices = Prices("2", 80.00, 70.00, 60.00, 60.00, reservation = 60.00),
         images = carroDelta
     ),
 )

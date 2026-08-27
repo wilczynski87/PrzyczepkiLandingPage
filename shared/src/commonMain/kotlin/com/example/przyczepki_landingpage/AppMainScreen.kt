@@ -25,15 +25,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import com.example.przyczepki_landingpage.data.LicenseCategory
 import com.example.przyczepki_landingpage.model.CurrentScreen
 import com.example.przyczepki_landingpage.model.ModalType
-import com.example.przyczepki_landingpage.data.Prices
-import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.ui.ContactPage
 import com.example.przyczepki_landingpage.ui.CustomerRegistrationForm
-import com.example.przyczepki_landingpage.ui.LoginOrRegister
 import com.example.przyczepki_landingpage.ui.HowToReservePage
+import com.example.przyczepki_landingpage.ui.LoginOrRegister
 import com.example.przyczepki_landingpage.ui.MainScreen
 import com.example.przyczepki_landingpage.ui.MyTopAppBar
 import com.example.przyczepki_landingpage.ui.PricesPage
@@ -43,11 +40,14 @@ import com.example.przyczepki_landingpage.ui.ReservationPage
 import com.example.przyczepki_landingpage.ui.ReservationSummaryPage
 import com.example.przyczepki_landingpage.ui.SiteFooter
 import com.example.przyczepki_landingpage.ui.TermsPage
+import com.example.przyczepki_landingpage.ui.TrailerDetailPage
+import com.example.przyczepki_landingpage.ui.TrailersPage
 import com.example.przyczepki_landingpage.ui.modal.AppModals
 import kotlinx.coroutines.MainScope
 import org.jetbrains.compose.resources.painterResource
 import przyczepkilandingpage.shared.generated.resources.Res
 import przyczepkilandingpage.shared.generated.resources.przyczepka1
+
 val scope = MainScope()
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
@@ -91,6 +91,14 @@ fun AppMainScreen() {
                 when (screen) {
                     CurrentScreen.LANDING -> {
                         MainScreen(widthSizeClass, viewModel)
+                    }
+
+                    CurrentScreen.TRAILERS -> {
+                        TrailersPage(widthSizeClass, viewModel)
+                    }
+
+                    CurrentScreen.TRAILER_DETAIL -> {
+                        TrailerDetailPage(widthSizeClass, viewModel)
                     }
 
                     CurrentScreen.RESERVATION -> {

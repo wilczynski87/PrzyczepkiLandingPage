@@ -52,6 +52,7 @@ class TrailersRepoImpl(
         updated.loadingMass?.let { updates.add(Updates.set("loadingMass", it)) }
         updated.gvw?.let { updates.add(Updates.set("gvw", it)) }
         updated.purpose?.let { updates.add(Updates.set("purpose", it)) }
+        updated.zastosowanie?.let { updates.add(Updates.set("zastosowanie", it)) }
         updated.axles?.let { updates.add(Updates.set("axles", it)) }
         updated.licenseCategory?.let { updates.add(Updates.set("licenseCategory", it.name)) } // enum → string
         updated.hasBreaks?.let { updates.add(Updates.set("hasBreaks", it)) }
@@ -82,6 +83,7 @@ data class TrailerTable(
     val loadingMass: Double? = null,
     val gvw: Double? = null,
     val purpose: String? = null,
+    val zastosowanie: String? = null,
     val axles: Int? = null,
     val licenseCategory: LicenseCategory? = null,
     val hasBreaks: Boolean? = null,
@@ -97,6 +99,7 @@ data class TrailerTable(
             loadingMass = loadingMass,
             gvw = gvw,
             purpose = purpose,
+            zastosowanie = zastosowanie,
             axles = axles,
             licenseCategory = licenseCategory,
             hasBreaks = hasBreaks,
@@ -116,6 +119,7 @@ fun Trailer.toTable(): TrailerTable {
         loadingMass = loadingMass,
         gvw = gvw,
         purpose = purpose,
+        zastosowanie = zastosowanie,
         axles = axles,
         licenseCategory = licenseCategory,
         hasBreaks = hasBreaks,

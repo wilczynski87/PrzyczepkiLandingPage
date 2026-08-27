@@ -2,6 +2,8 @@ package com.example.przyczepki_landingpage.model
 
 enum class CurrentScreen {
     LANDING,
+    TRAILERS,
+    TRAILER_DETAIL,
     RESERVATION,
     PRICES,
     CONTACT,

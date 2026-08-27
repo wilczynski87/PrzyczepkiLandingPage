@@ -1,7 +1,6 @@
 package com.example.przyczepki_landingpage.data
 
 import kotlinx.serialization.Serializable
-import org.jetbrains.compose.resources.DrawableResource
 
 @Serializable
 data class Trailer(
@@ -11,6 +10,7 @@ data class Trailer(
     val loadingMass: Double? = null,
     val gvw: Double? = null,
     val purpose: String? = null,
+    val zastosowanie: String? = null,
     val axles: Int? = null,
     val licenseCategory: LicenseCategory? = null,
     val hasBreaks: Boolean? = null,
