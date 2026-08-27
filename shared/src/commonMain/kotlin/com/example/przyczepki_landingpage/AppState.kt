@@ -74,11 +74,12 @@ val zaslaw = mapOf<String, String>(
     "tyl" to "https://i.postimg.cc/kXz5jtB2/zaslaw2.webp",
 )
 
-val foowee = mapOf<String, String>(
-    "thumbnail" to "https://i.postimg.cc/PNdh97BF/bok-prawy.jpg",
-    "prawyBok" to "https://i.postimg.cc/9X7MR51V/bok-prawy.jpg",
-    "lewyBok" to "https://i.postimg.cc/YqPbXFY3/bok-lewy.jpg",
-    "tyl" to "https://i.postimg.cc/7P26G89F/tyl.jpg",
+val carroDelta = mapOf<String, String>(
+    "thumbnail" to "https://i.postimg.cc/4YZNWpb0/Carro-Flat.webp",
+    "carroFlat" to "https://i.postimg.cc/13Vn5Hgy/Carro-Flat.webp",
+    "carroBack" to "https://i.postimg.cc/Dw4JygW2/Carro-Back.webp",
+    "carroFront" to "https://i.postimg.cc/cJqKKn3P/Carro-Front.webp",
+    "flat" to ""
 )
 
 val trailers = listOf(
@@ -107,16 +108,16 @@ val trailers = listOf(
         images = zaslaw
     ),
     Trailer(
-        name = "Przyczepka lekka - platforma FOOWEE",
-        size = "390 x 200 x 0 cm",
-        loadingMass = 400.00,
+        name = "Przyczepka lekka - platforma CARRO DELTA D4020",
+        size = "400 x 200 x 40 cm",
+        loadingMass = 413.00,
         gvw = 750.00,
         purpose = "Towarowa",
         axles = 2,
         licenseCategory = LicenseCategory.B,
         hasBreaks = false,
-        prices = Prices("2", 80.00, 70.00, 60.00, 60.00, reservation = 60.00),
-        images = foowee
+        prices = Prices("2", 70.00, 60.00, 50.00, 50.00, reservation = 50.00),
+        images = carroDelta
     ),
 )
 

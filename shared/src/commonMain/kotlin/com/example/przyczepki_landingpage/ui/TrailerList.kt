@@ -352,7 +352,7 @@ fun TableRowPrice(
                     ) {
                         PriceDetailRow("Druga doba", "${prices.secondDay?.asPrice()} zł")
                         PriceDetailRow("Każda kolejna doba", "${prices.otherDays?.asPrice()} zł")
-                        PriceDetailRow("12 godzin", "${prices.halfDay?.asPrice()} zł")
+                        PriceDetailRow("Do 6h", "${prices.halfDay?.asPrice()} zł")
                         PriceDetailRow("Rezerwacja", "${prices.reservation?.asPrice()} zł")
                     }
                 }
