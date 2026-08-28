@@ -120,7 +120,7 @@ val trailers = listOf(
         axles = 2,
         licenseCategory = LicenseCategory.B,
         hasBreaks = false,
-        prices = Prices("2", 80.00, 70.00, 60.00, 60.00, reservation = 60.00),
+        prices = Prices("3", 80.00, 70.00, 60.00, 60.00, reservation = 60.00),
         images = carroDelta
     ),
 )
