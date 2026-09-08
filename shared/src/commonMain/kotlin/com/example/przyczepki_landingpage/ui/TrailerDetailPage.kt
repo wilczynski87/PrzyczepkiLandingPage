@@ -51,7 +51,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
 import com.example.przyczepki_landingpage.data.Trailer
-import com.example.przyczepki_landingpage.getEnvironment
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.launch
@@ -123,9 +122,7 @@ fun TrailerDetailPage(
 
                 TableRowPrice(prices = trailer.prices)
 
-                if (getEnvironment() == "prod") {
-                    Reservation { viewModel.reservationButtonClick(trailer) }
-                }
+                Reservation { viewModel.reservationButtonClick(trailer) }
             }
 
             Spacer(Modifier.height(24.dp))

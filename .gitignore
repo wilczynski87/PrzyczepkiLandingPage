@@ -20,4 +20,4 @@ node_modules/
 npm/data/
 npm/letsencrypt/
 .env
-docker-compose.dev.yaml
+# docker-compose.dev.yaml jest wersjonowany (lokalny stack DEV)

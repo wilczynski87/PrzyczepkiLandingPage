@@ -21,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
-import com.example.przyczepki_landingpage.getEnvironment
 import com.example.przyczepki_landingpage.model.CurrentScreen
 import com.example.przyczepki_landingpage.model.latitude
 import com.example.przyczepki_landingpage.model.longitude
@@ -113,13 +112,11 @@ private fun BottomInfoLinks(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        if (getEnvironment() == "prod") {
-            TextButton(
-                onClick = { viewModel.navigateTo(CurrentScreen.RESERVATION) },
-                modifier = Modifier.padding(0.dp)
-            ) {
-                Text("Rezerwacje")
-            }
+        TextButton(
+            onClick = { viewModel.navigateTo(CurrentScreen.RESERVATION) },
+            modifier = Modifier.padding(0.dp)
+        ) {
+            Text("Rezerwacje")
         }
         TextButton(
             onClick = { viewModel.navigateTo(CurrentScreen.TRAILERS) },

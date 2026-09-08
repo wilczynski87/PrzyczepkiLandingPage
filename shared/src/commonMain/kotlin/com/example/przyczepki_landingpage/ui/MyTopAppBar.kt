@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
 import com.example.przyczepki_landingpage.AppViewModel
-import com.example.przyczepki_landingpage.getEnvironment
 import com.example.przyczepki_landingpage.model.CurrentScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,7 +69,7 @@ fun MyTopAppBar(viewModel: AppViewModel) {
                         viewModel.navigateTo(CurrentScreen.TRAILERS)
                     }
                 )
-                if(getEnvironment() == "prod") DropdownMenuItem(
+                DropdownMenuItem(
                     text = { Text("Rezerwacja") },
                     onClick = {
                         expanded = false

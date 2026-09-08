@@ -1,69 +1,90 @@
-This is a Kotlin Multiplatform project targeting Web, Server.
+# PrzyczepkiLandingPage
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+Kotlin Multiplatform: Compose (WASM/JS) + Ktor API + MongoDB.
+Rezerwacje przyczepek, płatności Przelewy24, brama Supla, e-mail.
 
-* [/server](./server/src/main/kotlin) is for the Ktor server application.
+## Moduły
 
-* [/shared](./shared/src) is for the code that will be shared between all targets in the project.
-  The most important subfolder is [commonMain](./shared/src/commonMain/kotlin). If preferred, you
-  can add code to the platform-specific folders here too.
+* [`composeApp`](./composeApp/src) — entry point WASM/JS
+* [`shared`](./shared/src) — UI Compose, modele, klienty HTTP (commonMain)
+* [`server`](./server/src/main/kotlin) — API Ktor (port **8090**)
 
-### Build and Run Server
+## Tryby: DEV vs PROD
 
-To build and run the development version of the server, use the run configuration from the run widget
-in your IDE’s toolbar or run it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :server:run
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :server:run
-  ```
+| | Lokalnie **DEV** | Produkcja **PROD** |
+|---|---|---|
+| `APP_ENV` / `API_ENV` | `dev` | `prod` |
+| Płatności | `PAYMENT_MOCK=true` / sandbox | live P24 (`PAYMENT_MOCK=false`) |
+| Brama | `GATE_MOCK=true` (domyślnie) | Supla live |
+| UI rezerwacji | zawsze dostępne | zawsze dostępne |
 
-### Build and Run Web Application
-
-To build and run the development version of the web app, use the run configuration from the run widget
-in your IDE's toolbar or run it directly from the terminal:
-- for the Wasm target (faster, modern browsers):
-  - on macOS/Linux
-    ```shell
-    ./gradlew :composeApp:wasmJsBrowserDevelopmentRun
-    ```
-  - on Windows
-    ```shell
-    .\gradlew.bat :composeApp:wasmJsBrowserDevelopmentRun
-    ```
-- for the JS target (slower, supports older browsers):
-  - on macOS/Linux
-    ```shell
-    ./gradlew :composeApp:jsBrowserDevelopmentRun
-    ```
-  - on Windows
-    ```shell
-    .\gradlew.bat :composeApp:jsBrowserDevelopmentRun
-    ```
-
-The dev server runs on port **8080** by default. After payment, Przelewy24 redirects the user to
-`PAYMENT_URL_RETURN` (default in dev: `http://localhost:8080/podsumowanieRezerwacji`). The frontend
-must be running on that port — the API runs separately on **8090** (`./gradlew :server:run`).
-
-In production, nginx serves `index.html` for all SPA paths (`try_files ... /index.html`).
-In local dev, `composeApp/webpack.config.d/spa-routing.js` enables the same behaviour via
-`historyApiFallback`.
+Skopiuj env: `cp .env.example .env` i uzupełnij wartości.
 
 ---
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
-[Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform),
-[Kotlin/Wasm](https://kotl.in/wasm/)…
+## DEV — Gradle (codzienna praca)
 
-We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
-If you face any issues, please report them on [YouTrack](https://youtrack.jetbrains.com/newIssue?project=CMP).
+Frontend na **8080**, API na **8090**. Mongo (i opcjonalnie e-mail) w Dockerze.
+
+```shell
+# 1. Env
+cp .env.example .env   # jeśli jeszcze nie masz .env
+
+# 2. Baza (+ opcjonalnie e-mail)
+docker compose -f docker-compose.dev.yaml up -d przyczepki_db
+# docker compose -f docker-compose.dev.yaml up -d przyczepki_email
+
+# 3. API (ładuje .env z katalogu głównego)
+./gradlew :server:run
+
+# 4. Web (WASM)
+./gradlew :composeApp:wasmJsBrowserDevelopmentRun
+```
+
+Alternatywa JS (starsze przeglądarki): `./gradlew :composeApp:jsBrowserDevelopmentRun`
+
+Po płatności P24 użytkownik wraca na `PAYMENT_URL_RETURN`
+(domyślnie w `.env.example`: `http://localhost:8080/podsumowanieRezerwacji`).
+
+Lokalny webpack ma `historyApiFallback` (`composeApp/webpack.config.d/spa-routing.js`) —
+ścieżki SPA działają jak w produkcji (nginx `try_files`).
+
+---
+
+## DEV — pełny Docker
+
+Cały stack (web + API + Mongo + e-mail):
+
+```shell
+cp .env.example .env
+docker compose -f docker-compose.dev.yaml up --build
+```
+
+- Web: http://localhost:${WEB_PORT:-80}
+- API: http://localhost:8090
+- Domyślnie mocki płatności i bramy (`PAYMENT_MOCK` / `GATE_MOCK`)
+
+---
+
+## PROD — Docker
+
+Na VPS zwykle przez CI (`.github/workflows/deploy.yml`). Ręcznie:
+
+```shell
+# .env z APP_ENV=prod, API_ENV=prod i pełnymi sekretami
+docker compose up -d --build
+```
+
+[`docker-compose.yaml`](./docker-compose.yaml) domyślnie ustawia `APP_ENV`/`API_ENV` na **prod**.
+Nginx w obrazie web serwuje SPA i proxy `/api/` → API.
+
+---
+
+## Uwagi
+
+- `:server:run` wstrzykuje zmienne z `.env` (patrz `server/build.gradle.kts`).
+- W DEV API może działać bez credentials P24 (`PAYMENT_MOCK`) i bez bramy (`GATE_MOCK`).
+- W PROD brak wymaganych sekretów kończy się błędem startu (`ApiConfig`).
+
+Więcej o KMP: [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
+[Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform).

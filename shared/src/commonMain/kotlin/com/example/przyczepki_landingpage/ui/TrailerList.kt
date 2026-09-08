@@ -54,7 +54,6 @@ import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
 import com.example.przyczepki_landingpage.data.Prices
 import com.example.przyczepki_landingpage.data.Trailer
-import com.example.przyczepki_landingpage.getEnvironment
 import com.example.przyczepki_landingpage.model.CurrentScreen
 import com.example.przyczepki_landingpage.model.asPrice
 import io.kamel.image.KamelImage
@@ -180,8 +179,7 @@ fun TrailerCardBig(
             )
 
             // ===== CTA =====
-            println("ENV: ${getEnvironment()}")
-            if(getEnvironment() == "prod") Reservation(rezerwuj)
+            Reservation(rezerwuj)
         }
     }
 }
@@ -273,7 +271,7 @@ fun TrailerCardSmall(
             }
         }
         // Rezerwacja przy kalendarzu
-        if(getEnvironment() == "prod") Reservation(rezerwuj)
+        Reservation(rezerwuj)
     }
 }
 

@@ -21,7 +21,7 @@ services:
     image: wilczynski87/przyczepki-web:latest
     environment:
       - TZ=Europe/Warsaw
-      - APP_ENV=${APP_ENV:-dev}
+      - APP_ENV=${APP_ENV:-prod}
     networks:
       - przyczepki-network
     restart: unless-stopped
@@ -38,7 +38,7 @@ services:
     container_name: przyczepki_api
     environment:
       - TZ=Europe/Warsaw
-      - API_ENV=${APP_ENV:-dev}
+      - API_ENV=${APP_ENV:-prod}
       - DB_HOST=${DB_HOST:-przyczepki_db}
       - DB_PORT=${DB_PORT:-27017}
       - DB_NAME=${DB_NAME:-przyczepki}
