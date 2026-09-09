@@ -100,12 +100,9 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
-    # Tylko localhost na VPS — z lokalnej maszyny: ssh -L 27017:127.0.0.1:27017 user@vps
-    # Nie publikuj 0.0.0.0 (Mongo bez TLS na internet).
+    # Dostęp z zewnątrz (Compass). Wymaga otwartego 27017 na firewallu VPS.
     ports:
-      - "${DB_PORT:-27017}"
-    expose:
-      - "${DB_PORT:-27017}:${DB_PORT:-27017}"
+      - "${DB_PORT:-27017}:27017"
     volumes:
       - przyczepki_mongo_data:/data/db
 

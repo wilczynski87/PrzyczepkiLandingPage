@@ -78,12 +78,13 @@ docker compose up -d --build
 [`docker-compose.yaml`](./docker-compose.yaml) domyślnie ustawia `APP_ENV`/`API_ENV` na **prod**.
 Nginx w obrazie web serwuje SPA i proxy `/api/` → API.
 
-Mongo w PROD jest wystawione tylko na `127.0.0.1:27017` na VPS (nie na internet).
-Z lokalnej maszyny:
+Mongo w PROD jest wystawione na `0.0.0.0:27017` (dostęp z zewnątrz).
+Na VPS musi być otwarty firewall na TCP 27017. Nazwa bazy: `przyczepki` (nie `przyczepki_db`).
 
-```shell
-ssh -L 27017:127.0.0.1:27017 USER@VPS_HOST
-# potem klient Mongo na localhost:27017
+Przykład URI Compass (`!` w haśle → `%21`):
+
+```
+mongodb://admin:HASLO@IP_VPS:27017/przyczepki?authSource=admin
 ```
 
 ---
