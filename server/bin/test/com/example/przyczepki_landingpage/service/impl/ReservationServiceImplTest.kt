@@ -1,5 +1,6 @@
 package com.example.przyczepki_landingpage.service.impl
 
+import com.example.przyczepki_landingpage.support.FakeCustomerRepo
 import com.example.przyczepki_landingpage.support.FakeReservationRepo
 import com.example.przyczepki_landingpage.support.FakeTrailersRepo
 import com.example.przyczepki_landingpage.support.ReservationTestFixtures
@@ -14,7 +15,8 @@ class ReservationServiceImplTest {
 
     private val reservationRepo = FakeReservationRepo()
     private val trailersRepo = FakeTrailersRepo()
-    private val service = ReservationServiceImpl(reservationRepo, trailersRepo)
+    private val customerRepo = FakeCustomerRepo()
+    private val service = ReservationServiceImpl(reservationRepo, trailersRepo, customerRepo)
 
     @Test
     fun `checkReservation returns dto when dates are free`() = runBlocking {
@@ -41,7 +43,7 @@ class ReservationServiceImplTest {
     }
 
     @Test
-    fun `calculatePrice for single day uses first day rate only`() = runBlocking {
+    fun `calculatePrice for single day uses half day rate`() = runBlocking {
         trailersRepo.addTrailer(ReservationTestFixtures.trailer())
         val reservation = ReservationTestFixtures.reservationDto(
             startDate = LocalDate(2025, 6, 10),
@@ -52,7 +54,7 @@ class ReservationServiceImplTest {
 
         assertEquals(0L, result.reservationPrice?.daysNumber)
         assertEquals(30.0, result.reservationPrice?.reservation)
-        assertEquals(100.0, result.reservationPrice?.sum)
+        assertEquals(60.0, result.reservationPrice?.sum)
         assertEquals(ReservationTestFixtures.TRAILER_ID, result.reservationPrice?.trailerId)
     }
 
@@ -107,15 +109,34 @@ class ReservationServiceImplTest {
     }
 
     @Test
-    fun `calculatePrice throws when first day price is missing`() = runBlocking {
+    fun `calculatePrice throws when half day price is missing for single day`() = runBlocking {
         trailersRepo.addTrailer(
             ReservationTestFixtures.trailer(
-                prices = ReservationTestFixtures.samplePrices.copy(firstDay = null),
+                prices = ReservationTestFixtures.samplePrices.copy(halfDay = null),
             ),
         )
 
         val error = assertFailsWith<Exception> {
             service.calculatePrice(ReservationTestFixtures.reservationDto())
+        }
+
+        assertEquals("Trailer half day price not found", error.message)
+    }
+
+    @Test
+    fun `calculatePrice throws when first day price is missing for multi day range`() = runBlocking {
+        trailersRepo.addTrailer(
+            ReservationTestFixtures.trailer(
+                prices = ReservationTestFixtures.samplePrices.copy(firstDay = null),
+            ),
+        )
+        val reservation = ReservationTestFixtures.reservationDto(
+            startDate = LocalDate(2025, 6, 10),
+            endDate = LocalDate(2025, 6, 11),
+        )
+
+        val error = assertFailsWith<Exception> {
+            service.calculatePrice(reservation)
         }
 
         assertEquals("Trailer first day price not found", error.message)
@@ -173,5 +194,45 @@ class ReservationServiceImplTest {
         assertEquals(reservation.startDate, result.startDate)
         assertEquals(reservation.endDate, result.endDate)
         assertNull(reservation.reservationPrice)
+    }
+
+    @Test
+    fun `calculatePrice works across year boundary`() = runBlocking {
+        trailersRepo.addTrailer(ReservationTestFixtures.trailer())
+        val reservation = ReservationTestFixtures.reservationDto(
+            startDate = LocalDate(2025, 12, 31),
+            endDate = LocalDate(2026, 1, 2),
+        )
+
+        val result = service.calculatePrice(reservation)
+
+        assertEquals(2L, result.reservationPrice?.daysNumber)
+        assertEquals(230.0, result.reservationPrice?.sum)
+    }
+
+    @Test
+    fun `createReservation rejects mismatched price`() = runBlocking {
+        trailersRepo.addTrailer(ReservationTestFixtures.trailer())
+        customerRepo.addCustomer(
+            com.example.przyczepki_landingpage.data.Customer(id = "customer-1"),
+        )
+        val reservation = ReservationTestFixtures.reservationDto(
+            startDate = LocalDate(2025, 6, 10),
+            endDate = LocalDate(2025, 6, 10),
+        ).copy(
+            customerId = "customer-1",
+            reservationPrice = com.example.przyczepki_landingpage.data.ReservationPrice(
+                trailerId = ReservationTestFixtures.TRAILER_ID,
+                reservation = 30.0,
+                daysNumber = 0,
+                sum = 1.0,
+            ),
+        )
+
+        val error = assertFailsWith<Exception> {
+            service.createReservation(reservation)
+        }
+
+        assertEquals(true, error.message?.contains("Reservation price mismatch") == true)
     }
 }

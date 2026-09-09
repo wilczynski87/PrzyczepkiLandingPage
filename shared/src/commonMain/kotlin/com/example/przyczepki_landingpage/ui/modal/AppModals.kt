@@ -481,25 +481,23 @@ fun trailerReservationPrices(
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Pół dnia (jeśli dotyczy)
-                if (prices?.halfDay != null) {
+                // 1 dzień = pół dnia (do 6h); dłuższy wynajem = doba / kolejne doby
+                if (reservationPrice.daysNumber == 0L) {
                     PriceRow(
                         label = "Wynajem pół dnia",
-                        amount = prices.halfDay,
+                        amount = prices?.halfDay ?: throw NullPointerException("Brak ceny pół dnia"),
                         showInfo = true,
-                        infoText = "Do 6 godzin wynajmu"
+                        infoText = "Do 6 godzin wynajmu",
+                    )
+                } else {
+                    PriceRow(
+                        label = "Pierwsza doba:",
+                        amount = prices?.firstDay ?: throw NullPointerException("Brak 1 dnia rezerwacji"),
                     )
                 }
 
-                // Pierwszy dzień
-                PriceRow(
-                    label = "Pierwsza doba:",
-                    amount = prices?.firstDay ?: throw NullPointerException("Brak 1 dnia rezerwacji"),
-                )
-
                 // Drugi dzień
                 if (reservationPrice.daysNumber >= 1 && prices.secondDay != null) {
-                    prices.secondDay
                     PriceRow(
                         label = "Druga doba",
                         amount = prices.secondDay,

@@ -43,7 +43,11 @@ docker compose -f docker-compose.dev.yaml up -d przyczepki_db
 
 Alternatywa JS (starsze przeglądarki): `./gradlew :composeApp:jsBrowserDevelopmentRun`
 
-Po płatności P24 użytkownik wraca na `PAYMENT_URL_RETURN`
+Po płatności P24 użytkownik wraca na `PAYMENT_URL_RETURN`.
+W **DEV** domyślnie return/status idą przez tunel ngrok
+(`PAYMENT_PUBLIC_BASE`, domyślnie `https://adelyn-unarrestable-amirah.ngrok-free.dev`),
+bo sandbox P24 nie dosięga `localhost`. Uruchom np. `ngrok http 8090` (API).
+W PROD URL-e to domena produkcyjna (`przyczepkifat.pl`).
 (domyślnie w `.env.example`: `http://localhost:8080/podsumowanieRezerwacji`).
 
 Lokalny webpack ma `historyApiFallback` (`composeApp/webpack.config.d/spa-routing.js`) —

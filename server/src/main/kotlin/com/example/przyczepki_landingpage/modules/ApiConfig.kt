@@ -181,13 +181,22 @@ private fun readPaymentConfig(): PaymentConfig {
     val mockMode = System.getenv("PAYMENT_MOCK")?.toBooleanStrictOrNull()
         ?: (isDev && merchantId == 0 && secretId == "dev-secret" && crc == "dev-crc")
 
+    // Lokalnie / DEV: webhooki i return z P24 idą przez publiczny tunel (ngrok),
+    // bo sandbox nie dosięgnie localhost.
+    val paymentPublicBase = System.getenv("PAYMENT_PUBLIC_BASE")
+        ?: if (isDev) "https://adelyn-unarrestable-amirah.ngrok-free.dev" else null
+    val defaultReturn = paymentPublicBase?.let { "${it.trimEnd('/')}/podsumowanieRezerwacji" }
+        ?: "/podsumowanieRezerwacji"
+    val defaultStatus = paymentPublicBase?.let { "${it.trimEnd('/')}/payment/notification" }
+        ?: "https://przyczepkifat.pl/api/payment/notification"
+
     return PaymentConfig(
         merchantId = merchantId,
         posId = posId,
         secretId = secretId,
         crc = crc,
-        urlReturn = envOrDev("PAYMENT_URL_RETURN", "/podsumowanieRezerwacji"),
-        urlStatus = envOrDev("PAYMENT_URL_STATUS", "https://przyczepkifat.pl/api/payment/notification"),
+        urlReturn = envOrDev("PAYMENT_URL_RETURN", defaultReturn),
+        urlStatus = envOrDev("PAYMENT_URL_STATUS", defaultStatus),
         apiBaseUrl = "$paymentHost/api/v1",
         redirectBaseUrl = "$paymentHost/trnRequest/",
         mockMode = mockMode,

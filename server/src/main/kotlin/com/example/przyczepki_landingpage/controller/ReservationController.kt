@@ -57,8 +57,10 @@ fun Route.reservation() {
             if(reservationDto.customerId.isNullOrBlank()) throw NullPointerException("CustomerId is wrong: ${reservationDto.customerId}")
             if(reservationDto.trailerId.isNullOrBlank()) throw NullPointerException("TrailerId is wrong: ${reservationDto.trailerId}")
 
-            customerService.get(reservationDto.customerId!!) ?: call.respond(HttpStatusCode.NotAcceptable, "Nie znaleziono Klienta o takim id: ${reservationDto.customerId}")
-            trailersService.getTrailer(reservationDto.trailerId!!) ?: call.respond(HttpStatusCode.NotAcceptable, "Nie znaleziono sprzętu o takim id: ${reservationDto.trailerId}")
+            customerService.get(reservationDto.customerId!!)
+                ?: return@post call.respond(HttpStatusCode.NotAcceptable, "Nie znaleziono Klienta o takim id: ${reservationDto.customerId}")
+            trailersService.getTrailer(reservationDto.trailerId!!)
+                ?: return@post call.respond(HttpStatusCode.NotAcceptable, "Nie znaleziono sprzętu o takim id: ${reservationDto.trailerId}")
 
             val reservation = reservationService.createReservation(reservationDto) ?: throw Exception("Reservation not created")
 

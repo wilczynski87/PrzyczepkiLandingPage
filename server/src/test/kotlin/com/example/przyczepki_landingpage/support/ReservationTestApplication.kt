@@ -2,6 +2,7 @@ package com.example.przyczepki_landingpage.support
 
 import com.example.przyczepki_landingpage.controller.reservation
 import com.example.przyczepki_landingpage.modules.configureStatusPages
+import com.example.przyczepki_landingpage.repo.CustomerRepo
 import com.example.przyczepki_landingpage.repo.ReservationRepo
 import com.example.przyczepki_landingpage.repo.TrailersRepo
 import com.example.przyczepki_landingpage.service.CustomerService
@@ -21,11 +22,13 @@ import org.koin.ktor.plugin.Koin
 data class ReservationTestDependencies(
     val reservationRepo: FakeReservationRepo,
     val trailersRepo: FakeTrailersRepo,
+    val customerRepo: FakeCustomerRepo,
 )
 
 fun Application.installReservationCheckTestDependencies(
     reservationRepo: FakeReservationRepo = FakeReservationRepo(),
     trailersRepo: FakeTrailersRepo = FakeTrailersRepo(),
+    customerRepo: FakeCustomerRepo = FakeCustomerRepo(),
 ): ReservationTestDependencies {
     install(ContentNegotiation) {
         json(
@@ -44,8 +47,9 @@ fun Application.installReservationCheckTestDependencies(
             module {
                 single<ReservationRepo> { reservationRepo }
                 single<TrailersRepo> { trailersRepo }
+                single<CustomerRepo> { customerRepo }
                 single<TrailersService> { TrailersServiceImpl(get()) }
-                single<ReservationService> { ReservationServiceImpl(get(), get()) }
+                single<ReservationService> { ReservationServiceImpl(get(), get(), get()) }
                 single<CustomerService> { FakeCustomerService() }
             },
         )
@@ -53,5 +57,5 @@ fun Application.installReservationCheckTestDependencies(
     routing {
         reservation()
     }
-    return ReservationTestDependencies(reservationRepo, trailersRepo)
+    return ReservationTestDependencies(reservationRepo, trailersRepo, customerRepo)
 }
