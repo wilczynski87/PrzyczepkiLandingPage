@@ -6,6 +6,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
@@ -39,6 +40,20 @@ fun Route.trailers() {
             val savedTrailer = trailerService.saveTrailer(trailer) ?: throw NullPointerException("Trailer is null")
 
             call.respond(savedTrailer)
+        }
+
+        delete("/{id}") {
+            val id = call.parameters["id"] ?: return@delete call.respond(
+                HttpStatusCode.BadRequest, "Invalid ID"
+            )
+
+            val deleted = trailerService.deleteTrailer(id)
+
+            if (deleted) {
+                call.respond(HttpStatusCode.OK, true)
+            } else {
+                call.respond(HttpStatusCode.NotFound, false)
+            }
         }
     }
 }

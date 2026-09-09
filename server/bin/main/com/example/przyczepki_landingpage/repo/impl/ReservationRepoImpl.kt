@@ -81,6 +81,22 @@ class ReservationRepoImpl(
         return reservationCollection.find(filters).firstOrNull()?.toReservation()
     }
 
+    override suspend fun getActiveReservationsForCustomer(
+        customerId: String,
+        date: LocalDate,
+    ): List<Reservation> {
+        val dateJava = date.toJavaLocalDate()
+        val filters = and(
+            eq("customer.id", customerId),
+            lte("startDate", dateJava),
+            gte("endDate", dateJava),
+        )
+        return reservationCollection
+            .find(filters)
+            .map { it.toReservation() }
+            .toList()
+    }
+
 }
 
 data class ReservationTable(

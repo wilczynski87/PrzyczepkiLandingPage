@@ -1,6 +1,7 @@
 package com.example.przyczepki_landingpage.service.impl
 
 import com.example.przyczepki_landingpage.data.EmailTemplate
+import com.example.przyczepki_landingpage.data.dto.ReservationSendEmailRequest
 import com.example.przyczepki_landingpage.data.dto.SendEmailRequest
 import com.example.przyczepki_landingpage.data.dto.SendEmailResponse
 import com.example.przyczepki_landingpage.modules.AuthConfig
@@ -14,6 +15,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.isSuccess
 import pl.przyczepki.email.api.dto.AccountConfirmationData
+import pl.przyczepki.email.api.dto.ReservationConfirmationData
 
 class EmailServiceImpl(
     private val client: HttpClient,
@@ -54,8 +56,26 @@ class EmailServiceImpl(
     override suspend fun sendReservationConfirmation(
         to: String,
         subject: String,
-        body: String
+        body: ReservationConfirmationData,
     ): SendEmailResponse {
-        TODO("Not yet implemented")
+        val emailUrl = "$emailUrlBase/send"
+        val response = client.post(emailUrl) {
+            header("X-Internal-Api-Key", cfgAuth.internalApiKey)
+            setBody(
+                ReservationSendEmailRequest(
+                    to = to,
+                    subject = subject,
+                    template = EmailTemplate.RESERVATION_CONFIRMATION.templateName,
+                    data = body,
+                )
+            )
+        }
+        if (!response.status.isSuccess()) {
+            val errorBody = runCatching { response.bodyAsText() }.getOrDefault("")
+            throw IllegalStateException(
+                "Email service error ${response.status} from $emailUrl: $errorBody".trim()
+            )
+        }
+        return response.body()
     }
 }

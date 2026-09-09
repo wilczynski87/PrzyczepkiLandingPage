@@ -37,4 +37,15 @@ class FakeReservationRepo(
             reservation.startDate!! <= to &&
             reservation.endDate!! >= from
     }
+
+    override suspend fun getActiveReservationsForCustomer(
+        customerId: String,
+        date: LocalDate,
+    ): List<Reservation> = reservations.filter { reservation ->
+        reservation.customer?.id == customerId &&
+            reservation.startDate != null &&
+            reservation.endDate != null &&
+            reservation.startDate!! <= date &&
+            reservation.endDate!! >= date
+    }
 }

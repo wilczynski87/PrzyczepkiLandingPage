@@ -34,6 +34,26 @@ data class AuthConfig(
 )
 
 @Serializable
+data class GateConfig(
+    val openUrl: String,
+    val method: String = "PATCH",
+    /** Stały access token (PAT) lub początkowy OAuth access token. */
+    val accessToken: String? = null,
+    /** OAuth refresh token – backend odświeża access token automatycznie. */
+    val refreshToken: String? = null,
+    val clientId: String? = null,
+    val clientSecret: String? = null,
+    val tokenUrl: String = "https://svr111.supla.org/oauth/v2/token",
+    val redirectUri: String = "",
+    /** Włącza POST /gate/supla/exchange-code (tylko do jednorazowego setupu). */
+    val oauthHelperEnabled: Boolean = false,
+    /** Opcjonalny JSON body, np. {"action":"OPEN_CLOSE"} dla SUPLA. */
+    val requestBody: String? = null,
+    val mockMode: Boolean = false,
+    val cooldownSeconds: Long = 60,
+)
+
+@Serializable
 data class PaymentConfig(
     val merchantId: Int,
     val posId: Int,
@@ -55,6 +75,7 @@ data class ApiConfig(
     val db: DbConfig,
     val auth: AuthConfig,
     val paymentConfig: PaymentConfig,
+    val gateConfig: GateConfig,
 )
 
 /**
@@ -97,6 +118,41 @@ fun toApiConfig(): ApiConfig {
         ),
 
         paymentConfig = readPaymentConfig(),
+        gateConfig = readGateConfig(),
+    )
+}
+
+private fun readGateConfig(): GateConfig {
+    val isDev = (System.getenv("API_ENV") ?: "DEV").equals("DEV", ignoreCase = true)
+    val openUrl = System.getenv("GATE_OPEN_URL") ?: ""
+    val mockMode = System.getenv("GATE_MOCK")?.toBooleanStrictOrNull()
+        ?: (isDev || openUrl.isBlank())
+
+    val accessToken = System.getenv("GATE_ACCESS_TOKEN")
+        ?: System.getenv("GATE_API_KEY")
+
+    val clientId = System.getenv("SUPLA_CLIENT_ID")
+        ?: System.getenv("SUPLA_ID")
+    val clientSecret = System.getenv("SUPLA_CLIENT_SECRET")
+        ?: System.getenv("SUPLA_SECRET")
+
+    val oauthHelperEnabled = System.getenv("SUPLA_OAUTH_HELPER")?.toBooleanStrictOrNull()
+        ?: isDev
+
+    return GateConfig(
+        openUrl = openUrl,
+        method = System.getenv("GATE_OPEN_METHOD") ?: "PATCH",
+        accessToken = accessToken,
+        refreshToken = System.getenv("SUPLA_REFRESH_TOKEN"),
+        clientId = clientId,
+        clientSecret = clientSecret,
+        tokenUrl = System.getenv("SUPLA_TOKEN_URL")
+            ?: "https://svr111.supla.org/oauth/v2/token",
+        redirectUri = System.getenv("SUPLA_REDIRECT_URI") ?: "",
+        oauthHelperEnabled = oauthHelperEnabled,
+        requestBody = System.getenv("GATE_REQUEST_BODY") ?: """{"action":"OPEN_CLOSE"}""",
+        mockMode = mockMode,
+        cooldownSeconds = System.getenv("GATE_COOLDOWN_SECONDS")?.toLongOrNull() ?: 60,
     )
 }
 
