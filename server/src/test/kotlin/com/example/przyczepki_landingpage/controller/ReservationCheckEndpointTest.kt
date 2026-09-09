@@ -56,7 +56,7 @@ class ReservationCheckEndpointTest {
         assertEquals(LocalDate(2025, 6, 10), body.startDate)
         assertEquals(LocalDate(2025, 6, 12), body.endDate)
         assertEquals(2L, body.reservationPrice?.daysNumber)
-        assertEquals(230.0, body.reservationPrice?.sum)
+        assertEquals(180.0, body.reservationPrice?.sum)
         assertEquals(30.0, body.reservationPrice?.reservation)
     }
 

@@ -41,15 +41,17 @@ class ReservationServiceImpl(
         val endDate = reservation.endDate ?: throw Exception("End date is null")
         if (endDate < startDate) throw Exception("End date is before start date")
 
-        val days = startDate.daysUntil(endDate)
+        val calendarSpan = startDate.daysUntil(endDate)
         val prices = trailer.prices ?: throw Exception("Trailer prices not found")
 
-        // 1 dzień kalendarzowy (ta sama data od–do) = wynajem do 6h (halfDay)
-        val sum = if (days == 0) {
+        // Ta sama data = pół dnia (do 6h).
+        // Od–do kolejnego dnia (np. 8:00→8:00) = 1 doba, nie 2.
+        // daysNumber = liczba dób = daysUntil(start, end).
+        val sum = if (calendarSpan == 0) {
             prices.halfDay ?: throw Exception("Trailer half day price not found")
         } else {
-            (0..days).sumOf { day ->
-                when (day) {
+            (0 until calendarSpan).sumOf { dayIndex ->
+                when (dayIndex) {
                     0 -> prices.firstDay ?: throw Exception("Trailer first day price not found")
                     1 -> prices.secondDay ?: throw Exception("Trailer second day price not found")
                     else -> prices.otherDays ?: throw Exception("Trailer other day price not found")
@@ -60,7 +62,7 @@ class ReservationServiceImpl(
         val reservationPrice = ReservationPrice(
             trailerId = reservation.trailerId,
             reservation = prices.reservation,
-            daysNumber = days.toLong(),
+            daysNumber = calendarSpan.toLong(),
             sum = sum,
         )
         return reservation.copy(reservationPrice = reservationPrice)

@@ -481,7 +481,7 @@ fun trailerReservationPrices(
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // 1 dzień = pół dnia (do 6h); dłuższy wynajem = doba / kolejne doby
+                // Ta sama data = pół dnia; daysNumber = liczba dób (od→następny dzień = 1 doba)
                 if (reservationPrice.daysNumber == 0L) {
                     PriceRow(
                         label = "Wynajem pół dnia",
@@ -496,8 +496,8 @@ fun trailerReservationPrices(
                     )
                 }
 
-                // Drugi dzień
-                if (reservationPrice.daysNumber >= 1 && prices.secondDay != null) {
+                // Druga doba (gdy zaznaczono 3 daty kalendarzowe = 2 doby)
+                if (reservationPrice.daysNumber >= 2L && prices.secondDay != null) {
                     PriceRow(
                         label = "Druga doba",
                         amount = prices.secondDay,
@@ -506,8 +506,8 @@ fun trailerReservationPrices(
                     )
                 }
 
-                // Kolejne dni (jeśli więcej niż 1 dzień)
-                if (reservationPrice.daysNumber >= 2) {
+                // Kolejne doby
+                if (reservationPrice.daysNumber >= 3L) {
                     prices.otherDays ?: throw NullPointerException("Brak kolejnych dni rezerwacji")
                     val subsequentDays = reservationPrice.daysNumber - 2
                     PriceRow(

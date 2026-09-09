@@ -59,7 +59,7 @@ class ReservationServiceImplTest {
     }
 
     @Test
-    fun `calculatePrice for two day rental sums first and second day rates`() = runBlocking {
+    fun `calculatePrice for overnight span uses one full day rate`() = runBlocking {
         trailersRepo.addTrailer(ReservationTestFixtures.trailer())
         val reservation = ReservationTestFixtures.reservationDto(
             startDate = LocalDate(2025, 6, 10),
@@ -69,11 +69,11 @@ class ReservationServiceImplTest {
         val result = service.calculatePrice(reservation)
 
         assertEquals(1L, result.reservationPrice?.daysNumber)
-        assertEquals(180.0, result.reservationPrice?.sum)
+        assertEquals(100.0, result.reservationPrice?.sum)
     }
 
     @Test
-    fun `calculatePrice for multi day rental sums tiered daily prices`() = runBlocking {
+    fun `calculatePrice for two full days sums first and second day rates`() = runBlocking {
         trailersRepo.addTrailer(ReservationTestFixtures.trailer())
         val reservation = ReservationTestFixtures.reservationDto(
             startDate = LocalDate(2025, 6, 10),
@@ -83,6 +83,20 @@ class ReservationServiceImplTest {
         val result = service.calculatePrice(reservation)
 
         assertEquals(2L, result.reservationPrice?.daysNumber)
+        assertEquals(180.0, result.reservationPrice?.sum)
+    }
+
+    @Test
+    fun `calculatePrice for three full days includes other day rate`() = runBlocking {
+        trailersRepo.addTrailer(ReservationTestFixtures.trailer())
+        val reservation = ReservationTestFixtures.reservationDto(
+            startDate = LocalDate(2025, 6, 10),
+            endDate = LocalDate(2025, 6, 13),
+        )
+
+        val result = service.calculatePrice(reservation)
+
+        assertEquals(3L, result.reservationPrice?.daysNumber)
         assertEquals(230.0, result.reservationPrice?.sum)
     }
 
@@ -143,7 +157,7 @@ class ReservationServiceImplTest {
     }
 
     @Test
-    fun `calculatePrice throws when second day price is missing for multi day range`() = runBlocking {
+    fun `calculatePrice throws when second day price is missing for two full days`() = runBlocking {
         trailersRepo.addTrailer(
             ReservationTestFixtures.trailer(
                 prices = ReservationTestFixtures.samplePrices.copy(secondDay = null),
@@ -151,7 +165,7 @@ class ReservationServiceImplTest {
         )
         val reservation = ReservationTestFixtures.reservationDto(
             startDate = LocalDate(2025, 6, 10),
-            endDate = LocalDate(2025, 6, 11),
+            endDate = LocalDate(2025, 6, 12),
         )
 
         val error = assertFailsWith<Exception> {
@@ -170,7 +184,7 @@ class ReservationServiceImplTest {
         )
         val reservation = ReservationTestFixtures.reservationDto(
             startDate = LocalDate(2025, 6, 10),
-            endDate = LocalDate(2025, 6, 12),
+            endDate = LocalDate(2025, 6, 13),
         )
 
         val error = assertFailsWith<Exception> {
@@ -207,7 +221,7 @@ class ReservationServiceImplTest {
         val result = service.calculatePrice(reservation)
 
         assertEquals(2L, result.reservationPrice?.daysNumber)
-        assertEquals(230.0, result.reservationPrice?.sum)
+        assertEquals(180.0, result.reservationPrice?.sum)
     }
 
     @Test
