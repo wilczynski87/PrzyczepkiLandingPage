@@ -55,7 +55,7 @@ services:
       - PAYMENT_ENV=${PAYMENT_ENV:-sandbox}
       - PAYMENT_MOCK=${PAYMENT_MOCK:-true}
       - PAYMENT_PUBLIC_BASE=${PAYMENT_PUBLIC_BASE:-https://adelyn-unarrestable-amirah.ngrok-free.dev}
-      - PAYMENT_URL_RETURN=${PAYMENT_URL_RETURN:-https://adelyn-unarrestable-amirah.ngrok-free.dev/podsumowanieRezerwacji}
+      - PAYMENT_URL_RETURN=${PAYMENT_URL_RETURN:-http://localhost/podsumowanieRezerwacji}
       - PAYMENT_URL_STATUS=${PAYMENT_URL_STATUS:-https://adelyn-unarrestable-amirah.ngrok-free.dev/payment/notification}
       - GATE_OPEN_URL=${GATE_OPEN_URL:-}
       - GATE_OPEN_METHOD=${GATE_OPEN_METHOD:-PATCH}

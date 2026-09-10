@@ -518,34 +518,33 @@ fun trailerReservationPrices(
                     )
                 }
 
-                // Kaucja rezerwacyjna
+                // Kaucja (płatna online) — nie doliczamy do kosztu wynajmu
                 PriceRow(
-                    label = "Kaucja rezerwacyjna",
+                    label = "Kaucja rezerwacyjna (płatna teraz)",
                     amount = reservationPrice.reservation ?: 40.00,
                     showInfo = true,
-                    infoText = "Bezzwrotna przy rezygnacji"
+                    infoText = "Zaliczka; bezzwrotna przy rezygnacji",
                 )
 
-                // Linia separatora przed sumą
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 8.dp),
                     thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant
+                    color = MaterialTheme.colorScheme.outlineVariant,
                 )
 
-                // Suma końcowa
                 PriceRow(
-                    label = "Łącznie do zapłaty",
+                    label = "Koszt wynajmu",
                     amount = reservationPrice.sum ?: throw NullPointerException("Brak sumy wypożyczenia"),
-                    isTotal = true
+                    isTotal = true,
                 )
 
-                // Informacja o sposobie płatności
-                Text(
-                    text = "Kaucja rezerwacyjna płatna przy rezerwacji, pozostała kwota (${(reservationPrice.sum - (reservationPrice.reservation ?: 0.0)).asPrice()} zł) przy odbiorze",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 8.dp)
+                val remaining = ((reservationPrice.sum ?: 0.0) - (reservationPrice.reservation ?: 0.0))
+                    .coerceAtLeast(0.0)
+                PriceRow(
+                    label = "Pozostało do zapłaty",
+                    amount = remaining,
+                    showInfo = true,
+                    infoText = if (remaining > 0.0) "Płatne przy odbiorze" else "Opłacone w całości kaucją",
                 )
             }
         }

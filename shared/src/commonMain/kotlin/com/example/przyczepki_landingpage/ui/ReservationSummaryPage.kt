@@ -1,5 +1,11 @@
 package com.example.przyczepki_landingpage.ui
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,10 +22,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.HourglassTop
+import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +38,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -55,17 +64,16 @@ fun ReservationSummaryPage(
     val state by viewModel.appState.collectAsState()
     val paymentStatus = state.paymentStatus
     val reservation = paymentStatus?.reservation ?: state.reservationToMake
+    val waitingForPayment = state.paymentStatusLoading ||
+        paymentStatus?.status == PaymentSessionStatus.PENDING ||
+        paymentStatus?.status == PaymentSessionStatus.VERIFIED
 
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter,
     ) {
         when {
-            state.paymentStatusLoading -> {
-                LoadingScreen("statusu płatności")
-            }
-
-            state.paymentStatusError != null -> {
+            state.paymentStatusError != null && !waitingForPayment -> {
                 PaymentSummaryError(
                     message = state.paymentStatusError!!,
                     onRetry = { viewModel.retryPaymentStatusCheck() },
@@ -91,9 +99,127 @@ fun ReservationSummaryPage(
             }
 
             else -> {
-                PaymentSummaryPending()
+                PaymentConfirmationWaiting(
+                    status = paymentStatus?.status,
+                    statusMessage = paymentStatus?.message,
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun PaymentConfirmationWaiting(
+    status: PaymentSessionStatus?,
+    statusMessage: String?,
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "paymentWaitPulse")
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.45f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1100, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "paymentWaitPulseAlpha",
+    )
+
+    val statusLabel = when (status) {
+        PaymentSessionStatus.VERIFIED -> "Płatność zweryfikowana — zapisujemy rezerwację"
+        PaymentSessionStatus.PENDING -> "Oczekiwanie na potwierdzenie z Przelewy24"
+        else -> "Łączymy się z Przelewy24"
+    }
+
+    Column(
+        modifier = Modifier
+            .widthIn(max = 520.dp)
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(72.dp),
+                strokeWidth = 5.dp,
+            )
+            Icon(
+                imageVector = Icons.Default.Payments,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .size(28.dp)
+                    .alpha(pulseAlpha),
+            )
+        }
+
+        Text(
+            text = "Potwierdzenie rezerwacji",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+        )
+
+        Text(
+            text = statusLabel,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.alpha(pulseAlpha),
+        )
+
+        Text(
+            text = "Prosimy nie zamykać tej strony. Po zaksięgowaniu płatności " +
+                "wyświetlimy szczegóły rezerwacji i wyślemy potwierdzenie e-mail.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+
+        statusMessage?.takeIf { it.isNotBlank() }?.let { message ->
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
+
+        Card(
+            shape = RoundedCornerShape(14.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+            ),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = "Co się dzieje?",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    text = "1. Przelewy24 potwierdza wpływ kaucji rezerwacyjnej",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Text(
+                    text = "2. System zapisuje rezerwację w kalendarzu",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Text(
+                    text = "3. Dostajesz podsumowanie i e-mail z potwierdzeniem",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+
+        LoadingDotsText(
+            baseText = "Sprawdzanie statusu płatności",
+            modifier = Modifier.padding(top = 4.dp),
+        )
     }
 }
 
@@ -116,7 +242,9 @@ private fun ReservationSummarySuccess(
             imageVector = Icons.Default.CheckCircle,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(top = 8.dp),
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .size(56.dp),
         )
 
         Text(
@@ -127,7 +255,8 @@ private fun ReservationSummarySuccess(
         )
 
         Text(
-            text = "Płatność została zaksięgowana, a rezerwacja została zapisana na serwerze.",
+            text = "Płatność została zaksięgowana, a rezerwacja zapisana. " +
+                "Potwierdzenie wyślemy na Twój adres e-mail.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -192,13 +321,6 @@ private fun ReservationSummarySuccess(
             }
         }
 
-        Text(
-            text = "Potwierdzenie rezerwacji zostanie wysłane na Twój adres e-mail.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-
         Button(
             onClick = onGoHome,
             modifier = Modifier.fillMaxWidth(),
@@ -214,36 +336,6 @@ private fun ReservationSummarySuccess(
         ) {
             Text("Zarezerwuj ponownie")
         }
-    }
-}
-
-@Composable
-private fun PaymentSummaryPending() {
-    Column(
-        modifier = Modifier
-            .widthIn(max = 480.dp)
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        Icon(
-            imageVector = Icons.Default.HourglassTop,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-        )
-        Text(
-            text = "Weryfikacja płatności",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold,
-            textAlign = TextAlign.Center,
-        )
-        Text(
-            text = "Trwa potwierdzanie płatności i zapisywanie rezerwacji. To może potrwać kilka chwil.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-        LoadingScreen("statusu płatności")
     }
 }
 
@@ -264,6 +356,7 @@ private fun PaymentSummaryError(
             imageVector = Icons.Default.Error,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.error,
+            modifier = Modifier.size(48.dp),
         )
         Text(
             text = "Problem z potwierdzeniem rezerwacji",

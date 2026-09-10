@@ -35,32 +35,39 @@ class AppViewModel(private val scope: CoroutineScope) {
 
     init {
         scope.launch {
+            // Najpierw obsłuż powrót z P24 — niezależnie od health checka
+            handlePaymentReturnIfNeeded()
+
             val serverStatus = ApiClient.healthCheck.healthCheck()
-            if(serverStatus.status != ServerStatus.OK) {
+            if (serverStatus.status != ServerStatus.OK) {
                 _appState.update {
                     it.copy(
                         serverStatus = serverStatus,
-                        trailers = trailers
+                        trailers = trailers,
                     )
                 }
             } else {
                 _appState.update {
-                    it.copy(
-                        serverStatus = serverStatus,
-                    )
+                    it.copy(serverStatus = serverStatus)
                 }
                 fetchTrailers()
                 fetchReservations()
-                handlePaymentReturnIfNeeded()
             }
         }
     }
 
     fun navigateTo(destination: CurrentScreen) {
         _appState.update {
-            it.copy(
-                currentScreen = destination
-            )
+            it.copy(currentScreen = destination)
+        }
+        when (destination) {
+            CurrentScreen.RESERVATION_SUMMARY -> replaceBrowserPath(PAYMENT_RETURN_PATH)
+            CurrentScreen.LANDING -> {
+                if (getCurrentPath().endsWith(PAYMENT_RETURN_PATH)) {
+                    replaceBrowserPath("/")
+                }
+            }
+            else -> Unit
         }
     }
 
@@ -420,12 +427,15 @@ class AppViewModel(private val scope: CoroutineScope) {
     }
 
     private fun handlePaymentReturnIfNeeded() {
-        if (!getCurrentPath().endsWith(PAYMENT_RETURN_PATH)) return
+        val path = getCurrentPath().substringBefore('?').trimEnd('/')
+        val onReturnPath = path.endsWith(PAYMENT_RETURN_PATH) || path.endsWith("podsumowanieRezerwacji")
+        val sessionId = getLocalStorageValue(PAYMENT_SESSION_STORAGE_KEY)
 
-        replaceBrowserPath("/")
+        // Wejście z P24 albo odświeżenie z aktywną sesją płatności
+        if (!onReturnPath && sessionId.isNullOrBlank()) return
+
         navigateTo(CurrentScreen.RESERVATION_SUMMARY)
 
-        val sessionId = getLocalStorageValue(PAYMENT_SESSION_STORAGE_KEY)
         if (sessionId.isNullOrBlank()) {
             _appState.update {
                 it.copy(
@@ -463,9 +473,17 @@ class AppViewModel(private val scope: CoroutineScope) {
                 )
             }
 
-            repeat(30) {
+            repeat(45) { attempt -> // ~90s przy delay 2s
                 ApiClient.paymentController.getPaymentStatus(sessionId).onSuccess { status ->
-                    _appState.update { it.copy(paymentStatus = status) }
+                    _appState.update {
+                        it.copy(
+                            paymentStatus = status,
+                            // Loader zostaje, dopóki nie ma COMPLETED / FAILED
+                            paymentStatusLoading = status.status == PaymentSessionStatus.PENDING ||
+                                status.status == PaymentSessionStatus.VERIFIED,
+                            paymentStatusError = null,
+                        )
+                    }
 
                     when (status.status) {
                         PaymentSessionStatus.PENDING,
@@ -504,6 +522,11 @@ class AppViewModel(private val scope: CoroutineScope) {
                         }
                     }
                 }.onFailure { error ->
+                    // Chwilowy błąd sieci — spróbuj ponownie zamiast od razu padać
+                    if (attempt < 2) {
+                        delay(2000)
+                        return@repeat
+                    }
                     _appState.update {
                         it.copy(
                             paymentStatusLoading = false,

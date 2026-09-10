@@ -41,10 +41,13 @@ class ReservationConfirmationServiceImpl(
         val prices = reservation.reservationPrice
         val rentalAmount = prices?.sum
         val reservationFee = prices?.reservation
-        val totalAmount = when {
-            rentalAmount != null && reservationFee != null -> rentalAmount + reservationFee
+        // sum = koszt wynajmu (całość). Kaucja nie jest doliczana.
+        // totalAmount w mailu = pozostało do zapłaty przy odbiorze (sum - kaucja).
+        val remainingToPay = when {
+            rentalAmount != null && reservationFee != null ->
+                (rentalAmount - reservationFee).coerceAtLeast(0.0)
             rentalAmount != null -> rentalAmount
-            else -> reservationFee
+            else -> null
         }
 
         return ReservationConfirmationData(
@@ -58,7 +61,7 @@ class ReservationConfirmationServiceImpl(
             daysNumber = prices?.daysNumber,
             reservationFee = reservationFee,
             rentalAmount = rentalAmount,
-            totalAmount = totalAmount,
+            totalAmount = remainingToPay,
             paidAmount = paidAmountGrosze?.let(::formatPlnFromGrosze),
             orderId = orderId?.toString(),
         )

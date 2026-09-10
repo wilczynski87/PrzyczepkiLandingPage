@@ -181,12 +181,17 @@ private fun readPaymentConfig(): PaymentConfig {
     val mockMode = System.getenv("PAYMENT_MOCK")?.toBooleanStrictOrNull()
         ?: (isDev && merchantId == 0 && secretId == "dev-secret" && crc == "dev-crc")
 
-    // Lokalnie / DEV: webhooki i return z P24 idą przez publiczny tunel (ngrok),
-    // bo sandbox nie dosięgnie localhost.
+    // Lokalnie / DEV:
+    // - urlStatus (webhook P24→serwer) przez publiczny tunel (ngrok)
+    // - urlReturn (przeglądarka) na frontend SPA (localhost)
     val paymentPublicBase = System.getenv("PAYMENT_PUBLIC_BASE")
         ?: if (isDev) "https://adelyn-unarrestable-amirah.ngrok-free.dev" else null
-    val defaultReturn = paymentPublicBase?.let { "${it.trimEnd('/')}/podsumowanieRezerwacji" }
-        ?: "/podsumowanieRezerwacji"
+    val defaultReturn = if (isDev) {
+        System.getenv("PAYMENT_URL_RETURN")
+            ?: "http://localhost:8080/podsumowanieRezerwacji"
+    } else {
+        null
+    } ?: "/podsumowanieRezerwacji"
     val defaultStatus = paymentPublicBase?.let { "${it.trimEnd('/')}/payment/notification" }
         ?: "https://przyczepkifat.pl/api/payment/notification"
 
@@ -195,8 +200,10 @@ private fun readPaymentConfig(): PaymentConfig {
         posId = posId,
         secretId = secretId,
         crc = crc,
-        urlReturn = envOrDev("PAYMENT_URL_RETURN", defaultReturn),
-        urlStatus = envOrDev("PAYMENT_URL_STATUS", defaultStatus),
+        urlReturn = System.getenv("PAYMENT_URL_RETURN")
+            ?: if (isDev) defaultReturn else throw NullPointerException("PAYMENT_URL_RETURN is missing"),
+        urlStatus = System.getenv("PAYMENT_URL_STATUS")
+            ?: if (isDev) defaultStatus else throw NullPointerException("PAYMENT_URL_STATUS is missing"),
         apiBaseUrl = "$paymentHost/api/v1",
         redirectBaseUrl = "$paymentHost/trnRequest/",
         mockMode = mockMode,
