@@ -212,15 +212,17 @@ jobs:
               echo "SUPLA_OAUTH_HELPER=${SUPLA_OAUTH_HELPER:-false}"
             } > .env
 
-            # Login na VPS zmniejsza limity anonimowe i czasem omija problemy CDN
+            # Login jest opcjonalny: TLS do Docker Hub na tym VPS często timeoutuje.
+            # Nie wolno tu wywalić całego deployu (set -e) — lokalne obrazy wystarczą.
             if [ -n "${DOCKER_USER:-}" ] && [ -n "${DOCKER_PAT:-}" ]; then
-              echo "$DOCKER_PAT" | docker login -u "$DOCKER_USER" --password-stdin
+              echo "$DOCKER_PAT" | docker login -u "$DOCKER_USER" --password-stdin \
+                || echo "WARN: docker login failed, continuing with local/cached images"
             fi
 
             pull_image() {
               local image="$1"
               local label="$2"
-              local delay=20
+              local delay=15
               for i in 1 2 3 4 5 6; do
                 if docker pull "$image"; then
                   echo "Pulled $label OK"
@@ -228,13 +230,17 @@ jobs:
                 fi
                 echo "Pull $label failed (attempt $i/6), waiting ${delay}s..."
                 sleep "$delay"
-                delay=$((delay + 20))
+                delay=$((delay + 15))
               done
-              echo "Pull $label failed after 6 attempts"
+              if docker image inspect "$image" >/dev/null 2>&1; then
+                echo "WARN: could not pull $label; using existing local image"
+                return 0
+              fi
+              echo "Pull $label failed and no local image is present"
               return 1
             }
 
-            # Najpierw pull — dopiero potem down. Przy failu pulla stara produkcja zostaje.
+            # Najpierw pull — dopiero potem down. Przy failu Hub lokalny obraz + stary stack.
             pull_image "wilczynski87/przyczepki-web:latest" "web"
             pull_image "wilczynski87/przyczepki-api:latest" "api"
 
