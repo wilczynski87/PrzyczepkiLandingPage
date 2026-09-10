@@ -139,12 +139,15 @@ jobs:
           SUPLA_REDIRECT_URI: ${{ secrets.SUPLA_REDIRECT_URI }}
           SUPLA_REFRESH_TOKEN: ${{ secrets.SUPLA_REFRESH_TOKEN }}
           SUPLA_OAUTH_HELPER: "false"
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PAT: ${{ secrets.DOCKER_PAT }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           port: ${{ secrets.VPS_PORT || 22 }}
           key: ${{ secrets.PRZYCZEPKI_WEB }}
-          envs: TZ,APP_ENV,WEB_PORT,DB_HOST,DB_PORT,DB_NAME,DB_USER,DB_PASSWORD,DB_AUTH_SOURCE,AUTH_SECRET_LOGIN,AUTH_SECRET_REFRESH,AUTH_ISSUER,AUTH_AUDIENCE,AUTH_REALM,AUTH_ACCESS_TOKEN_EXPIRY,AUTH_REFRESH_TOKEN_EXPIRY,AUTH_CLAIM,INTERNAL_API_KEY,EMAIL_HOST,EMAIL_PORT,EMAIL_ENV,WEB_HOST,API_HOST,API_PORT,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GOOGLE_REFRESH_TOKEN,GMAIL_SENDER_EMAIL,BCC,PAYMENT_ENV,PAYMENT_MOCK,PAYMENT_MERCHANT_ID,PAYMENT_POS_ID,PAYMENT_SECRET_ID,PAYMENT_CRC,PAYMENT_URL_RETURN,PAYMENT_URL_STATUS,GATE_OPEN_URL,GATE_OPEN_METHOD,GATE_ACCESS_TOKEN,GATE_API_KEY,GATE_REQUEST_BODY,GATE_MOCK,GATE_COOLDOWN_SECONDS,SUPLA_ID,SUPLA_SECRET,SUPLA_TOKEN_URL,SUPLA_REDIRECT_URI,SUPLA_REFRESH_TOKEN,SUPLA_OAUTH_HELPER
+          command_timeout: 30m
+          envs: TZ,APP_ENV,WEB_PORT,DB_HOST,DB_PORT,DB_NAME,DB_USER,DB_PASSWORD,DB_AUTH_SOURCE,AUTH_SECRET_LOGIN,AUTH_SECRET_REFRESH,AUTH_ISSUER,AUTH_AUDIENCE,AUTH_REALM,AUTH_ACCESS_TOKEN_EXPIRY,AUTH_REFRESH_TOKEN_EXPIRY,AUTH_CLAIM,INTERNAL_API_KEY,EMAIL_HOST,EMAIL_PORT,EMAIL_ENV,WEB_HOST,API_HOST,API_PORT,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GOOGLE_REFRESH_TOKEN,GMAIL_SENDER_EMAIL,BCC,PAYMENT_ENV,PAYMENT_MOCK,PAYMENT_MERCHANT_ID,PAYMENT_POS_ID,PAYMENT_SECRET_ID,PAYMENT_CRC,PAYMENT_URL_RETURN,PAYMENT_URL_STATUS,GATE_OPEN_URL,GATE_OPEN_METHOD,GATE_ACCESS_TOKEN,GATE_API_KEY,GATE_REQUEST_BODY,GATE_MOCK,GATE_COOLDOWN_SECONDS,SUPLA_ID,SUPLA_SECRET,SUPLA_TOKEN_URL,SUPLA_REDIRECT_URI,SUPLA_REFRESH_TOKEN,SUPLA_OAUTH_HELPER,DOCKER_USER,DOCKER_PAT
           script: |
             set -e
             mkdir -p /przyczepki-landing-page
@@ -209,6 +212,32 @@ jobs:
               echo "SUPLA_OAUTH_HELPER=${SUPLA_OAUTH_HELPER:-false}"
             } > .env
 
+            # Login na VPS zmniejsza limity anonimowe i czasem omija problemy CDN
+            if [ -n "${DOCKER_USER:-}" ] && [ -n "${DOCKER_PAT:-}" ]; then
+              echo "$DOCKER_PAT" | docker login -u "$DOCKER_USER" --password-stdin
+            fi
+
+            pull_image() {
+              local image="$1"
+              local label="$2"
+              local delay=20
+              for i in 1 2 3 4 5 6; do
+                if docker pull "$image"; then
+                  echo "Pulled $label OK"
+                  return 0
+                fi
+                echo "Pull $label failed (attempt $i/6), waiting ${delay}s..."
+                sleep "$delay"
+                delay=$((delay + 20))
+              done
+              echo "Pull $label failed after 6 attempts"
+              return 1
+            }
+
+            # Najpierw pull — dopiero potem down. Przy failu pulla stara produkcja zostaje.
+            pull_image "wilczynski87/przyczepki-web:latest" "web"
+            pull_image "wilczynski87/przyczepki-api:latest" "api"
+
             docker compose down --remove-orphans 2>/dev/null || true
             docker rm -f \
               przyczepki-landing-page nginx-proxy-manager \
@@ -216,24 +245,5 @@ jobs:
               przyczepki-web przyczepki-api \
               2>/dev/null || true
 
-            for i in 1 2 3; do
-              docker pull wilczynski87/przyczepki-web:latest && break
-              if [ "$i" -eq 3 ]; then
-                echo "Pull web image failed after 3 attempts"
-                exit 1
-              fi
-              echo "Pull web failed (attempt $i), retrying in 30s..."
-              sleep 30
-            done
-
-            for i in 1 2 3; do
-              docker pull wilczynski87/przyczepki-api:latest && break
-              if [ "$i" -eq 3 ]; then
-                echo "Pull api image failed after 3 attempts"
-                exit 1
-              fi
-              echo "Pull api failed (attempt $i), retrying in 30s..."
-              sleep 30
-            done
-
-            docker compose up -d --no-build --pull always
+            # Obrazy już ściągnięte — bez ponownego --pull always
+            docker compose up -d --no-build --pull never
