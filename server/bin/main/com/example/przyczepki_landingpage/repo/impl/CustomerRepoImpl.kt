@@ -6,9 +6,9 @@ import com.example.przyczepki_landingpage.data.LoginRequest
 import com.example.przyczepki_landingpage.data.Private
 import com.example.przyczepki_landingpage.repo.CustomerRepo
 import com.example.przyczepki_landingpage.service.auth.PasswordUtil.hash
-import com.mongodb.client.model.Filters.and
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.Filters.or
+import com.mongodb.client.model.Filters.regex
 import com.mongodb.client.model.FindOneAndUpdateOptions
 import com.mongodb.client.model.ReturnDocument
 import com.mongodb.client.model.Updates.set
@@ -19,6 +19,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import org.bson.types.ObjectId
+import java.util.regex.Pattern
 import kotlin.time.Clock
 
 class CustomerRepoImpl(
@@ -48,11 +49,7 @@ class CustomerRepoImpl(
     override suspend fun get(id: String): Customer? = customerCollection.find(eq("id", id)).firstOrNull()?.toCustomer()
 
     override suspend fun getByEmail(email: String): Customer? =
-        customerCollection.find( or(
-            eq("private.email", email),
-            eq("company.email", email)
-            )
-        ).firstOrNull()?.toCustomer()
+        customerCollection.find(emailFilter(email)).firstOrNull()?.toCustomer()
 
     override suspend fun update(customer: Customer): Customer? {
         TODO("Not yet implemented")
@@ -61,27 +58,24 @@ class CustomerRepoImpl(
     override suspend fun updatePassword(loginRequest: LoginRequest): Boolean {
         val email = loginRequest.email
         return customerCollection.updateOne(
-            filter = or(
-                eq("private.email", email),
-                eq("company.email", email)
-            ),
+            filter = emailFilter(email),
             update = set(CustomerTable::passwordHash.name, hash(loginRequest.password)),
          ).wasAcknowledged()
     }
 
     override suspend fun getCustomerTableByEmail(email: String): CustomerTable? {
-        return customerCollection.find(and(
-            or(
-                eq("private.email", email),
-                eq("company.email", email)
-            )
-        )).firstOrNull()
+        return customerCollection.find(emailFilter(email)).firstOrNull()
     }
 
     override suspend fun delete(id: String): Boolean {
         TODO("Not yet implemented")
     }
 }
+
+private fun emailFilter(email: String) = or(
+    regex("private.email", "^${Pattern.quote(email.trim())}$", "i"),
+    regex("company.email", "^${Pattern.quote(email.trim())}$", "i"),
+)
 
 @Serializable
 data class CustomerTable(

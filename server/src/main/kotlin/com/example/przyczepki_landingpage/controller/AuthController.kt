@@ -1,15 +1,21 @@
 package com.example.przyczepki_landingpage.controller
 
 import com.example.przyczepki_landingpage.auth.RefreshTokenRequest
+import com.example.przyczepki_landingpage.data.GoogleAuthConfigResponse
+import com.example.przyczepki_landingpage.data.GoogleOAuthRequest
 import com.example.przyczepki_landingpage.data.LoginRequest
 import com.example.przyczepki_landingpage.data.LoginResponse
+import com.example.przyczepki_landingpage.modules.ApiConfig
 import com.example.przyczepki_landingpage.service.CustomerService
+import com.example.przyczepki_landingpage.service.auth.GoogleIdTokenVerifier
 import com.example.przyczepki_landingpage.service.auth.JwtService
 import com.example.przyczepki_landingpage.service.auth.PasswordUtil.verify
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import org.koin.ktor.ext.inject
@@ -17,8 +23,59 @@ import org.koin.ktor.ext.inject
 fun Route.authController() {
     val customerService by inject<CustomerService>()
     val authService by inject<JwtService>()
+    val googleIdTokenVerifier by inject<GoogleIdTokenVerifier>()
+    val apiConfig by inject<ApiConfig>()
 
     route("auth") {
+        get("/google-config") {
+            val webClientId = apiConfig.auth.googleWebClientId.orEmpty()
+            call.respond(
+                GoogleAuthConfigResponse(
+                    webClientId = webClientId,
+                    enabled = webClientId.isNotBlank(),
+                )
+            )
+        }
+
+        post("/google") {
+            try {
+                val request = call.receive<GoogleOAuthRequest>()
+                val email = googleIdTokenVerifier.verifyAndExtractEmail(request.idToken)
+                val customer = customerService.getCustomerByEmail(email)
+                    ?: throw NotFoundException(
+                        "Nie znaleziono konta dla adresu $email. Zarejestruj się najpierw.",
+                    )
+                val customerId = customer.id
+                    ?: throw IllegalStateException("Brak customer ID: $customer")
+
+                if (customer.confirmed.isNullOrBlank()) {
+                    customerService.confirm(customerId)
+                }
+
+                val token = authService.generateToken(customer)
+                val refreshToken = authService.generateRefreshToken(customer)
+                call.respond(
+                    LoginResponse(
+                        token = token,
+                        customerId = customerId,
+                        refreshToken = refreshToken,
+                    )
+                )
+            } catch (e: NotFoundException) {
+                println("authController, google: ${e.message}")
+                call.respond(HttpStatusCode.NotFound, e.message ?: "Konto nie istnieje")
+            } catch (e: IllegalStateException) {
+                println("authController, google: ${e.message}")
+                call.respond(HttpStatusCode.ServiceUnavailable, e.message ?: "Google login niedostępny")
+            } catch (e: IllegalArgumentException) {
+                println("authController, google: ${e.message}")
+                call.respond(HttpStatusCode.Unauthorized, e.message ?: "Invalid Google token")
+            } catch (e: Exception) {
+                println("authController, google: ${e.message}")
+                call.respond(HttpStatusCode.BadRequest, e.message ?: "Unknown error")
+            }
+        }
+
         post("/login") {
             try {
                 val request = call.receive<LoginRequest>()

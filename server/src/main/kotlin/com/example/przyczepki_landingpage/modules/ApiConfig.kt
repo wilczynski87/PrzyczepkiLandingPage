@@ -31,7 +31,11 @@ data class AuthConfig(
     val refreshTokenExpiry: Long = 2592000000,
     val claim: String,
     val internalApiKey: String,
-)
+    val googleClientIds: List<String> = emptyList(),
+) {
+    val googleWebClientId: String?
+        get() = googleClientIds.firstOrNull()
+}
 
 @Serializable
 data class GateConfig(
@@ -115,11 +119,21 @@ fun toApiConfig(): ApiConfig {
             refreshTokenExpiry = System.getenv("AUTH_REFRESH_TOKEN_EXPIRY")?.toLongOrNull() ?: 2592000000,
             internalApiKey = System.getenv("INTERNAL_API_KEY") ?: throw NullPointerException("INTERNAL_API_KEY is missing"),
             claim = System.getenv("AUTH_CLAIM") ?: throw NullPointerException("AUTH_CLAIM is missing"),
+            googleClientIds = parseGoogleClientIds(),
         ),
 
         paymentConfig = readPaymentConfig(),
         gateConfig = readGateConfig(),
     )
+}
+
+private fun parseGoogleClientIds(): List<String> {
+    val raw = System.getenv("AUTH_GOOGLE_CLIENT_ID")
+        ?: System.getenv("GOOGLE_CLIENT_ID")
+        ?: ""
+    return raw.split(',', ';')
+        .map { it.trim() }
+        .filter { it.isNotBlank() }
 }
 
 private fun readGateConfig(): GateConfig {

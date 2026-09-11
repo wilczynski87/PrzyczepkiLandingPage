@@ -15,3 +15,14 @@ data class LoginResponse(
     val refreshToken: String? = null,
     val customerId: String,
 )
+
+@Serializable
+data class GoogleOAuthRequest(
+    val idToken: String,
+)
+
+@Serializable
+data class GoogleAuthConfigResponse(
+    val webClientId: String,
+    val enabled: Boolean = webClientId.isNotBlank(),
+)

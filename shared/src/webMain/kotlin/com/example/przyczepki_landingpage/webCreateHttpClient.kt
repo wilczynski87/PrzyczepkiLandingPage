@@ -116,6 +116,8 @@ fun webCreateHttpClient(tokenManager: TokenManager): HttpClient {
                 sendWithoutRequest { request ->
                     val path = request.url.encodedPath
                     !path.contains("/auth/login") &&
+                            !path.contains("/auth/google") &&
+                            !path.contains("/auth/google-config") &&
                             !path.contains("/auth/register") &&
                             !path.contains("/auth/refresh")
                 }

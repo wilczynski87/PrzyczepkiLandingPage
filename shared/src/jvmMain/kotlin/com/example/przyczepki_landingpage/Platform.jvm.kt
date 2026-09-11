@@ -48,6 +48,14 @@ actual fun getBaseUrl(): String {
         else "http://localhost:8090"
 }
 
+actual fun requestGoogleIdToken(clientId: String, onResult: (Result<String>) -> Unit) {
+    onResult(Result.failure(Exception("Logowanie Google jest dostępne tylko w przeglądarce")))
+}
+
+actual fun getLocationHash(): String = ""
+
+actual fun replaceLocationHash(hash: String) = Unit
+
 actual fun createHttpClient(tokenManager: TokenManager): HttpClient {
     TODO("Not yet implemented")
 }

@@ -28,6 +28,7 @@ import com.example.przyczepki_landingpage.service.ReservationConfirmationService
 import com.example.przyczepki_landingpage.service.ReservationService
 import com.example.przyczepki_landingpage.service.SuplaTokenProvider
 import com.example.przyczepki_landingpage.service.TrailersService
+import com.example.przyczepki_landingpage.service.auth.GoogleIdTokenVerifier
 import com.example.przyczepki_landingpage.service.auth.JwtService
 import com.example.przyczepki_landingpage.service.impl.CustomerServiceImpl
 import com.example.przyczepki_landingpage.service.impl.EmailServiceImpl
@@ -80,6 +81,13 @@ val appModule = module {
     single {
         val authConfig = get<ApiConfig>().auth
         JwtService(authConfig)
+    }
+
+    single {
+        GoogleIdTokenVerifier(
+            httpClient = get(),
+            allowedClientIds = get<ApiConfig>().auth.googleClientIds,
+        )
     }
 
     single<MongoClient> {

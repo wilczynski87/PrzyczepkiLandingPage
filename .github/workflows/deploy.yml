@@ -177,6 +177,7 @@ jobs:
               echo "AUTH_ACCESS_TOKEN_EXPIRY=${AUTH_ACCESS_TOKEN_EXPIRY:-3600000}"
               echo "AUTH_REFRESH_TOKEN_EXPIRY=${AUTH_REFRESH_TOKEN_EXPIRY:-2592000000}"
               echo "AUTH_CLAIM=${AUTH_CLAIM:-userId}"
+              echo "AUTH_GOOGLE_CLIENT_ID=${AUTH_GOOGLE_CLIENT_ID:-${GOOGLE_CLIENT_ID:-}}"
               echo "INTERNAL_API_KEY=${INTERNAL_API_KEY}"
               echo "EMAIL_HOST=${EMAIL_HOST:-przyczepki_email}"
               echo "EMAIL_PORT=${EMAIL_PORT:-8200}"

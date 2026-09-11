@@ -1,5 +1,7 @@
 package com.example.przyczepki_landingpage.model
 
+import com.example.przyczepki_landingpage.controller.GoogleAccountNotFoundException
+import com.example.przyczepki_landingpage.controller.GoogleAuthException
 import com.example.przyczepki_landingpage.controller.InvalidLoginCredentialsException
 import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.plugins.HttpRequestTimeoutException
@@ -76,6 +78,10 @@ fun isServerConnectionError(error: Throwable): Boolean {
 
 fun mapLoginError(error: Throwable): String {
     return when {
+        error is GoogleAccountNotFoundException ->
+            "Nie znaleziono konta dla tego adresu Gmail. Zarejestruj się najpierw, używając tego samego e-maila."
+        error is GoogleAuthException ->
+            error.message ?: "Nie udało się zalogować przez Google."
         error is InvalidLoginCredentialsException ->
             "Nieprawidłowy email/telefon lub hasło. Sprawdź dane i spróbuj ponownie."
         isServerConnectionError(error) ->

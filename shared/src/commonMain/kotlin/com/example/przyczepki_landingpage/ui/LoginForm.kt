@@ -42,7 +42,6 @@ import com.example.przyczepki_landingpage.AppViewModel
 @Composable
 fun LoginScreen(
     viewModel: AppViewModel,
-    onGoogleClick: () -> Unit = {},
     onAppleClick: () -> Unit = {}
 ) {
     val state by viewModel.appState.collectAsState()
@@ -170,11 +169,19 @@ fun LoginScreen(
 
         // GOOGLE
         OutlinedButton(
-            onClick = onGoogleClick,
+            onClick = { viewModel.loginWithGoogle() },
             enabled = !loginState.isLoading,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Kontynuuj z Google")
+            if (loginState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            } else {
+                Text("Kontynuuj z Google")
+            }
         }
 
         Spacer(Modifier.height(8.dp))

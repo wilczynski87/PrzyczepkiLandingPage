@@ -43,6 +43,9 @@ class AppViewModel(private val scope: CoroutineScope) {
 
     init {
         hydrateRememberedCredentials()
+        consumeGoogleIdTokenFromHash()?.let { idToken ->
+            scope.launch { completeGoogleLogin(idToken) }
+        }
         scope.launch {
             // Najpierw obsłuż powrót z P24 — niezależnie od health checka
             handlePaymentReturnIfNeeded()
@@ -624,34 +627,11 @@ class AppViewModel(private val scope: CoroutineScope) {
                     ApiClient.authController.login(LoginRequest(loginInput, password))
 
                 result.onSuccess { loginResponse ->
-                    println("Zalogowano: ${loginResponse.token}")
-                    ApiClient.tokenManager.setTokens(
-                        loginResponse.token,
-                        loginResponse.refreshToken
+                    applySuccessfulLogin(
+                        loginResponse = loginResponse,
+                        rememberedLogin = loginInput,
+                        rememberedPassword = password,
                     )
-                    saveStoredCustomerId(loginResponse.customerId)
-
-                    val remember = loginState.rememberCredentials
-                    if (remember) {
-                        saveRememberedCredentials(loginInput, password)
-                    } else {
-                        clearRememberedCredentials()
-                    }
-
-                    _appState.update { state ->
-                        state.copy(
-                            accessToken = loginResponse.token,
-                            refreshToken = loginResponse.refreshToken,
-                            loginUiState = LoginUiState(
-                                login = if (remember) loginInput else "",
-                                password = if (remember) password else "",
-                                rememberCredentials = remember,
-                            )
-                        )
-                    }
-
-                    fetchCustomer(loginResponse.customerId)
-
                 }.onFailure { error ->
                     println("Nie udało się zalogować: ${error.message}")
                     _appState.update { state ->
@@ -675,6 +655,136 @@ class AppViewModel(private val scope: CoroutineScope) {
                 }
             }
         }
+    }
+
+    fun loginWithGoogle() {
+        if (appState.value.loginUiState.isLoading) return
+        scope.launch {
+            _appState.update { state ->
+                state.copy(
+                    loginUiState = state.loginUiState.copy(isLoading = true, error = null)
+                )
+            }
+            val configResult = ApiClient.authController.getGoogleConfig()
+            val clientId = configResult.getOrNull()?.webClientId.orEmpty()
+            _appState.update { state ->
+                state.copy(
+                    loginUiState = state.loginUiState.copy(isLoading = false)
+                )
+            }
+            if (clientId.isBlank()) {
+                _appState.update { state ->
+                    state.copy(
+                        loginUiState = state.loginUiState.copy(
+                            error = configResult.exceptionOrNull()?.let(::mapLoginError)
+                                ?: "Logowanie Google nie jest skonfigurowane.",
+                        )
+                    )
+                }
+                return@launch
+            }
+            requestGoogleIdToken(clientId) { result ->
+                result.fold(
+                    onSuccess = { idToken ->
+                        scope.launch { completeGoogleLogin(idToken) }
+                    },
+                    onFailure = { error ->
+                        _appState.update { state ->
+                            state.copy(
+                                loginUiState = state.loginUiState.copy(
+                                    isLoading = false,
+                                    error = error.message ?: "Nie udało się zalogować przez Google.",
+                                )
+                            )
+                        }
+                    },
+                )
+            }
+        }
+    }
+
+    private suspend fun completeGoogleLogin(idToken: String) {
+        _appState.update { state ->
+            state.copy(
+                loginUiState = state.loginUiState.copy(isLoading = true, error = null)
+            )
+        }
+        try {
+            ApiClient.authController.loginWithGoogle(idToken)
+                .onSuccess { loginResponse ->
+                    applySuccessfulLogin(
+                        loginResponse = loginResponse,
+                        rememberedLogin = appState.value.loginUiState.login,
+                        rememberedPassword = appState.value.loginUiState.password,
+                    )
+                }
+                .onFailure { error ->
+                    _appState.update { state ->
+                        state.copy(
+                            loginUiState = state.loginUiState.copy(
+                                isLoading = false,
+                                error = mapLoginError(error),
+                            )
+                        )
+                    }
+                }
+        } catch (error: Throwable) {
+            _appState.update { state ->
+                state.copy(
+                    loginUiState = state.loginUiState.copy(
+                        isLoading = false,
+                        error = mapLoginError(error),
+                    )
+                )
+            }
+        }
+    }
+
+    private suspend fun applySuccessfulLogin(
+        loginResponse: LoginResponse,
+        rememberedLogin: String,
+        rememberedPassword: String,
+    ) {
+        println("Zalogowano: ${loginResponse.token}")
+        ApiClient.tokenManager.setTokens(
+            loginResponse.token,
+            loginResponse.refreshToken,
+        )
+        saveStoredCustomerId(loginResponse.customerId)
+
+        val remember = appState.value.loginUiState.rememberCredentials
+        if (remember) {
+            saveRememberedCredentials(rememberedLogin, rememberedPassword)
+        } else {
+            clearRememberedCredentials()
+        }
+
+        _appState.update { state ->
+            state.copy(
+                accessToken = loginResponse.token,
+                refreshToken = loginResponse.refreshToken,
+                loginUiState = LoginUiState(
+                    login = if (remember) rememberedLogin else "",
+                    password = if (remember) rememberedPassword else "",
+                    rememberCredentials = remember,
+                )
+            )
+        }
+
+        fetchCustomer(loginResponse.customerId)
+    }
+
+    private fun consumeGoogleIdTokenFromHash(): String? {
+        val hash = getLocationHash().removePrefix("#")
+        if (hash.isBlank()) return null
+        val params = hash.split("&").associate { part ->
+            val separator = part.indexOf('=')
+            if (separator <= 0) "" to part
+            else part.substring(0, separator) to part.substring(separator + 1)
+        }
+        val token = params["id_token"]?.takeIf { it.isNotBlank() } ?: return null
+        replaceLocationHash("")
+        return token
     }
 
     fun logout() {

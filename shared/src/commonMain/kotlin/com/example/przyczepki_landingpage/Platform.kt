@@ -31,3 +31,9 @@ expect fun setLocalStorageValue(key: String, value: String)
 expect fun removeLocalStorageValue(key: String)
 
 expect fun getBaseUrl(): String
+
+expect fun requestGoogleIdToken(clientId: String, onResult: (Result<String>) -> Unit)
+
+expect fun getLocationHash(): String
+
+expect fun replaceLocationHash(hash: String)
