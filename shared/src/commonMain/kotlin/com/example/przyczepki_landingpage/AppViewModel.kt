@@ -1,6 +1,14 @@
 package com.example.przyczepki_landingpage
 
+import com.example.przyczepki_landingpage.auth.clearRememberedCredentials
+import com.example.przyczepki_landingpage.auth.clearStoredCustomerId
+import com.example.przyczepki_landingpage.auth.customerIdFromJwt
+import com.example.przyczepki_landingpage.auth.loadRememberedCredentials
+import com.example.przyczepki_landingpage.auth.loadStoredCustomerId
+import com.example.przyczepki_landingpage.auth.saveRememberedCredentials
+import com.example.przyczepki_landingpage.auth.saveStoredCustomerId
 import com.example.przyczepki_landingpage.controller.ApiClient
+import com.example.przyczepki_landingpage.controller.InvalidLoginCredentialsException
 import com.example.przyczepki_landingpage.data.Customer
 import com.example.przyczepki_landingpage.data.LoginRequest
 import com.example.przyczepki_landingpage.data.LoginResponse
@@ -34,6 +42,7 @@ class AppViewModel(private val scope: CoroutineScope) {
     val appState: StateFlow<AppState> = _appState.asStateFlow()
 
     init {
+        hydrateRememberedCredentials()
         scope.launch {
             // Najpierw obsłuż powrót z P24 — niezależnie od health checka
             handlePaymentReturnIfNeeded()
@@ -52,6 +61,7 @@ class AppViewModel(private val scope: CoroutineScope) {
                 }
                 fetchTrailers()
                 fetchReservations()
+                restoreSessionIfPossible()
             }
         }
     }
@@ -207,7 +217,7 @@ class AppViewModel(private val scope: CoroutineScope) {
             modal = null,
             modalType = ModalType.NONE,
             modalVisible = false,
-            loginUiState = LoginUiState()
+            loginUiState = it.loginUiState.copy(isLoading = false, error = null)
         ) }
     }
 
@@ -332,11 +342,8 @@ class AppViewModel(private val scope: CoroutineScope) {
             val customerId: String = customerId ?: appState.value.customer?.id ?: return@launch
             ApiClient.customerController.deleteCustomer(customerId)
                 .onSuccess {
-                    _appState.update { state ->
-                        state.copy(
-                            customer = null
-                        )
-                    }
+                    clearRememberedCredentials()
+                    clearLocalSession()
                 }
                 .onFailure {
                     println("Error: ${it.message}")
@@ -351,24 +358,39 @@ class AppViewModel(private val scope: CoroutineScope) {
     fun fetchCustomer(customerId: String? = null) {
         println("fetchCustomer")
         scope.launch {
-            val customerId: String = customerId ?: appState.value.customer?.id ?: return@launch
-            ApiClient.customerController.getCustomer(customerId)
-                .onSuccess { customer ->
-                    _appState.update { state ->
-                        state.copy(
-                            customer = customer
-                        )
-                    }
-                    closeModal()
+            fetchCustomerInternal(
+                customerId = customerId ?: appState.value.customer?.id ?: return@launch,
+                closeLoginModal = true,
+                showError = true,
+            )
+        }
+    }
+
+    private suspend fun fetchCustomerInternal(
+        customerId: String,
+        closeLoginModal: Boolean,
+        showError: Boolean,
+    ) {
+        ApiClient.customerController.getCustomer(customerId)
+            .onSuccess { customer ->
+                saveStoredCustomerId(customerId)
+                _appState.update { state ->
+                    state.copy(customer = customer)
                 }
-                .onFailure {
-                    println("Error: ${it.message}")
+                if (closeLoginModal) closeModal()
+            }
+            .onFailure { error ->
+                println("Error: ${error.message}")
+                if (error is InvalidLoginCredentialsException) {
+                    clearLocalSession()
+                }
+                if (showError) {
                     openModal(ModalType.CUSTOMER_ERROR, ModalData(
                         dialogTitle = "Błąd przy pobieraniu danych klienta",
-                        dialogText = it.message ?: "Unknown error")
+                        dialogText = error.message ?: "Unknown error")
                     )
                 }
-        }
+            }
     }
 
     fun initiatePayment(depositAmount: Double) {
@@ -563,6 +585,14 @@ class AppViewModel(private val scope: CoroutineScope) {
         }
     }
 
+    fun onRememberCredentialsChange(remember: Boolean) {
+        _appState.update { state ->
+            state.copy(
+                loginUiState = state.loginUiState.copy(rememberCredentials = remember)
+            )
+        }
+    }
+
     fun login() {
         val loginState = appState.value.loginUiState
         val loginInput = loginState.login.trim()
@@ -599,12 +629,24 @@ class AppViewModel(private val scope: CoroutineScope) {
                         loginResponse.token,
                         loginResponse.refreshToken
                     )
+                    saveStoredCustomerId(loginResponse.customerId)
+
+                    val remember = loginState.rememberCredentials
+                    if (remember) {
+                        saveRememberedCredentials(loginInput, password)
+                    } else {
+                        clearRememberedCredentials()
+                    }
 
                     _appState.update { state ->
                         state.copy(
                             accessToken = loginResponse.token,
                             refreshToken = loginResponse.refreshToken,
-                            loginUiState = LoginUiState()
+                            loginUiState = LoginUiState(
+                                login = if (remember) loginInput else "",
+                                password = if (remember) password else "",
+                                rememberCredentials = remember,
+                            )
                         )
                     }
 
@@ -636,10 +678,71 @@ class AppViewModel(private val scope: CoroutineScope) {
     }
 
     fun logout() {
+        scope.launch {
+            clearLocalSession()
+        }
+    }
+
+    private fun hydrateRememberedCredentials() {
+        val saved = loadRememberedCredentials() ?: return
         _appState.update { state ->
             state.copy(
-                customer = null
+                loginUiState = state.loginUiState.copy(
+                    login = saved.login,
+                    password = saved.password,
+                    rememberCredentials = true,
+                )
             )
+        }
+    }
+
+    private suspend fun restoreSessionIfPossible() {
+        val access = ApiClient.tokenManager.getAccessToken()
+        val refresh = ApiClient.tokenManager.getRefreshToken()
+        if (access.isNullOrBlank() && refresh.isNullOrBlank()) return
+
+        val customerId = loadStoredCustomerId()
+            ?: customerIdFromJwt(access)
+            ?: customerIdFromJwt(refresh)
+            ?: return
+
+        _appState.update {
+            it.copy(
+                accessToken = access,
+                refreshToken = refresh,
+            )
+        }
+        fetchCustomerInternal(
+            customerId = customerId,
+            closeLoginModal = false,
+            showError = false,
+        )
+    }
+
+    private suspend fun clearLocalSession() {
+        ApiClient.tokenManager.clearTokens()
+        clearStoredCustomerId()
+        val remembered = rememberedLoginUiState()
+        _appState.update { state ->
+            state.copy(
+                customer = null,
+                accessToken = null,
+                refreshToken = null,
+                loginUiState = remembered,
+            )
+        }
+    }
+
+    private fun rememberedLoginUiState(): LoginUiState {
+        val saved = loadRememberedCredentials()
+        return if (saved != null) {
+            LoginUiState(
+                login = saved.login,
+                password = saved.password,
+                rememberCredentials = true,
+            )
+        } else {
+            LoginUiState(rememberCredentials = appState.value.loginUiState.rememberCredentials)
         }
     }
 }

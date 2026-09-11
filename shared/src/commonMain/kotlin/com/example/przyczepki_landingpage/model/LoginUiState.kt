@@ -8,6 +8,7 @@ import io.ktor.util.network.UnresolvedAddressException
 data class LoginUiState(
     val login: String = "",
     val password: String = "",
+    val rememberCredentials: Boolean = true,
     val isLoading: Boolean = false,
     val error: String? = null
 )

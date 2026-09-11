@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -99,6 +100,21 @@ fun LoginScreen(
             },
             modifier = Modifier.fillMaxWidth()
         )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Checkbox(
+                checked = loginState.rememberCredentials,
+                onCheckedChange = viewModel::onRememberCredentialsChange,
+                enabled = !loginState.isLoading,
+            )
+            Text(
+                text = "Zapamiętaj login i hasło",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
 
         // KOMUNIKAT BŁĘDU
         loginState.error?.let { error ->
