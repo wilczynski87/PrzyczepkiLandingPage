@@ -7,7 +7,7 @@ import com.example.przyczepki_landingpage.service.CustomerService
 import pl.przyczepki.email.api.dto.AccountConfirmationData
 
 class FakeCustomerService : CustomerService {
-    override suspend fun save(customer: Customer): Customer? = customer
+    override suspend fun save(customer: Customer, password: String): Customer? = customer
     override suspend fun accountConfirmationData(customer: Customer): AccountConfirmationData {
         TODO("Not yet implemented")
     }

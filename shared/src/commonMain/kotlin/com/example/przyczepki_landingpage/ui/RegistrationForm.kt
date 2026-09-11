@@ -12,6 +12,8 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +30,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import com.example.przyczepki_landingpage.AppViewModel
 import com.example.przyczepki_landingpage.model.CurrentScreen
 
@@ -140,6 +144,10 @@ private fun CustomerRegistrationContent(
     val companyPhone  = customer?.company?.phoneNumber ?: ""
     val nip = customer?.company?.nip ?: ""
 
+    var password by rememberSaveable { mutableStateOf("") }
+    var confirmPassword by rememberSaveable { mutableStateOf("") }
+    val requirePassword = customer?.id == null
+
     val validationErrors = validateCustomerForm(
         isCompany = isCompany,
         firstName = firstName,
@@ -152,7 +160,10 @@ private fun CustomerRegistrationContent(
         companyEmail = companyEmail,
         companyPhone = companyPhone,
         nip = nip,
-        companyAddress = companyAddress
+        companyAddress = companyAddress,
+        password = password,
+        confirmPassword = confirmPassword,
+        requirePassword = requirePassword,
     )
 
     val canSubmit = !validationErrors.hasErrors
@@ -464,13 +475,21 @@ private fun CustomerRegistrationContent(
             )
         }
 
+        if (requirePassword) {
+            PasswordFormSection(
+                password = password,
+                confirmPassword = confirmPassword,
+                onPasswordChange = { password = it },
+                onConfirmPasswordChange = { confirmPassword = it },
+                passwordError = validationErrors.password,
+                confirmPasswordError = validationErrors.confirmPassword,
+            )
+        }
+
         Button(
             onClick = {
-                // TODO wysłanie danych do serwera w celu walidacji
-                // jeśli ok to rejestracja klienta -> email z potwierdzeniem
-                if(customer?.id != null) viewModel.putCustomer()
-                    else viewModel.saveCustomer()
-
+                if (customer?.id != null) viewModel.putCustomer()
+                else viewModel.saveCustomer(password)
             },
             enabled = canSubmit,
             modifier = Modifier.fillMaxWidth()
@@ -799,6 +818,67 @@ fun ExtraFieldsSection(
     }
 }
 
+@Composable
+fun PasswordFormSection(
+    password: String,
+    confirmPassword: String,
+    onPasswordChange: (String) -> Unit,
+    onConfirmPasswordChange: (String) -> Unit,
+    passwordError: String? = null,
+    confirmPasswordError: String? = null,
+) {
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmVisible by remember { mutableStateOf(false) }
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = "Hasło do logowania",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+        )
+        OutlinedTextField(
+            value = password,
+            onValueChange = onPasswordChange,
+            label = { Text("Hasło") },
+            singleLine = true,
+            isError = passwordError != null,
+            supportingText = {
+                passwordError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            },
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        contentDescription = null,
+                    )
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        OutlinedTextField(
+            value = confirmPassword,
+            onValueChange = onConfirmPasswordChange,
+            label = { Text("Powtórz hasło") },
+            singleLine = true,
+            isError = confirmPasswordError != null,
+            supportingText = {
+                confirmPasswordError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            },
+            visualTransformation = if (confirmVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = { confirmVisible = !confirmVisible }) {
+                    Icon(
+                        if (confirmVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        contentDescription = null,
+                    )
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
 
 // Klasa dla błędów walidacji
 data class ValidationErrors(
@@ -812,12 +892,15 @@ data class ValidationErrors(
     val companyEmail: String? = null,
     val companyPhone: String? = null,
     val nip: String? = null,
-    val companyAddress: String? = null
+    val companyAddress: String? = null,
+    val password: String? = null,
+    val confirmPassword: String? = null,
 ) {
     val hasErrors: Boolean
         get() = listOf(
             firstName, lastName, privateEmail, privatePhone, pesel, privateAddress,
-            companyName, companyEmail, companyPhone, nip, companyAddress
+            companyName, companyEmail, companyPhone, nip, companyAddress,
+            password, confirmPassword,
         ).any { it != null }
 }
 
@@ -884,6 +967,22 @@ private fun isValidNipChecksum(nip: String): Boolean {
 }
 
 // Główna funkcja walidacji
+fun validatePassword(password: String): String? {
+    return when {
+        password.isBlank() -> "Podaj hasło"
+        password.length < 6 -> "Hasło musi mieć co najmniej 6 znaków"
+        else -> null
+    }
+}
+
+fun validatePasswordConfirm(password: String, confirmPassword: String): String? {
+    return when {
+        confirmPassword.isBlank() -> "Powtórz hasło"
+        password != confirmPassword -> "Hasła nie są takie same"
+        else -> null
+    }
+}
+
 fun validateCustomerForm(
     isCompany: Boolean,
     firstName: String,
@@ -896,8 +995,19 @@ fun validateCustomerForm(
     companyEmail: String,
     companyPhone: String,
     nip: String,
-    companyAddress: String
+    companyAddress: String,
+    password: String = "",
+    confirmPassword: String = "",
+    requirePassword: Boolean = false,
 ): ValidationErrors {
+    val passwordErrors = if (requirePassword) {
+        ValidationErrors(
+            password = validatePassword(password),
+            confirmPassword = validatePasswordConfirm(password, confirmPassword),
+        )
+    } else {
+        ValidationErrors()
+    }
 
     return if (isCompany) {
         ValidationErrors(
@@ -905,7 +1015,9 @@ fun validateCustomerForm(
             companyEmail = validateEmail(companyEmail),
             companyPhone = validatePhone(companyPhone),
             nip = validateNip(nip),
-            companyAddress = validateRequired(companyAddress, "Adres firmy")
+            companyAddress = validateRequired(companyAddress, "Adres firmy"),
+            password = passwordErrors.password,
+            confirmPassword = passwordErrors.confirmPassword,
         )
     } else {
         ValidationErrors(
@@ -914,7 +1026,9 @@ fun validateCustomerForm(
             privateEmail = validateEmail(privateEmail),
             privatePhone = validatePhone(privatePhone),
             pesel = validatePesel(pesel),
-            privateAddress = validateRequired(privateAddress, "Adres")
+            privateAddress = validateRequired(privateAddress, "Adres"),
+            password = passwordErrors.password,
+            confirmPassword = passwordErrors.confirmPassword,
         )
     }
 }

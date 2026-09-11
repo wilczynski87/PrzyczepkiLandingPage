@@ -14,7 +14,7 @@ class FakeCustomerRepo(
         customers[id] = customer
     }
 
-    override suspend fun save(customer: Customer): Customer? {
+    override suspend fun save(customer: Customer, password: String): Customer? {
         val id = customer.id ?: "customer-${customers.size + 1}"
         val saved = customer.copy(id = id)
         customers[id] = saved

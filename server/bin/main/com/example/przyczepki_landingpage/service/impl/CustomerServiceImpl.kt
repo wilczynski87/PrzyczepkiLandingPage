@@ -19,8 +19,16 @@ class CustomerServiceImpl(
     private val apiBaseUrl: String,
     private val customerRepo: CustomerRepo
 ): CustomerService {
-    override suspend fun save(customer: Customer): Customer? =
-        customerRepo.save(customer)
+    override suspend fun save(customer: Customer, password: String): Customer? {
+        if (password.length < 6) {
+            throw BadRequestException("Hasło musi mieć co najmniej 6 znaków")
+        }
+        val email = customer.getEmail()?.trim().orEmpty()
+        if (email.isNotBlank() && customerRepo.getByEmail(email) != null) {
+            throw BadRequestException("Klient z tym adresem e-mail już istnieje")
+        }
+        return customerRepo.save(customer, password)
+    }
 
     override suspend fun accountConfirmationData(customer: Customer): AccountConfirmationData {
         val confirmationLink = "${apiBaseUrl}customer/confirm/${customer.id}"

@@ -285,10 +285,10 @@ class AppViewModel(private val scope: CoroutineScope) {
     }
 
     // Server update
-    fun saveCustomer() {
+    fun saveCustomer(password: String) {
         scope.launch {
             val customer = appState.value.customer ?: return@launch
-            ApiClient.customerController.saveCustomer(customer)
+            ApiClient.customerController.saveCustomer(customer, password)
                 .onSuccess {
                     _appState.update { state ->
                         state.copy(

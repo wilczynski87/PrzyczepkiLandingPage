@@ -25,8 +25,8 @@ class CustomerRepoImpl(
     private val customerCollection: MongoCollection<CustomerTable>
 ): CustomerRepo {
 
-    override suspend fun save(customer: Customer): Customer? {
-        val toSave = customer.toTable()
+    override suspend fun save(customer: Customer, password: String): Customer? {
+        val toSave = customer.toTable(password)
 
         val customerId = customerCollection.insertOne(toSave).insertedId
 
@@ -100,7 +100,7 @@ data class CustomerTable(
         confirmed = confirmed
     )
 }
-fun Customer.toTable(): CustomerTable {
+fun Customer.toTable(password: String): CustomerTable {
     val _id = ObjectId()
     return CustomerTable(
         _id = _id,
@@ -108,6 +108,6 @@ fun Customer.toTable(): CustomerTable {
         private = private,
         company = company,
         confirmed = confirmed,
-        passwordHash = hash(company?.nip ?: private?.pesel ?: "")
+        passwordHash = hash(password),
     )
 }

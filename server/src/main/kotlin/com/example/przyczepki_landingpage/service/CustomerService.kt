@@ -6,7 +6,7 @@ import com.example.przyczepki_landingpage.repo.impl.CustomerTable
 import pl.przyczepki.email.api.dto.AccountConfirmationData
 
 interface CustomerService {
-    suspend fun save(customer: Customer): Customer?
+    suspend fun save(customer: Customer, password: String): Customer?
     suspend fun accountConfirmationData(customer: Customer): AccountConfirmationData
     suspend fun confirm(id: String): Customer?
     suspend fun get(id: String): Customer?

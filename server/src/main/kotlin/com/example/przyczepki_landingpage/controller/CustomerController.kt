@@ -1,12 +1,12 @@
 package com.example.przyczepki_landingpage.controller
 
 import com.example.przyczepki_landingpage.data.Customer
+import com.example.przyczepki_landingpage.data.CustomerRegisterRequest
 import com.example.przyczepki_landingpage.data.EmailTemplate
 import com.example.przyczepki_landingpage.data.LoginRequest
 import com.example.przyczepki_landingpage.data.dto.SendEmailRequest
 import com.example.przyczepki_landingpage.service.CustomerService
 import com.example.przyczepki_landingpage.service.EmailService
-import com.example.przyczepki_landingpage.service.auth.PasswordUtil.hash
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.plugins.BadRequestException
@@ -30,10 +30,15 @@ fun Route.customerController() {
     route("/customer") {
         post {
             try {
-                // TODO hasło początkowe + validaja (np powtarzanie email lub nip/pesel)
-                val customer = call.receive<Customer>()
+                val request = call.receive<CustomerRegisterRequest>()
+                val customer = request.customer
+                val password = request.password.trim()
+                if (password.length < 6) {
+                    throw BadRequestException("Hasło musi mieć co najmniej 6 znaków")
+                }
 
-                val saved = customerService.save(customer) ?: throw BadRequestException("Nie udało się zapisać klienta")
+                val saved = customerService.save(customer, password)
+                    ?: throw BadRequestException("Nie udało się zapisać klienta")
 
                 val accountConfirmationData = customerService.accountConfirmationData(saved)
                 emailService.sendEmailConfirmationRequest(

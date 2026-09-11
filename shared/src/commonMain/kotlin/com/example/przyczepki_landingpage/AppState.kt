@@ -55,8 +55,8 @@ val ikona = mapOf<String, String>(
 )
 
 val logo = mapOf(
-    "thumbnail" to "https://i.postimg.cc/yWHwwDrt/logo-przyczepkifat-kadr.png",
-    "logo" to "https://i.postimg.cc/2jbrLvdk/logo-przyczepkifat-kadr.png"
+    "thumbnail" to "https://i.postimg.cc/kRN3SV1F/logo-przyczepkifat-kadr.png",
+    "logo" to "https://i.postimg.cc/kGznkKWZ/logo-przyczepkifat-kadr.png"
 )
 
 val vesta = mapOf<String, String>(

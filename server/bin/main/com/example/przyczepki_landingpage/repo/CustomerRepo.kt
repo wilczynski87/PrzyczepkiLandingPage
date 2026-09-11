@@ -5,7 +5,7 @@ import com.example.przyczepki_landingpage.data.LoginRequest
 import com.example.przyczepki_landingpage.repo.impl.CustomerTable
 
 interface CustomerRepo {
-    suspend fun save(customer: Customer): Customer?
+    suspend fun save(customer: Customer, password: String): Customer?
     suspend fun confirm(id: String): Customer?
     suspend fun get(id: String): Customer?
     suspend fun getByEmail(email: String): Customer?
