@@ -35,6 +35,7 @@ import com.example.przyczepki_landingpage.ui.MainScreen
 import com.example.przyczepki_landingpage.ui.MyTopAppBar
 import com.example.przyczepki_landingpage.ui.PricesPage
 import com.example.przyczepki_landingpage.ui.PrivacyPolicyPage
+import com.example.przyczepki_landingpage.ui.RegistrationPendingPage
 import com.example.przyczepki_landingpage.ui.ReservationFinaliseMain
 import com.example.przyczepki_landingpage.ui.ReservationPage
 import com.example.przyczepki_landingpage.ui.ReservationSummaryPage
@@ -127,6 +128,10 @@ fun AppMainScreen() {
 
                     CurrentScreen.SIGN_UP -> {
                         CustomerRegistrationForm(widthSizeClass, viewModel)
+                    }
+
+                    CurrentScreen.REGISTRATION_PENDING -> {
+                        RegistrationPendingPage(widthSizeClass, viewModel)
                     }
 
                     CurrentScreen.RESERVATION_FINALISE -> {

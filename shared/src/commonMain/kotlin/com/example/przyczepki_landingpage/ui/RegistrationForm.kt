@@ -504,7 +504,8 @@ private fun CustomerRegistrationContent(
 fun CustomerPreviewCard(
     customer: Customer?,
     isCompany: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    title: String = "Podgląd klienta",
 ) {
     val displayName = if (isCompany) {
         customer?.company?.name?.takeIf { it.isNotBlank() }
@@ -526,7 +527,7 @@ fun CustomerPreviewCard(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                "Podgląd klienta",
+                title,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

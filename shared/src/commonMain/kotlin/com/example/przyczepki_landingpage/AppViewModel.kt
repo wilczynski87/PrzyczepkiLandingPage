@@ -305,7 +305,7 @@ class AppViewModel(private val scope: CoroutineScope) {
                             customer = it
                         )
                     }
-                    navigateTo(CurrentScreen.RESERVATION_FINALISE)
+                    navigateTo(CurrentScreen.REGISTRATION_PENDING)
                 }.onFailure {
                     println("Error: ${it.message}")
                     openModal(ModalType.CUSTOMER_ERROR, ModalData(
