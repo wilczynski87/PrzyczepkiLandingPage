@@ -80,6 +80,7 @@ class AppViewModel(private val scope: CoroutineScope) {
                     replaceBrowserPath("/")
                 }
             }
+            CurrentScreen.LOGIN -> fetchCustomerReservations()
             else -> Unit
         }
     }
@@ -264,6 +265,42 @@ class AppViewModel(private val scope: CoroutineScope) {
         }
     }
 
+    fun fetchCustomerReservations() {
+        if (appState.value.customer?.id == null) return
+        scope.launch {
+            _appState.update {
+                it.copy(
+                    customerReservationsLoading = true,
+                    customerReservationsError = null,
+                )
+            }
+            ApiClient.reservationController.getMyReservations()
+                .onSuccess { reservations ->
+                    _appState.update {
+                        it.copy(
+                            customerReservations = reservations,
+                            customerReservationsLoading = false,
+                            customerReservationsError = null,
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    println("Error fetching customer reservations: ${error.message}")
+                    _appState.update {
+                        it.copy(
+                            customerReservationsLoading = false,
+                            customerReservationsError = if (error is InvalidLoginCredentialsException) {
+                                "Sesja wygasła. Zaloguj się ponownie."
+                            } else {
+                                error.message?.takeIf { message -> message.isNotBlank() }
+                                    ?: "Nie udało się pobrać rezerwacji."
+                            },
+                        )
+                    }
+                }
+        }
+    }
+
     private fun mapReservationsToBlockedDates(
         reservations: List<ReservationDto>? = null,
         trailerId: String? = null
@@ -301,19 +338,24 @@ class AppViewModel(private val scope: CoroutineScope) {
     fun saveCustomer(password: String) {
         scope.launch {
             val customer = appState.value.customer ?: return@launch
+            _appState.update {
+                it.copy(customerActionInProgress = true, customerActionFeedback = null)
+            }
             ApiClient.customerController.saveCustomer(customer, password)
                 .onSuccess {
                     _appState.update { state ->
                         state.copy(
-                            customer = it
+                            customer = it,
+                            customerActionInProgress = false,
                         )
                     }
                     navigateTo(CurrentScreen.REGISTRATION_PENDING)
                 }.onFailure {
                     println("Error: ${it.message}")
-                    openModal(ModalType.CUSTOMER_ERROR, ModalData(
-                        dialogTitle = "Błąd przy zapisie danych klienta",
-                        dialogText = it.message ?: "Unknown error")
+                    showCustomerActionResult(
+                        success = false,
+                        title = "Błąd przy zapisie danych klienta",
+                        message = customerActionErrorMessage(it),
                     )
                 }
         }
@@ -322,37 +364,32 @@ class AppViewModel(private val scope: CoroutineScope) {
     fun putCustomer() {
         scope.launch {
             val customer = appState.value.customer ?: return@launch
+            _appState.update {
+                it.copy(customerActionInProgress = true, customerActionFeedback = null)
+            }
             ApiClient.customerController.updateCustomer(customer)
                 .onSuccess { updated ->
                     if (updated == null) {
-                        openModal(
-                            ModalType.CUSTOMER_ERROR,
-                            ModalData(
-                                dialogTitle = "Błąd przy aktualizacji danych klienta",
-                                dialogText = "Serwer nie zwrócił zaktualizowanych danych.",
-                            ),
+                        showCustomerActionResult(
+                            success = false,
+                            title = "Błąd przy aktualizacji danych",
+                            message = "Serwer nie zwrócił zaktualizowanych danych.",
                         )
                         return@onSuccess
                     }
-                    _appState.update { state ->
-                        state.copy(customer = updated)
-                    }
-                    openModal(
-                        ModalType.CUSTOMER_INFO,
-                        ModalData(
-                            dialogTitle = "Dane zaktualizowane",
-                            dialogText = "Twoje dane zostały zapisane.",
-                        ),
+                    showCustomerActionResult(
+                        success = true,
+                        title = "Dane zaktualizowane",
+                        message = "Twoje dane zostały zapisane.",
+                        customer = updated,
                     )
                 }
                 .onFailure {
                     println("Error: ${it.message}")
-                    openModal(
-                        ModalType.CUSTOMER_ERROR,
-                        ModalData(
-                            dialogTitle = "Błąd przy aktualizacji danych klienta",
-                            dialogText = customerActionErrorMessage(it),
-                        ),
+                    showCustomerActionResult(
+                        success = false,
+                        title = "Błąd przy aktualizacji danych",
+                        message = customerActionErrorMessage(it),
                     )
                 }
         }
@@ -361,6 +398,9 @@ class AppViewModel(private val scope: CoroutineScope) {
     fun deleteCustomer(customerId: String? = null) {
         scope.launch {
             val customerId: String = customerId ?: appState.value.customer?.id ?: return@launch
+            _appState.update {
+                it.copy(customerActionInProgress = true, customerActionFeedback = null)
+            }
             ApiClient.customerController.deleteCustomer(customerId)
                 .onSuccess {
                     clearRememberedCredentials()
@@ -369,12 +409,10 @@ class AppViewModel(private val scope: CoroutineScope) {
                 }
                 .onFailure {
                     println("Error: ${it.message}")
-                    openModal(
-                        ModalType.CUSTOMER_ERROR,
-                        ModalData(
-                            dialogTitle = "Błąd przy usuwaniu danych klienta",
-                            dialogText = customerActionErrorMessage(it),
-                        ),
+                    showCustomerActionResult(
+                        success = false,
+                        title = "Błąd przy usuwaniu konta",
+                        message = customerActionErrorMessage(it),
                     )
                 }
         }
@@ -403,6 +441,7 @@ class AppViewModel(private val scope: CoroutineScope) {
                     state.copy(customer = customer)
                 }
                 if (closeLoginModal) closeModal()
+                fetchCustomerReservations()
             }
             .onFailure { error ->
                 println("Error: ${error.message}")
@@ -555,6 +594,7 @@ class AppViewModel(private val scope: CoroutineScope) {
                                 )
                             }
                             fetchReservations()
+                            fetchCustomerReservations()
                             return@launch
                         }
                         PaymentSessionStatus.FAILED -> {
@@ -860,6 +900,11 @@ class AppViewModel(private val scope: CoroutineScope) {
                 customer = null,
                 accessToken = null,
                 refreshToken = null,
+                customerReservations = emptyList(),
+                customerReservationsLoading = false,
+                customerReservationsError = null,
+                customerActionInProgress = false,
+                customerActionFeedback = null,
                 loginUiState = remembered,
             )
         }
@@ -878,10 +923,32 @@ class AppViewModel(private val scope: CoroutineScope) {
         }
     }
 
+    private fun showCustomerActionResult(
+        success: Boolean,
+        title: String,
+        message: String,
+        customer: Customer? = null,
+    ) {
+        _appState.update { state ->
+            state.copy(
+                customer = customer ?: state.customer,
+                customerActionInProgress = false,
+                customerActionFeedback = CustomerActionFeedback(
+                    success = success,
+                    title = title,
+                    message = message,
+                ),
+                modal = ModalData(dialogTitle = title, dialogText = message),
+                modalType = if (success) ModalType.CUSTOMER_INFO else ModalType.CUSTOMER_ERROR,
+                modalVisible = true,
+            )
+        }
+    }
+
     private fun customerActionErrorMessage(error: Throwable): String =
         if (error is InvalidLoginCredentialsException) {
             "Sesja wygasła. Zaloguj się ponownie."
         } else {
-            error.message?.takeIf { it.isNotBlank() } ?: "Unknown error"
+            error.message?.takeIf { it.isNotBlank() } ?: "Nie udało się zapisać zmian."
         }
 }

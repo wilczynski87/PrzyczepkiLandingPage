@@ -24,8 +24,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.BrokenImage
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.outlined.AttachMoney
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -632,47 +635,40 @@ fun LoginModal(viewModel: AppViewModel) {
 fun CustomerMessageModal(viewModel: AppViewModel) {
     val state by viewModel.appState.collectAsState()
     val modal = state.modal
+    val isError = state.modalType == ModalType.CUSTOMER_ERROR
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.45f))
-            .clickable { viewModel.closeModal() },
-        contentAlignment = Alignment.Center
-    ) {
-        Card(
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            elevation = CardDefaults.cardElevation(8.dp),
-            modifier = Modifier
-                .padding(24.dp)
-                .widthIn(max = 600.dp)
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ) { }
-        ) {
-            Column(modifier = Modifier.padding(24.dp)) {
-                Text(
-                    text = modal?.dialogTitle ?: "Komunikat",
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = modal?.dialogText ?: "",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = { viewModel.closeModal() },
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text("OK")
-                }
+    AlertDialog(
+        onDismissRequest = { viewModel.closeModal() },
+        icon = {
+            Icon(
+                imageVector = if (isError) Icons.Default.Error else Icons.Default.CheckCircle,
+                contentDescription = null,
+                tint = if (isError) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    MaterialTheme.colorScheme.primary
+                },
+            )
+        },
+        title = {
+            Text(modal?.dialogTitle ?: if (isError) "Błąd" else "Gotowe")
+        },
+        text = {
+            Text(modal?.dialogText ?: "")
+        },
+        confirmButton = {
+            Button(
+                onClick = { viewModel.closeModal() },
+                colors = if (isError) {
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                    )
+                } else {
+                    ButtonDefaults.buttonColors()
+                },
+            ) {
+                Text("OK")
             }
-        }
-    }
+        },
+    )
 }

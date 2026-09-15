@@ -62,6 +62,7 @@ fun AppMainScreen() {
     val modal: ModalType = currentState.modalType
     val visible: Boolean = currentState.modalVisible
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {
         MyTopAppBar(viewModel)
 
@@ -154,11 +155,13 @@ fun AppMainScreen() {
     }
     AnimatedVisibility(
         visible = visible,
+        modifier = Modifier.fillMaxSize(),
         enter = fadeIn(tween(250)) + scaleIn(initialScale = 0.95f),
         exit = fadeOut(tween(200)) + scaleOut(targetScale = 0.95f)
     ) {
         if (modal != ModalType.NONE) {
             AppModals(viewModel)
         }
+    }
     }
 }

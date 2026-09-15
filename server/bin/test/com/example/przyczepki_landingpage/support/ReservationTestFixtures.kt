@@ -41,8 +41,11 @@ object ReservationTestFixtures {
         trailerId: String = TRAILER_ID,
         startDate: LocalDate = LocalDate(2025, 6, 10),
         endDate: LocalDate = LocalDate(2025, 6, 12),
+        customerId: String? = null,
+        id: String = "existing-1",
     ): Reservation = Reservation(
-        id = "existing-1",
+        id = id,
+        customer = customerId?.let { com.example.przyczepki_landingpage.data.Customer(id = it) },
         trailer = trailer(trailerId),
         startDate = startDate,
         endDate = endDate,

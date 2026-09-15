@@ -7,6 +7,9 @@ import com.example.przyczepki_landingpage.service.ReservationService
 import com.example.przyczepki_landingpage.service.TrailersService
 import com.example.przyczepki_landingpage.service.startOfTheDay
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -31,6 +34,20 @@ fun Route.reservation() {
 
             val reservations = reservationService.getReservations(from, to)
             call.respond(reservations)
+        }
+
+        authenticate {
+            get("/mine") {
+                val jwtUserId = call.principal<JWTPrincipal>()
+                    ?.payload
+                    ?.getClaim("userId")
+                    ?.asString()
+                if (jwtUserId.isNullOrBlank()) {
+                    return@get call.respond(HttpStatusCode.Unauthorized, "Brak dostępu")
+                }
+                val reservations = reservationService.getCustomerReservations(jwtUserId)
+                call.respond(reservations)
+            }
         }
 
         // oblicza koszt wynajmu (ale jeszcze nie rezerwuje)

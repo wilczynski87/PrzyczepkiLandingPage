@@ -1,6 +1,7 @@
 package com.example.przyczepki_landingpage.support
 
 import com.example.przyczepki_landingpage.controller.customerController
+import com.example.przyczepki_landingpage.controller.reservation
 import com.example.przyczepki_landingpage.modules.ApiConfig
 import com.example.przyczepki_landingpage.modules.AuthConfig
 import com.example.przyczepki_landingpage.modules.DbConfig
@@ -10,9 +11,15 @@ import com.example.przyczepki_landingpage.modules.PaymentConfig
 import com.example.przyczepki_landingpage.modules.configureSecurity
 import com.example.przyczepki_landingpage.modules.configureStatusPages
 import com.example.przyczepki_landingpage.repo.CustomerRepo
+import com.example.przyczepki_landingpage.repo.ReservationRepo
+import com.example.przyczepki_landingpage.repo.TrailersRepo
 import com.example.przyczepki_landingpage.service.CustomerService
 import com.example.przyczepki_landingpage.service.EmailService
+import com.example.przyczepki_landingpage.service.ReservationService
+import com.example.przyczepki_landingpage.service.TrailersService
 import com.example.przyczepki_landingpage.service.impl.CustomerServiceImpl
+import com.example.przyczepki_landingpage.service.impl.ReservationServiceImpl
+import com.example.przyczepki_landingpage.service.impl.TrailersServiceImpl
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -90,4 +97,39 @@ fun Application.installCustomerTestDependencies(
         customerController()
     }
     return customerRepo
+}
+
+fun Application.installMyReservationsTestDependencies(
+    reservationRepo: FakeReservationRepo = FakeReservationRepo(),
+): FakeReservationRepo {
+    install(ContentNegotiation) {
+        json(
+            Json {
+                prettyPrint = true
+                isLenient = true
+                ignoreUnknownKeys = true
+                encodeDefaults = true
+                explicitNulls = false
+            },
+        )
+    }
+    configureStatusPages()
+    install(Koin) {
+        modules(
+            module {
+                single { testApiConfig }
+                single<ReservationRepo> { reservationRepo }
+                single<TrailersRepo> { FakeTrailersRepo() }
+                single<CustomerRepo> { FakeCustomerRepo() }
+                single<TrailersService> { TrailersServiceImpl(get()) }
+                single<ReservationService> { ReservationServiceImpl(get(), get(), get()) }
+                single<CustomerService> { FakeCustomerService() }
+            },
+        )
+    }
+    configureSecurity()
+    routing {
+        reservation()
+    }
+    return reservationRepo
 }

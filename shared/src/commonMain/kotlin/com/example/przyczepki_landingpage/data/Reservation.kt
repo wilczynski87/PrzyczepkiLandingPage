@@ -14,6 +14,7 @@ data class ReservationDto(
     @Serializable(with = KotlinxLocalDateSerializer::class)
     val endDate: LocalDate? = null,
     val reservationPrice: ReservationPrice? = null,
+    val trailerName: String? = null,
 )
 
 @Serializable
@@ -41,6 +42,7 @@ data class Reservation(
         startDate = startDate,
         endDate = endDate,
         reservationPrice = reservationPrice,
+        trailerName = trailer?.name,
     )
 
 }

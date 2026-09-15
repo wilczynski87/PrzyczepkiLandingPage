@@ -13,4 +13,5 @@ interface ReservationRepo {
     suspend fun checkReservationDates(trailerId: String, from: LocalDate, to: LocalDate): Reservation?
 
     suspend fun getActiveReservationsForCustomer(customerId: String, date: LocalDate): List<Reservation>
+    suspend fun getReservationsByCustomerId(customerId: String): List<Reservation>
 }

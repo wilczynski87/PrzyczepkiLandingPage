@@ -249,4 +249,36 @@ class ReservationServiceImplTest {
 
         assertEquals(true, error.message?.contains("Reservation price mismatch") == true)
     }
+
+    @Test
+    fun `getCustomerReservations returns only that customer's bookings`() = runBlocking {
+        reservationRepo.addReservation(
+            ReservationTestFixtures.existingReservation(customerId = "c1", id = "r1"),
+        )
+        reservationRepo.addReservation(
+            ReservationTestFixtures.existingReservation(
+                customerId = "c2",
+                id = "r2",
+                startDate = LocalDate(2025, 7, 1),
+                endDate = LocalDate(2025, 7, 3),
+            ),
+        )
+
+        val result = service.getCustomerReservations("c1")
+
+        assertEquals(1, result.size)
+        assertEquals("r1", result.first().id)
+        assertEquals("c1", result.first().customerId)
+        assertEquals("Test trailer", result.first().trailerName)
+    }
+
+    @Test
+    fun `getCustomerReservations returns empty list for unknown customer`() = runBlocking {
+        reservationRepo.addReservation(
+            ReservationTestFixtures.existingReservation(customerId = "c1", id = "r1"),
+        )
+
+        assertEquals(emptyList(), service.getCustomerReservations("missing"))
+        assertEquals(emptyList(), service.getCustomerReservations(""))
+    }
 }

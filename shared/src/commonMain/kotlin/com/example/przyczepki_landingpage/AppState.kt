@@ -28,6 +28,9 @@ data class AppState(
     val dateRangePickerEnd: LocalDate? = null,
     val blockedDates: Set<LocalDate> = emptySet(),
     val reservations: List<ReservationDto> = emptyList(),
+    val customerReservations: List<ReservationDto> = emptyList(),
+    val customerReservationsLoading: Boolean = false,
+    val customerReservationsError: String? = null,
 
     val reservationToMake: ReservationDto? = null,
     val reservationErrors: List<String> = emptyList(),
@@ -47,6 +50,15 @@ data class AppState(
     val paymentStatusError: String? = null,
 
     val loginUiState: LoginUiState = LoginUiState(),
+
+    val customerActionInProgress: Boolean = false,
+    val customerActionFeedback: CustomerActionFeedback? = null,
+)
+
+data class CustomerActionFeedback(
+    val success: Boolean,
+    val title: String,
+    val message: String,
 )
 
 val ikona = mapOf<String, String>(

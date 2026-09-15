@@ -97,6 +97,15 @@ class ReservationRepoImpl(
             .toList()
     }
 
+    override suspend fun getReservationsByCustomerId(customerId: String): List<Reservation> {
+        if (customerId.isBlank()) return emptyList()
+        return reservationCollection
+            .find(eq("customer.id", customerId))
+            .map { it.toReservation() }
+            .toList()
+            .sortedByDescending { it.startDate }
+    }
+
 }
 
 data class ReservationTable(

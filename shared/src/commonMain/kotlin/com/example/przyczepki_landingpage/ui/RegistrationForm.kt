@@ -7,7 +7,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Person
@@ -33,6 +35,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import com.example.przyczepki_landingpage.AppViewModel
+import com.example.przyczepki_landingpage.CustomerActionFeedback
 import com.example.przyczepki_landingpage.model.CurrentScreen
 
 // TODO poprawić walidator Firmy w ten sposób że tylko nip obowiązkowy!
@@ -166,7 +169,7 @@ private fun CustomerRegistrationContent(
         requirePassword = requirePassword,
     )
 
-    val canSubmit = !validationErrors.hasErrors
+    val canSubmit = !validationErrors.hasErrors && !state.customerActionInProgress
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
     Column(
@@ -182,6 +185,10 @@ private fun CustomerRegistrationContent(
             if (customer?.id != null) "Twoje dane" else "Rejestracja klienta",
             style = MaterialTheme.typography.headlineSmall,
         )
+
+        state.customerActionFeedback?.let { feedback ->
+            CustomerActionFeedbackBanner(feedback)
+        }
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             FilterChip(
@@ -498,13 +505,23 @@ private fun CustomerRegistrationContent(
             enabled = canSubmit,
             modifier = Modifier.fillMaxWidth()
         ) {
-            if(customer?.id != null) Text("Aktualizuj dane")
-            else Text("Zarejestruj")
+            if (state.customerActionInProgress) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(18.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                )
+            } else if (customer?.id != null) {
+                Text("Aktualizuj dane")
+            } else {
+                Text("Zarejestruj")
+            }
         }
 
         if (customer?.id != null) {
             OutlinedButton(
                 onClick = { showDeleteConfirm = true },
+                enabled = !state.customerActionInProgress,
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.error,
                 ),
@@ -541,6 +558,52 @@ private fun CustomerRegistrationContent(
                 }
             },
         )
+    }
+}
+
+@Composable
+private fun CustomerActionFeedbackBanner(
+    feedback: CustomerActionFeedback,
+) {
+    val container = if (feedback.success) {
+        MaterialTheme.colorScheme.primaryContainer
+    } else {
+        MaterialTheme.colorScheme.errorContainer
+    }
+    val content = if (feedback.success) {
+        MaterialTheme.colorScheme.onPrimaryContainer
+    } else {
+        MaterialTheme.colorScheme.onErrorContainer
+    }
+
+    Card(
+        colors = CardDefaults.cardColors(containerColor = container),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.Top,
+        ) {
+            Icon(
+                imageVector = if (feedback.success) Icons.Default.CheckCircle else Icons.Default.Error,
+                contentDescription = null,
+                tint = content,
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = feedback.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = content,
+                )
+                Text(
+                    text = feedback.message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = content,
+                )
+            }
+        }
     }
 }
 

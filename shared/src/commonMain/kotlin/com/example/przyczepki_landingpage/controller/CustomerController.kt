@@ -49,7 +49,7 @@ data class CustomerController( private val client: HttpClient ) {
                 response.status.isSuccess() -> Result.success(response.body())
                 response.status.value == 401 || response.status.value == 403 ->
                     Result.failure(InvalidLoginCredentialsException())
-                else -> Result.failure(Exception(errorMessage(response, "Server error: ${response.status}")))
+                else -> Result.failure(Exception(errorMessage(response, "Nie udało się zaktualizować danych")))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -74,7 +74,9 @@ data class CustomerController( private val client: HttpClient ) {
 private suspend fun errorMessage(
     response: HttpResponse,
     fallback: String,
-): String = runCatching { response.bodyAsText() }
-    .getOrNull()
-    ?.takeIf { it.isNotBlank() }
-    ?: fallback
+): String {
+    val body = runCatching { response.bodyAsText() }.getOrNull().orEmpty().trim()
+    if (body.isBlank()) return fallback
+    Regex(""""error"\s*:\s*"([^"]+)"""").find(body)?.groupValues?.get(1)?.let { return it }
+    return body.removeSurrounding("\"")
+}

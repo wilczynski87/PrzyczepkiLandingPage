@@ -57,6 +57,7 @@ class PaymentNotificationSignTest {
     },
     reservationService = object : ReservationService {
       override suspend fun getReservations(from: LocalDate, to: LocalDate?) = emptyList<ReservationDto>()
+      override suspend fun getCustomerReservations(customerId: String) = emptyList<ReservationDto>()
       override suspend fun checkReservation(reservation: ReservationDto) = reservation
       override suspend fun calculatePrice(reservation: ReservationDto) = reservation
       override suspend fun createReservation(reservation: ReservationDto) = reservation
@@ -70,6 +71,7 @@ class PaymentNotificationSignTest {
       override suspend fun deleteReservation(id: String) = false
       override suspend fun checkReservationDates(trailerId: String, from: LocalDate, to: LocalDate) = null
       override suspend fun getActiveReservationsForCustomer(customerId: String, date: LocalDate) = emptyList<Reservation>()
+      override suspend fun getReservationsByCustomerId(customerId: String) = emptyList<Reservation>()
     },
     reservationConfirmationService = object : ReservationConfirmationService {
       override suspend fun reservationConfirmationData(reservationId: String, paidAmountGrosze: Int?, orderId: Long?) =

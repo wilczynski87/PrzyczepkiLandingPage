@@ -23,6 +23,11 @@ class ReservationServiceImpl(
         return reservationRepo.getAllReservations(from, to).map { it.toDto() }
     }
 
+    override suspend fun getCustomerReservations(customerId: String): List<ReservationDto> {
+        if (customerId.isBlank()) return emptyList()
+        return reservationRepo.getReservationsByCustomerId(customerId).map { it.toDto() }
+    }
+
     override suspend fun checkReservation(reservation: ReservationDto): ReservationDto {
         val conflictingReservation = reservationRepo.checkReservationDates(
             reservation.trailerId!!,
