@@ -57,13 +57,32 @@ class CustomerServiceImpl(
     }
 
     override suspend fun update(customer: Customer): Customer? {
-        TODO("Not yet implemented")
+        val id = customer.id?.trim().orEmpty()
+        if (id.isBlank()) {
+            throw BadRequestException("Brak id klienta")
+        }
+        val existing = customerRepo.get(id) ?: return null
+        val newEmail = customer.getEmail()?.trim().orEmpty()
+        val oldEmail = existing.getEmail()?.trim().orEmpty()
+        if (newEmail.isNotBlank() && !newEmail.equals(oldEmail, ignoreCase = true)) {
+            val other = customerRepo.getByEmail(newEmail)
+            if (other != null && other.id != id) {
+                throw BadRequestException("Klient z tym adresem e-mail już istnieje")
+            }
+        }
+        return customerRepo.update(
+            customer.copy(
+                id = id,
+                confirmed = existing.confirmed,
+            )
+        )
     }
 
     override suspend fun updatePassword(loginRequest: LoginRequest): Boolean = customerRepo.updatePassword(loginRequest)
     override suspend fun getCustomerTableByEmail(email: String): CustomerTable? = customerRepo.getCustomerTableByEmail(email)
 
     override suspend fun delete(id: String): Boolean {
-        TODO("Not yet implemented")
+        if (id.isBlank()) return false
+        return customerRepo.delete(id)
     }
 }

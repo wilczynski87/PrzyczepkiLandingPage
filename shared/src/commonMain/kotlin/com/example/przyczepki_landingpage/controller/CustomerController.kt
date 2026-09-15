@@ -9,6 +9,8 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.isSuccess
 
 data class CustomerController( private val client: HttpClient ) {
@@ -42,8 +44,13 @@ data class CustomerController( private val client: HttpClient ) {
         return try {
             val response = client.put("$base_url/customer") {
                 setBody(customer)
-            }.body<Customer?>()
-            Result.success(response)
+            }
+            when {
+                response.status.isSuccess() -> Result.success(response.body())
+                response.status.value == 401 || response.status.value == 403 ->
+                    Result.failure(InvalidLoginCredentialsException())
+                else -> Result.failure(Exception(errorMessage(response, "Server error: ${response.status}")))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -52,9 +59,22 @@ data class CustomerController( private val client: HttpClient ) {
     suspend fun deleteCustomer(clientId: String): Result<Boolean> {
         return try {
             val response = client.delete("$base_url/customer/$clientId")
-            Result.success(response.status.value == 200)
+            when {
+                response.status.isSuccess() -> Result.success(true)
+                response.status.value == 401 || response.status.value == 403 ->
+                    Result.failure(InvalidLoginCredentialsException())
+                else -> Result.failure(Exception(errorMessage(response, "Server error: ${response.status}")))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 }
+
+private suspend fun errorMessage(
+    response: HttpResponse,
+    fallback: String,
+): String = runCatching { response.bodyAsText() }
+    .getOrNull()
+    ?.takeIf { it.isNotBlank() }
+    ?: fallback

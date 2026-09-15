@@ -7,4 +7,5 @@ enum class ModalType {
     CALL_FOR_RESERVATION,
     LOGIN,
     CUSTOMER_ERROR,
+    CUSTOMER_INFO,
 }

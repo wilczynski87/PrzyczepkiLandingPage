@@ -26,10 +26,11 @@ class FakeCustomerRepo(
     override suspend fun get(id: String): Customer? = customers[id]
 
     override suspend fun getByEmail(email: String): Customer? =
-        customers.values.firstOrNull { it.getEmail() == email }
+        customers.values.firstOrNull { it.getEmail()?.equals(email, ignoreCase = true) == true }
 
     override suspend fun update(customer: Customer): Customer? {
         val id = customer.id ?: return null
+        if (!customers.containsKey(id)) return null
         customers[id] = customer
         return customer
     }

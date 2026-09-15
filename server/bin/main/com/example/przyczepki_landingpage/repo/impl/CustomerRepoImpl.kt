@@ -11,6 +11,7 @@ import com.mongodb.client.model.Filters.or
 import com.mongodb.client.model.Filters.regex
 import com.mongodb.client.model.FindOneAndUpdateOptions
 import com.mongodb.client.model.ReturnDocument
+import com.mongodb.client.model.Updates.combine
 import com.mongodb.client.model.Updates.set
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import kotlinx.coroutines.flow.firstOrNull
@@ -52,7 +53,16 @@ class CustomerRepoImpl(
         customerCollection.find(emailFilter(email)).firstOrNull()?.toCustomer()
 
     override suspend fun update(customer: Customer): Customer? {
-        TODO("Not yet implemented")
+        val id = customer.id?.takeIf { it.isNotBlank() } ?: return null
+        return customerCollection.findOneAndUpdate(
+            eq("id", id),
+            combine(
+                set(CustomerTable::private.name, customer.private),
+                set(CustomerTable::company.name, customer.company),
+                set(CustomerTable::confirmed.name, customer.confirmed),
+            ),
+            FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER),
+        )?.toCustomer()
     }
 
     override suspend fun updatePassword(loginRequest: LoginRequest): Boolean {
@@ -68,7 +78,8 @@ class CustomerRepoImpl(
     }
 
     override suspend fun delete(id: String): Boolean {
-        TODO("Not yet implemented")
+        if (id.isBlank()) return false
+        return customerCollection.deleteOne(eq("id", id)).deletedCount > 0
     }
 }
 

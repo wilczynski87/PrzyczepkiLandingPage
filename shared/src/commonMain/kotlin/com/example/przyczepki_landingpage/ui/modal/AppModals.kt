@@ -95,8 +95,9 @@ fun AppModals(
         ModalType.LOGIN -> {
             LoginModal(viewModel)
         }
-        ModalType.CUSTOMER_ERROR -> {
-            CustomerErrorModal(viewModel)
+        ModalType.CUSTOMER_ERROR,
+        ModalType.CUSTOMER_INFO -> {
+            CustomerMessageModal(viewModel)
         }
     }
 }
@@ -628,7 +629,10 @@ fun LoginModal(viewModel: AppViewModel) {
 }
 
 @Composable
-fun CustomerErrorModal(viewModel: AppViewModel) {
+fun CustomerMessageModal(viewModel: AppViewModel) {
+    val state by viewModel.appState.collectAsState()
+    val modal = state.modal
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -645,9 +649,30 @@ fun CustomerErrorModal(viewModel: AppViewModel) {
             modifier = Modifier
                 .padding(24.dp)
                 .widthIn(max = 600.dp)
-//                .fillMaxHeight(0.9f)
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) { }
         ) {
-            Text("Error in customer seve")
+            Column(modifier = Modifier.padding(24.dp)) {
+                Text(
+                    text = modal?.dialogTitle ?: "Komunikat",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = modal?.dialogText ?: "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = { viewModel.closeModal() },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("OK")
+                }
+            }
         }
     }
 }

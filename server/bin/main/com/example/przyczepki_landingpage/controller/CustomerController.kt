@@ -8,7 +8,10 @@ import com.example.przyczepki_landingpage.data.dto.SendEmailRequest
 import com.example.przyczepki_landingpage.service.CustomerService
 import com.example.przyczepki_landingpage.service.EmailService
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.request.receive
@@ -63,18 +66,15 @@ fun Route.customerController() {
 
         authenticate {
             get("/{id}") {
-                try {
-                    val id = call.parameters["id"] ?: throw BadRequestException("Brak id")
-
-                    val customer = customerService.get(id)
-                        ?: throw NotFoundException("Nie ma klienta o takim id: $id")
-
-                    call.respondNullable(customer)
-
-                } catch (e: Exception) {
-                    println("Error: ${e.message}")
-                    call.respond(HttpStatusCode.BadRequest, e.message ?: "Unknown error")
+                val id = call.parameters["id"] ?: throw BadRequestException("Brak id")
+                if (!call.ownsCustomer(id)) {
+                    return@get call.respond(HttpStatusCode.Forbidden, "Brak dostępu")
                 }
+
+                val customer = customerService.get(id)
+                    ?: return@get call.respond(HttpStatusCode.NotFound, "Nie ma klienta o takim id: $id")
+
+                call.respondNullable(customer)
             }
 
             put("/changePassword") {
@@ -90,17 +90,23 @@ fun Route.customerController() {
 
             put {
                 val customer = call.receive<Customer>()
+                if (!call.ownsCustomer(customer.id)) {
+                    return@put call.respond(HttpStatusCode.Forbidden, "Brak dostępu")
+                }
 
                 val updated = customerService.update(customer)
-                    ?: return@put call.respond(HttpStatusCode.NotFound)
+                    ?: return@put call.respond(HttpStatusCode.NotFound, "Nie ma klienta o takim id")
 
                 call.respondNullable(HttpStatusCode.OK, updated)
             }
 
             delete("/{id}") {
                 val id = call.parameters["id"] ?: return@delete call.respond(
-                    HttpStatusCode.BadRequest, null
+                    HttpStatusCode.BadRequest, "Brak id"
                 )
+                if (!call.ownsCustomer(id)) {
+                    return@delete call.respond(HttpStatusCode.Forbidden, "Brak dostępu")
+                }
 
                 val deleted = customerService.delete(id)
 
@@ -112,4 +118,12 @@ fun Route.customerController() {
             }
         }
     }
+}
+
+private fun ApplicationCall.ownsCustomer(customerId: String?): Boolean {
+    val jwtUserId = principal<JWTPrincipal>()
+        ?.payload
+        ?.getClaim("userId")
+        ?.asString()
+    return !jwtUserId.isNullOrBlank() && jwtUserId == customerId
 }

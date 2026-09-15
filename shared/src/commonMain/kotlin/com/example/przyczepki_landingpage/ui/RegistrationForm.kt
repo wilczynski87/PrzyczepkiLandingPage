@@ -167,6 +167,7 @@ private fun CustomerRegistrationContent(
     )
 
     val canSubmit = !validationErrors.hasErrors
+    var showDeleteConfirm by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -177,7 +178,10 @@ private fun CustomerRegistrationContent(
 
         NavigationBackBar ({ viewModel.navigateTo(CurrentScreen.LANDING) })
 
-        Text("Rejestracja klienta", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            if (customer?.id != null) "Twoje dane" else "Rejestracja klienta",
+            style = MaterialTheme.typography.headlineSmall,
+        )
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             FilterChip(
@@ -497,6 +501,46 @@ private fun CustomerRegistrationContent(
             if(customer?.id != null) Text("Aktualizuj dane")
             else Text("Zarejestruj")
         }
+
+        if (customer?.id != null) {
+            OutlinedButton(
+                onClick = { showDeleteConfirm = true },
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error,
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Usuń konto")
+            }
+        }
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("Usuń konto") },
+            text = {
+                Text("Czy na pewno chcesz usunąć konto? Tej operacji nie można cofnąć.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeleteConfirm = false
+                        viewModel.deleteCustomer()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                    ),
+                ) {
+                    Text("Usuń")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text("Anuluj")
+                }
+            },
+        )
     }
 }
 

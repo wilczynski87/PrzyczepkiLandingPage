@@ -323,18 +323,36 @@ class AppViewModel(private val scope: CoroutineScope) {
         scope.launch {
             val customer = appState.value.customer ?: return@launch
             ApiClient.customerController.updateCustomer(customer)
-                .onSuccess {
-                    _appState.update { state ->
-                        state.copy(
-                            customer = it
+                .onSuccess { updated ->
+                    if (updated == null) {
+                        openModal(
+                            ModalType.CUSTOMER_ERROR,
+                            ModalData(
+                                dialogTitle = "Błąd przy aktualizacji danych klienta",
+                                dialogText = "Serwer nie zwrócił zaktualizowanych danych.",
+                            ),
                         )
+                        return@onSuccess
                     }
+                    _appState.update { state ->
+                        state.copy(customer = updated)
+                    }
+                    openModal(
+                        ModalType.CUSTOMER_INFO,
+                        ModalData(
+                            dialogTitle = "Dane zaktualizowane",
+                            dialogText = "Twoje dane zostały zapisane.",
+                        ),
+                    )
                 }
                 .onFailure {
                     println("Error: ${it.message}")
-                    openModal(ModalType.CUSTOMER_ERROR, ModalData(
-                        dialogTitle = "Błąd przy aktualizacji danych klienta",
-                        dialogText = it.message ?: "Unknown error")
+                    openModal(
+                        ModalType.CUSTOMER_ERROR,
+                        ModalData(
+                            dialogTitle = "Błąd przy aktualizacji danych klienta",
+                            dialogText = customerActionErrorMessage(it),
+                        ),
                     )
                 }
         }
@@ -347,12 +365,16 @@ class AppViewModel(private val scope: CoroutineScope) {
                 .onSuccess {
                     clearRememberedCredentials()
                     clearLocalSession()
+                    navigateTo(CurrentScreen.LANDING)
                 }
                 .onFailure {
                     println("Error: ${it.message}")
-                    openModal(ModalType.CUSTOMER_ERROR, ModalData(
-                        dialogTitle = "Błąd przy usuwaniu danych klienta",
-                        dialogText = it.message ?: "Unknown error")
+                    openModal(
+                        ModalType.CUSTOMER_ERROR,
+                        ModalData(
+                            dialogTitle = "Błąd przy usuwaniu danych klienta",
+                            dialogText = customerActionErrorMessage(it),
+                        ),
                     )
                 }
         }
@@ -855,4 +877,11 @@ class AppViewModel(private val scope: CoroutineScope) {
             LoginUiState(rememberCredentials = appState.value.loginUiState.rememberCredentials)
         }
     }
+
+    private fun customerActionErrorMessage(error: Throwable): String =
+        if (error is InvalidLoginCredentialsException) {
+            "Sesja wygasła. Zaloguj się ponownie."
+        } else {
+            error.message?.takeIf { it.isNotBlank() } ?: "Unknown error"
+        }
 }
