@@ -9,9 +9,21 @@ data class Customer(
     val company: Company? = null,
     val confirmed: String? = null,
 ) {
-    fun getName(): String = company?.name ?: "${private?.firstName} ${private?.lastName}"
+    fun getName(): String {
+        val company = company?.name?.trim().orEmpty()
+        if (company.isNotBlank()) return company
+        val person = listOfNotNull(private?.firstName, private?.lastName).joinToString(" ").trim()
+        if (person.isNotBlank()) return person
+        return getEmail() ?: id.orEmpty()
+    }
     fun getEmail(): String? = company?.email ?: private?.email
     fun getAddress(): String? = company?.address ?: private?.address
+    fun isAdmin(adminEmails: Collection<String>): Boolean {
+        val emails = listOfNotNull(private?.email, company?.email)
+            .map { it.trim().lowercase() }
+        if (emails.any { it in adminEmails }) return true
+        return private?.firstName.equals("admin", ignoreCase = true)
+    }
 
 }
 

@@ -61,7 +61,10 @@ class PaymentNotificationSignTest {
       override suspend fun checkReservation(reservation: ReservationDto) = reservation
       override suspend fun calculatePrice(reservation: ReservationDto) = reservation
       override suspend fun createReservation(reservation: ReservationDto) = reservation
-      override suspend fun deleteReservation(id: Long) = false
+      override suspend fun getAdminReservations(from: LocalDate?, to: LocalDate?, customerId: String?, trailerId: String?) = emptyList<ReservationDto>()
+      override suspend fun createAdminReservation(request: com.example.przyczepki_landingpage.data.AdminReservationRequest) = ReservationDto()
+      override suspend fun updateAdminReservation(id: String, request: com.example.przyczepki_landingpage.data.AdminReservationRequest) = null
+      override suspend fun deleteReservation(id: String) = false
       override suspend fun dtoToReservation(dto: ReservationDto) = throw NotImplementedError()
     },
     reservationRepo = object : ReservationRepo {
@@ -69,9 +72,10 @@ class PaymentNotificationSignTest {
       override suspend fun getReservationById(id: String) = null
       override suspend fun createReservation(reservation: Reservation) = reservation
       override suspend fun deleteReservation(id: String) = false
-      override suspend fun checkReservationDates(trailerId: String, from: LocalDate, to: LocalDate) = null
+      override suspend fun checkReservationDates(trailerId: String, from: LocalDate, to: LocalDate, excludeId: String?) = null
       override suspend fun getActiveReservationsForCustomer(customerId: String, date: LocalDate) = emptyList<Reservation>()
       override suspend fun getReservationsByCustomerId(customerId: String) = emptyList<Reservation>()
+      override suspend fun updateReservation(reservation: Reservation) = reservation
     },
     reservationConfirmationService = object : ReservationConfirmationService {
       override suspend fun reservationConfirmationData(reservationId: String, paidAmountGrosze: Int?, orderId: Long?) =

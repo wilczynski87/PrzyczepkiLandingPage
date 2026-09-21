@@ -1,6 +1,7 @@
 package com.example.przyczepki_landingpage.support
 
 import com.example.przyczepki_landingpage.controller.reservation
+import com.example.przyczepki_landingpage.modules.configureSecurity
 import com.example.przyczepki_landingpage.modules.configureStatusPages
 import com.example.przyczepki_landingpage.repo.CustomerRepo
 import com.example.przyczepki_landingpage.repo.ReservationRepo
@@ -45,6 +46,7 @@ fun Application.installReservationCheckTestDependencies(
     install(Koin) {
         modules(
             module {
+                single { testApiConfig }
                 single<ReservationRepo> { reservationRepo }
                 single<TrailersRepo> { trailersRepo }
                 single<CustomerRepo> { customerRepo }
@@ -54,6 +56,7 @@ fun Application.installReservationCheckTestDependencies(
             },
         )
     }
+    configureSecurity()
     routing {
         reservation()
     }

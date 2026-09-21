@@ -13,11 +13,15 @@ import com.mongodb.kotlin.client.coroutine.MongoCollection
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
-import kotlinx.serialization.Contextual
+import com.mongodb.client.model.FindOneAndUpdateOptions
+import com.mongodb.client.model.ReturnDocument
+import com.mongodb.client.model.Updates.combine
+import com.mongodb.client.model.Updates.set
 import org.bson.types.ObjectId
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinLocalDate
+import kotlinx.serialization.Contextual
 
 class ReservationRepoImpl(
     private val reservationCollection: MongoCollection<ReservationTable>
@@ -68,17 +72,21 @@ class ReservationRepoImpl(
     override suspend fun checkReservationDates(
         trailerId: String,
         from: LocalDate,
-        to: LocalDate
+        to: LocalDate,
+        excludeId: String?,
     ): Reservation? {
-        val from = from.toJavaLocalDate()
-        val to = to.toJavaLocalDate()
+        val fromJava = from.toJavaLocalDate()
+        val toJava = to.toJavaLocalDate()
 
         val filters = and(
             eq("trailer.id", trailerId),
-            lte("startDate", to),
-            gte("endDate", from),
+            lte("startDate", toJava),
+            gte("endDate", fromJava),
         )
-        return reservationCollection.find(filters).firstOrNull()?.toReservation()
+        return reservationCollection.find(filters)
+            .map { it.toReservation() }
+            .toList()
+            .firstOrNull { excludeId.isNullOrBlank() || it.id != excludeId }
     }
 
     override suspend fun getActiveReservationsForCustomer(
@@ -106,6 +114,20 @@ class ReservationRepoImpl(
             .sortedByDescending { it.startDate }
     }
 
+    override suspend fun updateReservation(reservation: Reservation): Reservation? {
+        val id = reservation.id?.takeIf { it.isNotBlank() } ?: return null
+        return reservationCollection.findOneAndUpdate(
+            eq("id", id),
+            combine(
+                set("customer", reservation.customer),
+                set("trailer", reservation.trailer),
+                set("startDate", reservation.startDate?.toJavaLocalDate()),
+                set("endDate", reservation.endDate?.toJavaLocalDate()),
+                set("reservationPrice", reservation.reservationPrice),
+            ),
+            FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER),
+        )?.toReservation()
+    }
 }
 
 data class ReservationTable(

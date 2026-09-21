@@ -41,6 +41,7 @@ services:
       - AUTH_ACCESS_TOKEN_EXPIRY=${AUTH_ACCESS_TOKEN_EXPIRY:-3600000}
       - AUTH_REFRESH_TOKEN_EXPIRY=${AUTH_REFRESH_TOKEN_EXPIRY:-2592000000}
       - AUTH_CLAIM=${AUTH_CLAIM:-userId}
+      - ADMIN_EMAILS=${ADMIN_EMAILS:-wilczynski87@gmail.com,parkingostrowskiego@gmail.com,przyczepkifat@gmail.com}
       - AUTH_GOOGLE_CLIENT_ID=${AUTH_GOOGLE_CLIENT_ID:-${GOOGLE_CLIENT_ID:-}}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
       - EMAIL_HOST=przyczepki_email

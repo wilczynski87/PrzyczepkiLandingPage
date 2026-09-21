@@ -81,6 +81,14 @@ class CustomerServiceImpl(
     override suspend fun updatePassword(loginRequest: LoginRequest): Boolean = customerRepo.updatePassword(loginRequest)
     override suspend fun getCustomerTableByEmail(email: String): CustomerTable? = customerRepo.getCustomerTableByEmail(email)
 
+    override suspend fun list(search: String?): List<Customer> = customerRepo.list(search)
+
+    override suspend fun saveAndConfirm(customer: Customer, password: String): Customer? {
+        val saved = save(customer, password) ?: return null
+        val id = saved.id ?: return saved
+        return confirm(id) ?: saved
+    }
+
     override suspend fun delete(id: String): Boolean {
         if (id.isBlank()) return false
         return customerRepo.delete(id)

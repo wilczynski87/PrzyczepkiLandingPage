@@ -15,6 +15,8 @@ import com.mongodb.client.model.Updates.combine
 import com.mongodb.client.model.Updates.set
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Contextual
@@ -75,6 +77,24 @@ class CustomerRepoImpl(
 
     override suspend fun getCustomerTableByEmail(email: String): CustomerTable? {
         return customerCollection.find(emailFilter(email)).firstOrNull()
+    }
+
+    override suspend fun list(search: String?): List<Customer> {
+        val all = customerCollection.find().map { it.toCustomer() }.toList()
+        val query = search?.trim().orEmpty()
+        if (query.isEmpty()) return all
+        return all.filter { customer ->
+            listOfNotNull(
+                customer.private?.firstName,
+                customer.private?.lastName,
+                customer.private?.email,
+                customer.private?.phoneNumber,
+                customer.company?.name,
+                customer.company?.email,
+                customer.company?.phoneNumber,
+                customer.id,
+            ).any { it.contains(query, ignoreCase = true) }
+        }
     }
 
     override suspend fun delete(id: String): Boolean {

@@ -1,5 +1,6 @@
 package com.example.przyczepki_landingpage.service.impl
 
+import com.example.przyczepki_landingpage.data.AdminReservationRequest
 import com.example.przyczepki_landingpage.data.Customer
 import com.example.przyczepki_landingpage.data.Reservation
 import com.example.przyczepki_landingpage.data.ReservationDto
@@ -25,7 +26,21 @@ class ReservationServiceImpl(
 
     override suspend fun getCustomerReservations(customerId: String): List<ReservationDto> {
         if (customerId.isBlank()) return emptyList()
-        return reservationRepo.getReservationsByCustomerId(customerId).map { it.toDto() }
+        return reservationRepo.getReservationsByCustomerId(customerId).map { it.toAdminDto() }
+    }
+
+    override suspend fun getAdminReservations(
+        from: LocalDate?,
+        to: LocalDate?,
+        customerId: String?,
+        trailerId: String?,
+    ): List<ReservationDto> {
+        val fromDate = from ?: LocalDate(2000, 1, 1)
+        return reservationRepo.getAllReservations(fromDate, to)
+            .filter { customerId.isNullOrBlank() || it.customer?.id == customerId }
+            .filter { trailerId.isNullOrBlank() || it.trailer?.id == trailerId }
+            .sortedByDescending { it.startDate }
+            .map { it.toAdminDto() }
     }
 
     override suspend fun checkReservation(reservation: ReservationDto): ReservationDto {
@@ -109,16 +124,79 @@ class ReservationServiceImpl(
         val createdReservation = reservationRepo.createReservation(reservationToMake)
             ?: throw Exception("Reservation not created: $reservationToMake")
 
-        return createdReservation.toDto()
+        return createdReservation.toAdminDto()
     }
 
-    override suspend fun deleteReservation(id: Long): Boolean {
-        TODO("Not yet implemented")
+    override suspend fun createAdminReservation(request: AdminReservationRequest): ReservationDto {
+        val dto = request.toDto()
+        val customer = customerRepo.get(request.customerId)
+            ?: throw IllegalArgumentException("Nie znaleziono klienta")
+        val trailer = trailersRepo.getTrailer(request.trailerId)
+            ?: throw IllegalArgumentException("Nie znaleziono przyczepki")
+        assertDatesAvailable(request.trailerId, request.startDate, request.endDate)
+        val expected = calculatePrice(dto).reservationPrice
+            ?: throw IllegalStateException("Nie udało się obliczyć ceny")
+        val created = reservationRepo.createReservation(
+            Reservation(
+                customer = customer,
+                trailer = trailer,
+                startDate = request.startDate,
+                endDate = request.endDate,
+                reservationPrice = expected,
+            )
+        ) ?: throw IllegalStateException("Nie udało się utworzyć rezerwacji")
+        return created.toAdminDto()
+    }
+
+    override suspend fun updateAdminReservation(id: String, request: AdminReservationRequest): ReservationDto? {
+        reservationRepo.getReservationById(id) ?: return null
+        val customer = customerRepo.get(request.customerId)
+            ?: throw IllegalArgumentException("Nie znaleziono klienta")
+        val trailer = trailersRepo.getTrailer(request.trailerId)
+            ?: throw IllegalArgumentException("Nie znaleziono przyczepki")
+        assertDatesAvailable(request.trailerId, request.startDate, request.endDate, excludeId = id)
+        val expected = calculatePrice(request.toDto()).reservationPrice
+            ?: throw IllegalStateException("Nie udało się obliczyć ceny")
+        return reservationRepo.updateReservation(
+            Reservation(
+                id = id,
+                customer = customer,
+                trailer = trailer,
+                startDate = request.startDate,
+                endDate = request.endDate,
+                reservationPrice = expected,
+            )
+        )?.toAdminDto()
+    }
+
+    override suspend fun deleteReservation(id: String): Boolean {
+        if (id.isBlank()) return false
+        return reservationRepo.deleteReservation(id)
     }
 
     override suspend fun dtoToReservation(dto: ReservationDto): Reservation {
-        TODO("Not yet implemented")
+        throw NotImplementedError("dtoToReservation is unused")
     }
+
+    private suspend fun assertDatesAvailable(
+        trailerId: String,
+        startDate: LocalDate,
+        endDate: LocalDate,
+        excludeId: String? = null,
+    ) {
+        if (endDate < startDate) throw IllegalArgumentException("Data końcowa jest wcześniejsza niż początkowa")
+        val conflicting = reservationRepo.checkReservationDates(trailerId, startDate, endDate, excludeId)
+        if (conflicting != null) {
+            throw IllegalArgumentException("Termin jest zajęty: ${conflicting.startDate}–${conflicting.endDate}")
+        }
+    }
+
+    private fun AdminReservationRequest.toDto(): ReservationDto = ReservationDto(
+        customerId = customerId,
+        trailerId = trailerId,
+        startDate = startDate,
+        endDate = endDate,
+    )
 
     private fun isPriceMatching(provided: ReservationPrice, expected: ReservationPrice): Boolean {
         if (provided.trailerId != expected.trailerId) return false

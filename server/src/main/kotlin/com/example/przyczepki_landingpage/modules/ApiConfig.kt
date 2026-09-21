@@ -80,7 +80,21 @@ data class ApiConfig(
     val auth: AuthConfig,
     val paymentConfig: PaymentConfig,
     val gateConfig: GateConfig,
+    val adminEmails: List<String> = defaultAdminEmails(),
 )
+
+fun defaultAdminEmails(): List<String> = listOf(
+    "wilczynski87@gmail.com",
+    "parkingostrowskiego@gmail.com",
+    "przyczepkifat@gmail.com",
+)
+
+fun parseAdminEmails(vararg raw: String?): List<String> =
+    raw.flatMap { value ->
+        value.orEmpty().split(',', ';', '\n', '\t', ' ')
+    }.map { it.trim().lowercase() }
+        .filter { '@' in it }
+        .distinct()
 
 /**
  * Źródło konfiguracji: zmienne środowiskowe (patrz docker-compose.yaml).
@@ -124,6 +138,12 @@ fun toApiConfig(): ApiConfig {
 
         paymentConfig = readPaymentConfig(),
         gateConfig = readGateConfig(),
+        adminEmails = parseAdminEmails(
+            System.getenv("ADMIN_EMAILS"),
+            System.getenv("ADMIN_EMAIL"),
+            System.getenv("BCC"),
+            System.getenv("GMAIL_SENDER_EMAIL"),
+        ).ifEmpty { defaultAdminEmails() },
     )
 }
 

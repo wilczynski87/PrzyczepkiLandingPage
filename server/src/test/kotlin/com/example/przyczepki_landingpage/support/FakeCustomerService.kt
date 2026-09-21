@@ -18,5 +18,7 @@ class FakeCustomerService : CustomerService {
     override suspend fun update(customer: Customer): Customer? = customer
     override suspend fun updatePassword(loginRequest: LoginRequest): Boolean = false
     override suspend fun getCustomerTableByEmail(email: String): CustomerTable? = null
+    override suspend fun list(search: String?): List<Customer> = emptyList()
+    override suspend fun saveAndConfirm(customer: Customer, password: String): Customer? = customer.copy(confirmed = "2026-01-01")
     override suspend fun delete(id: String): Boolean = false
 }

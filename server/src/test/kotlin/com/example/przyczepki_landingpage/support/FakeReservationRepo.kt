@@ -19,8 +19,13 @@ class FakeReservationRepo(
         reservations.firstOrNull { it.id == id }
 
     override suspend fun createReservation(reservation: Reservation): Reservation? {
-        reservations += reservation
-        return reservation
+        val saved = if (reservation.id.isNullOrBlank()) {
+            reservation.copy(id = "res-${reservations.size + 1}")
+        } else {
+            reservation
+        }
+        reservations += saved
+        return saved
     }
 
     override suspend fun deleteReservation(id: String): Boolean =
@@ -30,12 +35,14 @@ class FakeReservationRepo(
         trailerId: String,
         from: LocalDate,
         to: LocalDate,
+        excludeId: String?,
     ): Reservation? = reservations.firstOrNull { reservation ->
         reservation.trailer?.id == trailerId &&
             reservation.startDate != null &&
             reservation.endDate != null &&
             reservation.startDate!! <= to &&
-            reservation.endDate!! >= from
+            reservation.endDate!! >= from &&
+            (excludeId.isNullOrBlank() || reservation.id != excludeId)
     }
 
     override suspend fun getActiveReservationsForCustomer(
@@ -53,4 +60,11 @@ class FakeReservationRepo(
         reservations
             .filter { it.customer?.id == customerId }
             .sortedByDescending { it.startDate }
+
+    override suspend fun updateReservation(reservation: Reservation): Reservation? {
+        val index = reservations.indexOfFirst { it.id == reservation.id }
+        if (index < 0) return null
+        reservations[index] = reservation
+        return reservation
+    }
 }

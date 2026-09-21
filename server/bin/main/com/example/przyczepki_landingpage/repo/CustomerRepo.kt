@@ -12,5 +12,6 @@ interface CustomerRepo {
     suspend fun update(customer: Customer): Customer?
     suspend fun updatePassword(loginRequest: LoginRequest): Boolean
     suspend fun getCustomerTableByEmail(email: String): CustomerTable?
+    suspend fun list(search: String? = null): List<Customer>
     suspend fun delete(id: String): Boolean
 }

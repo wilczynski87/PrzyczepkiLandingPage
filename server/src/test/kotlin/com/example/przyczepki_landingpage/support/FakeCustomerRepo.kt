@@ -21,7 +21,12 @@ class FakeCustomerRepo(
         return saved
     }
 
-    override suspend fun confirm(id: String): Customer? = customers[id]
+    override suspend fun confirm(id: String): Customer? {
+        val existing = customers[id] ?: return null
+        val confirmed = existing.copy(confirmed = existing.confirmed ?: "2026-01-01")
+        customers[id] = confirmed
+        return confirmed
+    }
 
     override suspend fun get(id: String): Customer? = customers[id]
 
@@ -38,6 +43,22 @@ class FakeCustomerRepo(
     override suspend fun updatePassword(loginRequest: LoginRequest): Boolean = true
 
     override suspend fun getCustomerTableByEmail(email: String): CustomerTable? = null
+
+    override suspend fun list(search: String?): List<Customer> {
+        val all = customers.values.toList()
+        val query = search?.trim().orEmpty()
+        if (query.isEmpty()) return all
+        return all.filter { customer ->
+            listOfNotNull(
+                customer.private?.firstName,
+                customer.private?.lastName,
+                customer.private?.email,
+                customer.company?.name,
+                customer.company?.email,
+                customer.id,
+            ).any { it.contains(query, ignoreCase = true) }
+        }
+    }
 
     override suspend fun delete(id: String): Boolean = customers.remove(id) != null
 }

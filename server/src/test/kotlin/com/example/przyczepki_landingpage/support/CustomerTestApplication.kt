@@ -1,5 +1,6 @@
 package com.example.przyczepki_landingpage.support
 
+import com.example.przyczepki_landingpage.controller.adminController
 import com.example.przyczepki_landingpage.controller.customerController
 import com.example.przyczepki_landingpage.controller.reservation
 import com.example.przyczepki_landingpage.modules.ApiConfig
@@ -39,7 +40,7 @@ val testAuthConfig = AuthConfig(
     internalApiKey = "test-internal",
 )
 
-private val testApiConfig = ApiConfig(
+internal val testApiConfig = ApiConfig(
     env = "TEST",
     apiPort = 8090,
     apiHost = "localhost",
@@ -98,6 +99,49 @@ fun Application.installCustomerTestDependencies(
     }
     return customerRepo
 }
+
+fun Application.installAdminTestDependencies(
+    customerRepo: FakeCustomerRepo = FakeCustomerRepo(),
+    reservationRepo: FakeReservationRepo = FakeReservationRepo(),
+    trailersRepo: FakeTrailersRepo = FakeTrailersRepo(),
+): AdminTestDependencies {
+    install(ContentNegotiation) {
+        json(
+            Json {
+                prettyPrint = true
+                isLenient = true
+                ignoreUnknownKeys = true
+                encodeDefaults = true
+                explicitNulls = false
+            },
+        )
+    }
+    configureStatusPages()
+    install(Koin) {
+        modules(
+            module {
+                single { testApiConfig }
+                single<CustomerRepo> { customerRepo }
+                single<ReservationRepo> { reservationRepo }
+                single<TrailersRepo> { trailersRepo }
+                single<CustomerService> { CustomerServiceImpl("http://localhost/", get()) }
+                single<TrailersService> { TrailersServiceImpl(get()) }
+                single<ReservationService> { ReservationServiceImpl(get(), get(), get()) }
+            },
+        )
+    }
+    configureSecurity()
+    routing {
+        adminController()
+    }
+    return AdminTestDependencies(customerRepo, reservationRepo, trailersRepo)
+}
+
+data class AdminTestDependencies(
+    val customerRepo: FakeCustomerRepo,
+    val reservationRepo: FakeReservationRepo,
+    val trailersRepo: FakeTrailersRepo,
+)
 
 fun Application.installMyReservationsTestDependencies(
     reservationRepo: FakeReservationRepo = FakeReservationRepo(),

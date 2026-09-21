@@ -10,8 +10,14 @@ interface ReservationRepo {
     suspend fun createReservation(reservation: Reservation): Reservation?
     suspend fun deleteReservation(id: String): Boolean
     /** Returns an existing reservation that overlaps [from, to] for [trailerId], or null if dates are free. */
-    suspend fun checkReservationDates(trailerId: String, from: LocalDate, to: LocalDate): Reservation?
+    suspend fun checkReservationDates(
+        trailerId: String,
+        from: LocalDate,
+        to: LocalDate,
+        excludeId: String? = null,
+    ): Reservation?
 
     suspend fun getActiveReservationsForCustomer(customerId: String, date: LocalDate): List<Reservation>
     suspend fun getReservationsByCustomerId(customerId: String): List<Reservation>
+    suspend fun updateReservation(reservation: Reservation): Reservation?
 }

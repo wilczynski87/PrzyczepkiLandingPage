@@ -15,6 +15,8 @@ data class ReservationDto(
     val endDate: LocalDate? = null,
     val reservationPrice: ReservationPrice? = null,
     val trailerName: String? = null,
+    val customerName: String? = null,
+    val customerEmail: String? = null,
 )
 
 @Serializable
@@ -35,7 +37,9 @@ data class Reservation(
     val reservationPrice: ReservationPrice? = null,
     val paymentToken: String? = null,
 ) {
-    fun toDto(): ReservationDto = ReservationDto(
+    fun toDto(): ReservationDto = toAdminDto()
+
+    fun toAdminDto(): ReservationDto = ReservationDto(
         id = id,
         customerId = customer?.id,
         trailerId = trailer?.id,
@@ -43,6 +47,17 @@ data class Reservation(
         endDate = endDate,
         reservationPrice = reservationPrice,
         trailerName = trailer?.name,
+        customerName = customer.displayLabel(),
+        customerEmail = customer?.getEmail(),
     )
+}
 
+private fun Customer?.displayLabel(): String? {
+    val company = this?.company?.name?.trim().orEmpty()
+    if (company.isNotBlank()) return company
+    val person = listOfNotNull(this?.private?.firstName, this?.private?.lastName)
+        .joinToString(" ")
+        .trim()
+    if (person.isNotBlank()) return person
+    return this?.getEmail()
 }
