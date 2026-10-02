@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,6 +38,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -239,8 +241,10 @@ fun PaymentForReservation(
                     trailerReservationPrices(reservationPrices, trailer?.prices)
                 }
 
+                CouponCodeRow(viewModel)
+
                 ReservationTotalPrice(
-                    trailer?.prices?.reservation?.asPrice(),
+                    (reservationPrices?.reservation ?: trailer?.prices?.reservation)?.asPrice(),
                     reservationToMake?.reservationPrice?.sum?.asPrice(),
                 )
             }
@@ -453,6 +457,56 @@ fun NavigationBackBar(onClick: () -> Unit = {}, title: String = "Powrót") {
             title,
             style = MaterialTheme.typography.titleMedium
         )
+    }
+}
+
+@Composable
+private fun CouponCodeRow(viewModel: AppViewModel) {
+    val state by viewModel.appState.collectAsState()
+    val applied = state.reservationToMake?.couponCode
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = "Kod rabatowy",
+            style = MaterialTheme.typography.labelLarge,
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            OutlinedTextField(
+                value = state.couponCodeInput,
+                onValueChange = viewModel::updateCouponCodeInput,
+                modifier = Modifier.weight(1f),
+                singleLine = true,
+                label = { Text("Kupon") },
+                enabled = !state.couponApplying,
+            )
+            Button(
+                onClick = { viewModel.applyCoupon() },
+                enabled = !state.couponApplying && state.couponCodeInput.isNotBlank(),
+            ) {
+                if (state.couponApplying) {
+                    CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                } else {
+                    Text("Zastosuj")
+                }
+            }
+        }
+        state.couponError?.let { error ->
+            Text(
+                text = error,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        if (applied != null) {
+            Text(
+                text = "Zastosowano kupon $applied",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
     }
 }
 

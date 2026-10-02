@@ -3,7 +3,9 @@ package com.example.przyczepki_landingpage.controller
 import com.example.przyczepki_landingpage.data.AdminReservationRequest
 import com.example.przyczepki_landingpage.data.Customer
 import com.example.przyczepki_landingpage.data.CustomerRegisterRequest
+import com.example.przyczepki_landingpage.data.dto.Coupon
 import com.example.przyczepki_landingpage.modules.ApiConfig
+import com.example.przyczepki_landingpage.service.CouponService
 import com.example.przyczepki_landingpage.service.CustomerService
 import com.example.przyczepki_landingpage.service.ReservationService
 import io.ktor.http.HttpStatusCode
@@ -30,6 +32,7 @@ import com.example.przyczepki_landingpage.service.startOfTheDay
 fun Route.adminController() {
     val customerService by inject<CustomerService>()
     val reservationService by inject<ReservationService>()
+    val couponService by inject<CouponService>()
     val apiConfig by inject<ApiConfig>()
     val adminEmails = apiConfig.adminEmails.toSet()
 
@@ -125,6 +128,33 @@ fun Route.adminController() {
                     )
                 }
                 val deleted = customerService.delete(id)
+                if (deleted) call.respond(HttpStatusCode.OK, true)
+                else call.respond(HttpStatusCode.NotFound, false)
+            }
+
+            get("/coupons") {
+                if (call.requireAdmin(customerService, adminEmails) == null) return@get
+                call.respond(couponService.list())
+            }
+
+            post("/coupons") {
+                if (call.requireAdmin(customerService, adminEmails) == null) return@post
+                val coupon = call.receive<Coupon>()
+                call.respond(HttpStatusCode.Created, couponService.create(coupon))
+            }
+
+            put("/coupons/{id}") {
+                if (call.requireAdmin(customerService, adminEmails) == null) return@put
+                val id = call.parameters["id"] ?: return@put call.respond(HttpStatusCode.BadRequest, "Brak id")
+                val updated = couponService.update(call.receive<Coupon>().copy(id = id))
+                    ?: return@put call.respond(HttpStatusCode.NotFound, "Nie znaleziono kuponu")
+                call.respond(updated)
+            }
+
+            delete("/coupons/{id}") {
+                if (call.requireAdmin(customerService, adminEmails) == null) return@delete
+                val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest, "Brak id")
+                val deleted = couponService.delete(id)
                 if (deleted) call.respond(HttpStatusCode.OK, true)
                 else call.respond(HttpStatusCode.NotFound, false)
             }

@@ -1,5 +1,9 @@
 package com.example.przyczepki_landingpage.service.impl
 
+import com.example.przyczepki_landingpage.data.dto.Coupon
+import com.example.przyczepki_landingpage.data.dto.CouponStatus
+import com.example.przyczepki_landingpage.data.dto.Discount
+import com.example.przyczepki_landingpage.support.FakeCouponRepo
 import com.example.przyczepki_landingpage.support.FakeCustomerRepo
 import com.example.przyczepki_landingpage.support.FakeReservationRepo
 import com.example.przyczepki_landingpage.support.FakeTrailersRepo
@@ -16,7 +20,13 @@ class ReservationServiceImplTest {
     private val reservationRepo = FakeReservationRepo()
     private val trailersRepo = FakeTrailersRepo()
     private val customerRepo = FakeCustomerRepo()
-    private val service = ReservationServiceImpl(reservationRepo, trailersRepo, customerRepo)
+    private val couponRepo = FakeCouponRepo()
+    private val service = ReservationServiceImpl(
+        reservationRepo,
+        trailersRepo,
+        customerRepo,
+        CouponServiceImpl(couponRepo),
+    )
 
     @Test
     fun `checkReservation returns dto when dates are free`() = runBlocking {
@@ -280,5 +290,62 @@ class ReservationServiceImplTest {
 
         assertEquals(emptyList(), service.getCustomerReservations("missing"))
         assertEquals(emptyList(), service.getCustomerReservations(""))
+    }
+
+    @Test
+    fun `calculatePrice applies fixed coupon`() = runBlocking {
+        trailersRepo.addTrailer(ReservationTestFixtures.trailer())
+        couponRepo.add(
+            Coupon(id = "c1", code = "MINUS20", status = CouponStatus.ACTIVE, discount = Discount.Fixed(20.0)),
+        )
+        val result = service.calculatePrice(
+            ReservationTestFixtures.reservationDto().copy(couponCode = "minus20"),
+        )
+        assertEquals(40.0, result.reservationPrice?.sum)
+        assertEquals(30.0, result.reservationPrice?.reservation)
+        assertEquals("MINUS20", result.couponCode)
+        assertEquals(60.0, result.reservationPrice?.originalSum)
+    }
+
+    @Test
+    fun `calculatePrice applies percentage coupon`() = runBlocking {
+        trailersRepo.addTrailer(ReservationTestFixtures.trailer())
+        couponRepo.add(
+            Coupon(id = "c2", code = "HALF", status = CouponStatus.ACTIVE, discount = Discount.Percentage(50.0)),
+        )
+        val result = service.calculatePrice(
+            ReservationTestFixtures.reservationDto().copy(couponCode = "HALF"),
+        )
+        assertEquals(30.0, result.reservationPrice?.sum)
+        assertEquals(15.0, result.reservationPrice?.reservation)
+    }
+
+    @Test
+    fun `calculatePrice applies fixed price coupon`() = runBlocking {
+        trailersRepo.addTrailer(ReservationTestFixtures.trailer())
+        couponRepo.add(
+            Coupon(id = "c3", code = "FLAT25", status = CouponStatus.ACTIVE, discount = Discount.FixedPrice(25.0)),
+        )
+        val result = service.calculatePrice(
+            ReservationTestFixtures.reservationDto(
+                startDate = LocalDate(2025, 6, 10),
+                endDate = LocalDate(2025, 6, 12),
+            ).copy(couponCode = "FLAT25"),
+        )
+        assertEquals(2L, result.reservationPrice?.daysNumber)
+        assertEquals(50.0, result.reservationPrice?.sum)
+        assertEquals(25.0, result.reservationPrice?.reservation)
+    }
+
+    @Test
+    fun `calculatePrice rejects used coupon`() = runBlocking {
+        trailersRepo.addTrailer(ReservationTestFixtures.trailer())
+        couponRepo.add(
+            Coupon(id = "c4", code = "USED", status = CouponStatus.USED, discount = Discount.Fixed(10.0)),
+        )
+        val error = assertFailsWith<IllegalArgumentException> {
+            service.calculatePrice(ReservationTestFixtures.reservationDto().copy(couponCode = "USED"))
+        }
+        assertEquals("Kupon został już wykorzystany", error.message)
     }
 }

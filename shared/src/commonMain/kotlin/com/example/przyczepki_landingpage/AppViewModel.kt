@@ -154,6 +154,44 @@ class AppViewModel(private val scope: CoroutineScope) {
         }
     }
 
+    fun updateCouponCodeInput(code: String) {
+        _appState.update { it.copy(couponCodeInput = code, couponError = null) }
+    }
+
+    fun applyCoupon() {
+        val reservation = appState.value.reservationToMake ?: return
+        val code = appState.value.couponCodeInput.trim()
+        if (code.isBlank()) {
+            _appState.update { it.copy(couponError = "Podaj kod kuponu") }
+            return
+        }
+        scope.launch {
+            _appState.update { it.copy(couponApplying = true, couponError = null) }
+            ApiClient.reservationController.checkReservation(
+                reservation.copy(
+                    couponCode = code,
+                    customerId = appState.value.customer?.id ?: reservation.customerId,
+                ),
+            ).onSuccess { priced ->
+                _appState.update {
+                    it.copy(
+                        reservationToMake = priced,
+                        couponApplying = false,
+                        couponError = null,
+                        couponCodeInput = priced.couponCode ?: code.uppercase(),
+                    )
+                }
+            }.onFailure { error ->
+                _appState.update {
+                    it.copy(
+                        couponApplying = false,
+                        couponError = error.message ?: "Nie udało się zastosować kuponu",
+                    )
+                }
+            }
+        }
+    }
+
     fun checkReservation(reservation: ReservationDto) {
         scope.launch {
             ApiClient.reservationController.checkReservation(reservation)

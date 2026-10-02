@@ -124,6 +124,7 @@ class ReservationRepoImpl(
                 set("startDate", reservation.startDate?.toJavaLocalDate()),
                 set("endDate", reservation.endDate?.toJavaLocalDate()),
                 set("reservationPrice", reservation.reservationPrice),
+                set("couponCode", reservation.couponCode),
             ),
             FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER),
         )?.toReservation()
@@ -139,6 +140,7 @@ data class ReservationTable(
     val startDate: java.time.LocalDate? = null,
     val endDate: java.time.LocalDate? = null,
     val reservationPrice: ReservationPrice? = null,
+    val couponCode: String? = null,
 ) {
     constructor(_id: ObjectId? = null, reservation: Reservation) : this(
         _id = _id,
@@ -148,6 +150,7 @@ data class ReservationTable(
         startDate = reservation.startDate?.toJavaLocalDate(),
         endDate = reservation.endDate?.toJavaLocalDate(),
         reservationPrice = reservation.reservationPrice,
+        couponCode = reservation.couponCode ?: reservation.reservationPrice?.couponCode,
     )
 
    fun toReservation(): Reservation = Reservation(
@@ -156,6 +159,7 @@ data class ReservationTable(
        this.trailer,
        this.startDate?.toKotlinLocalDate(),
        this.endDate?.toKotlinLocalDate(),
-       this.reservationPrice
+       this.reservationPrice,
+       couponCode = this.couponCode ?: this.reservationPrice?.couponCode,
    )
 }

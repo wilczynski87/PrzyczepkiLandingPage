@@ -1,5 +1,7 @@
 package com.example.przyczepki_landingpage.controller
 
+import com.example.przyczepki_landingpage.data.dto.Coupon
+import com.example.przyczepki_landingpage.data.dto.Discount
 import com.example.przyczepki_landingpage.data.AdminReservationRequest
 import com.example.przyczepki_landingpage.data.Customer
 import com.example.przyczepki_landingpage.data.CustomerRegisterRequest
@@ -153,5 +155,37 @@ class AdminEndpointTest {
             header(HttpHeaders.Authorization, auth)
         }
         assertEquals(HttpStatusCode.OK, deletedCust.status)
+    }
+
+    @Test
+    fun `admin can create and list coupons`() = testApplication {
+        application {
+            val deps = installAdminTestDependencies()
+            deps.customerRepo.addCustomer(adminCustomer())
+        }
+        val http = createClient {
+            install(ContentNegotiation) { json(json) }
+        }
+        val auth = "Bearer ${token("admin-1")}"
+        val created = http.post("/admin/coupons") {
+            header(HttpHeaders.Authorization, auth)
+            contentType(ContentType.Application.Json)
+            setBody(
+                Coupon(
+                    code = "promo10",
+                    description = "10 zł taniej",
+                    discount = Discount.Fixed(10.0),
+                ),
+            )
+        }
+        assertEquals(HttpStatusCode.Created, created.status)
+        val coupon = json.decodeFromString<Coupon>(created.bodyAsText())
+        assertEquals("PROMO10", coupon.code)
+
+        val list = http.get("/admin/coupons") {
+            header(HttpHeaders.Authorization, auth)
+        }
+        assertEquals(HttpStatusCode.OK, list.status)
+        assertTrue(list.bodyAsText().contains("PROMO10"))
     }
 }

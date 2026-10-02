@@ -2,11 +2,14 @@ package com.example.przyczepki_landingpage.di
 
 import com.example.przyczepki_landingpage.modules.ApiConfig
 import com.example.przyczepki_landingpage.modules.toApiConfig
+import com.example.przyczepki_landingpage.repo.CouponRepo
 import com.example.przyczepki_landingpage.repo.CustomerRepo
 import com.example.przyczepki_landingpage.repo.GateEventRepo
 import com.example.przyczepki_landingpage.repo.ReservationRepo
 import com.example.przyczepki_landingpage.repo.TrailersRepo
 import com.example.przyczepki_landingpage.repo.PendingPaymentRepo
+import com.example.przyczepki_landingpage.repo.impl.CouponRepoImpl
+import com.example.przyczepki_landingpage.repo.impl.CouponTable
 import com.example.przyczepki_landingpage.repo.impl.CustomerRepoImpl
 import com.example.przyczepki_landingpage.repo.impl.CustomerTable
 import com.example.przyczepki_landingpage.repo.impl.GateEventRepoImpl
@@ -20,6 +23,7 @@ import com.example.przyczepki_landingpage.repo.impl.SuplaTokenTable
 import com.example.przyczepki_landingpage.repo.impl.TrailerTable
 import com.example.przyczepki_landingpage.repo.impl.TrailersRepoImpl
 import com.example.przyczepki_landingpage.repo.SuplaTokenRepo
+import com.example.przyczepki_landingpage.service.CouponService
 import com.example.przyczepki_landingpage.service.CustomerService
 import com.example.przyczepki_landingpage.service.EmailService
 import com.example.przyczepki_landingpage.service.GateService
@@ -30,6 +34,7 @@ import com.example.przyczepki_landingpage.service.SuplaTokenProvider
 import com.example.przyczepki_landingpage.service.TrailersService
 import com.example.przyczepki_landingpage.service.auth.GoogleIdTokenVerifier
 import com.example.przyczepki_landingpage.service.auth.JwtService
+import com.example.przyczepki_landingpage.service.impl.CouponServiceImpl
 import com.example.przyczepki_landingpage.service.impl.CustomerServiceImpl
 import com.example.przyczepki_landingpage.service.impl.EmailServiceImpl
 import com.example.przyczepki_landingpage.service.impl.GateServiceImpl
@@ -120,6 +125,9 @@ val appModule = module {
     single(named("suplaTokenCollection")) {
         get<MongoDatabase>().getCollection<SuplaTokenTable>("supla_token")
     }
+    single(named("couponCollection")) {
+        get<MongoDatabase>().getCollection<CouponTable>("coupon")
+    }
 
     // Repositories
     single<TrailersRepo> { TrailersRepoImpl(get(named("trailerCollection"))) }
@@ -128,6 +136,8 @@ val appModule = module {
     single<PendingPaymentRepo> { PendingPaymentRepoImpl(get(named("pendingPaymentCollection"))) }
     single<GateEventRepo> { GateEventRepoImpl(get(named("gateEventCollection"))) }
     single<SuplaTokenRepo> { SuplaTokenRepoImpl(get(named("suplaTokenCollection"))) }
+    single<CouponRepo> { CouponRepoImpl(get(named("couponCollection"))) }
+    single<CouponService> { CouponServiceImpl(get()) }
 
 
     // Services
@@ -142,6 +152,7 @@ val appModule = module {
             reservationRepo = get(),
             trailersRepo = get(),
             customerRepo = get(),
+            couponService = get(),
         )
     }
 

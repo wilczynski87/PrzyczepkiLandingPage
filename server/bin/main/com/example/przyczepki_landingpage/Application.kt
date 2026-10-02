@@ -1,6 +1,7 @@
 package com.example.przyczepki_landingpage
 
 import com.example.przyczepki_landingpage.controller.adminController
+import com.example.przyczepki_landingpage.controller.couponController
 import com.example.przyczepki_landingpage.controller.authController
 import com.example.przyczepki_landingpage.controller.customerController
 import com.example.przyczepki_landingpage.controller.gate
@@ -62,6 +63,7 @@ private fun Application.routing() {
         healthCheck()
         authController()
         adminController()
+        couponController()
         trailers()
         reservation()
         customerController()

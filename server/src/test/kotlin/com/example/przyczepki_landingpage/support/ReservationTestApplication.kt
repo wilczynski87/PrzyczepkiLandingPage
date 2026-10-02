@@ -3,12 +3,15 @@ package com.example.przyczepki_landingpage.support
 import com.example.przyczepki_landingpage.controller.reservation
 import com.example.przyczepki_landingpage.modules.configureSecurity
 import com.example.przyczepki_landingpage.modules.configureStatusPages
+import com.example.przyczepki_landingpage.repo.CouponRepo
 import com.example.przyczepki_landingpage.repo.CustomerRepo
 import com.example.przyczepki_landingpage.repo.ReservationRepo
 import com.example.przyczepki_landingpage.repo.TrailersRepo
+import com.example.przyczepki_landingpage.service.CouponService
 import com.example.przyczepki_landingpage.service.CustomerService
 import com.example.przyczepki_landingpage.service.ReservationService
 import com.example.przyczepki_landingpage.service.TrailersService
+import com.example.przyczepki_landingpage.service.impl.CouponServiceImpl
 import com.example.przyczepki_landingpage.service.impl.ReservationServiceImpl
 import com.example.przyczepki_landingpage.service.impl.TrailersServiceImpl
 import io.ktor.serialization.kotlinx.json.json
@@ -50,8 +53,10 @@ fun Application.installReservationCheckTestDependencies(
                 single<ReservationRepo> { reservationRepo }
                 single<TrailersRepo> { trailersRepo }
                 single<CustomerRepo> { customerRepo }
+                single<CouponRepo> { FakeCouponRepo() }
                 single<TrailersService> { TrailersServiceImpl(get()) }
-                single<ReservationService> { ReservationServiceImpl(get(), get(), get()) }
+                single<CouponService> { CouponServiceImpl(get()) }
+                single<ReservationService> { ReservationServiceImpl(get(), get(), get(), get()) }
                 single<CustomerService> { FakeCustomerService() }
             },
         )

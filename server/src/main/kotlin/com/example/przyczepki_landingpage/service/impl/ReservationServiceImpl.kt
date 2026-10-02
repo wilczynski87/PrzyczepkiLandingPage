@@ -9,6 +9,7 @@ import com.example.przyczepki_landingpage.data.Trailer
 import com.example.przyczepki_landingpage.repo.CustomerRepo
 import com.example.przyczepki_landingpage.repo.ReservationRepo
 import com.example.przyczepki_landingpage.repo.TrailersRepo
+import com.example.przyczepki_landingpage.service.CouponService
 import com.example.przyczepki_landingpage.service.ReservationService
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
@@ -18,6 +19,7 @@ class ReservationServiceImpl(
     private val reservationRepo: ReservationRepo,
     private val trailersRepo: TrailersRepo,
     private val customerRepo: CustomerRepo,
+    private val couponService: CouponService,
 ): ReservationService {
 
     override suspend fun getReservations(from: LocalDate, to: LocalDate?): List<ReservationDto> {
@@ -79,13 +81,23 @@ class ReservationServiceImpl(
             }
         }
 
-        val reservationPrice = ReservationPrice(
+        val basePrice = ReservationPrice(
             trailerId = reservation.trailerId,
             reservation = prices.reservation,
             daysNumber = calendarSpan.toLong(),
             sum = sum,
         )
-        return reservation.copy(reservationPrice = reservationPrice)
+        val couponCode = reservation.couponCode?.trim()?.ifBlank { null }
+        val reservationPrice = if (couponCode == null) {
+            basePrice
+        } else {
+            val coupon = couponService.requireUsable(couponCode, reservation.customerId)
+            couponService.applyToPrice(basePrice, coupon)
+        }
+        return reservation.copy(
+            reservationPrice = reservationPrice,
+            couponCode = reservationPrice.couponCode ?: couponCode,
+        )
     }
 
     override suspend fun createReservation(reservation: ReservationDto): ReservationDto? {
@@ -120,9 +132,14 @@ class ReservationServiceImpl(
             startDate = reservation.startDate!!,
             endDate = reservation.endDate!!,
             reservationPrice = expected,
+            couponCode = expected.couponCode ?: reservation.couponCode,
         )
         val createdReservation = reservationRepo.createReservation(reservationToMake)
             ?: throw Exception("Reservation not created: $reservationToMake")
+
+        expected.couponCode?.let { code ->
+            couponService.requireUsable(code, reservation.customerId).id?.let { couponService.markUsed(it) }
+        }
 
         return createdReservation.toAdminDto()
     }

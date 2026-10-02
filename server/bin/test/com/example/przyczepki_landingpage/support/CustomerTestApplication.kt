@@ -11,13 +11,17 @@ import com.example.przyczepki_landingpage.modules.GateConfig
 import com.example.przyczepki_landingpage.modules.PaymentConfig
 import com.example.przyczepki_landingpage.modules.configureSecurity
 import com.example.przyczepki_landingpage.modules.configureStatusPages
+import com.example.przyczepki_landingpage.controller.couponController
+import com.example.przyczepki_landingpage.repo.CouponRepo
 import com.example.przyczepki_landingpage.repo.CustomerRepo
 import com.example.przyczepki_landingpage.repo.ReservationRepo
 import com.example.przyczepki_landingpage.repo.TrailersRepo
+import com.example.przyczepki_landingpage.service.CouponService
 import com.example.przyczepki_landingpage.service.CustomerService
 import com.example.przyczepki_landingpage.service.EmailService
 import com.example.przyczepki_landingpage.service.ReservationService
 import com.example.przyczepki_landingpage.service.TrailersService
+import com.example.przyczepki_landingpage.service.impl.CouponServiceImpl
 import com.example.przyczepki_landingpage.service.impl.CustomerServiceImpl
 import com.example.przyczepki_landingpage.service.impl.ReservationServiceImpl
 import com.example.przyczepki_landingpage.service.impl.TrailersServiceImpl
@@ -104,6 +108,7 @@ fun Application.installAdminTestDependencies(
     customerRepo: FakeCustomerRepo = FakeCustomerRepo(),
     reservationRepo: FakeReservationRepo = FakeReservationRepo(),
     trailersRepo: FakeTrailersRepo = FakeTrailersRepo(),
+    couponRepo: FakeCouponRepo = FakeCouponRepo(),
 ): AdminTestDependencies {
     install(ContentNegotiation) {
         json(
@@ -124,23 +129,27 @@ fun Application.installAdminTestDependencies(
                 single<CustomerRepo> { customerRepo }
                 single<ReservationRepo> { reservationRepo }
                 single<TrailersRepo> { trailersRepo }
+                single<CouponRepo> { couponRepo }
                 single<CustomerService> { CustomerServiceImpl("http://localhost/", get()) }
                 single<TrailersService> { TrailersServiceImpl(get()) }
-                single<ReservationService> { ReservationServiceImpl(get(), get(), get()) }
+                single<CouponService> { CouponServiceImpl(get()) }
+                single<ReservationService> { ReservationServiceImpl(get(), get(), get(), get()) }
             },
         )
     }
     configureSecurity()
     routing {
         adminController()
+        couponController()
     }
-    return AdminTestDependencies(customerRepo, reservationRepo, trailersRepo)
+    return AdminTestDependencies(customerRepo, reservationRepo, trailersRepo, couponRepo)
 }
 
 data class AdminTestDependencies(
     val customerRepo: FakeCustomerRepo,
     val reservationRepo: FakeReservationRepo,
     val trailersRepo: FakeTrailersRepo,
+    val couponRepo: FakeCouponRepo,
 )
 
 fun Application.installMyReservationsTestDependencies(
@@ -165,8 +174,10 @@ fun Application.installMyReservationsTestDependencies(
                 single<ReservationRepo> { reservationRepo }
                 single<TrailersRepo> { FakeTrailersRepo() }
                 single<CustomerRepo> { FakeCustomerRepo() }
+                single<CouponRepo> { FakeCouponRepo() }
                 single<TrailersService> { TrailersServiceImpl(get()) }
-                single<ReservationService> { ReservationServiceImpl(get(), get(), get()) }
+                single<CouponService> { CouponServiceImpl(get()) }
+                single<ReservationService> { ReservationServiceImpl(get(), get(), get(), get()) }
                 single<CustomerService> { FakeCustomerService() }
             },
         )

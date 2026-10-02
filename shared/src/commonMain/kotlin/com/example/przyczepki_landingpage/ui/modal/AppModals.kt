@@ -167,7 +167,10 @@ fun ReservationConfirmationModal(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Total price
-                ReservationTotalPrice(trailer?.prices?.reservation?.asPrice(), reservationToMake?.reservationPrice?.sum?.asPrice())
+                ReservationTotalPrice(
+                    (reservationPrices?.reservation ?: trailer?.prices?.reservation)?.asPrice(),
+                    reservationToMake?.reservationPrice?.sum?.asPrice(),
+                )
 
                 Spacer(modifier = Modifier.height(12.dp))
 

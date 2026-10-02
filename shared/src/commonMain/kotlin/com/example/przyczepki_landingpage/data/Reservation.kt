@@ -17,6 +17,7 @@ data class ReservationDto(
     val trailerName: String? = null,
     val customerName: String? = null,
     val customerEmail: String? = null,
+    val couponCode: String? = null,
 )
 
 @Serializable
@@ -25,6 +26,8 @@ data class ReservationPrice(
     val reservation: Double? = null,
     val daysNumber: Long? = null,
     val sum: Double? = null,
+    val couponCode: String? = null,
+    val originalSum: Double? = null,
 )
 
 @Serializable
@@ -36,6 +39,7 @@ data class Reservation(
     val endDate: LocalDate? = null,
     val reservationPrice: ReservationPrice? = null,
     val paymentToken: String? = null,
+    val couponCode: String? = null,
 ) {
     fun toDto(): ReservationDto = toAdminDto()
 
@@ -49,6 +53,7 @@ data class Reservation(
         trailerName = trailer?.name,
         customerName = customer.displayLabel(),
         customerEmail = customer?.getEmail(),
+        couponCode = couponCode ?: reservationPrice?.couponCode,
     )
 }
 

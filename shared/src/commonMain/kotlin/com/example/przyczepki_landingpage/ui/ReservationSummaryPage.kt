@@ -315,7 +315,7 @@ private fun ReservationSummarySuccess(
                 }
 
                 ReservationTotalPrice(
-                    trailer?.prices?.reservation?.asPrice(),
+                    (reservation.reservationPrice?.reservation ?: trailer?.prices?.reservation)?.asPrice(),
                     reservation.reservationPrice?.sum?.asPrice(),
                 )
             }

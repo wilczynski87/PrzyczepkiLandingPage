@@ -53,6 +53,10 @@ data class AppState(
 
     val customerActionInProgress: Boolean = false,
     val customerActionFeedback: CustomerActionFeedback? = null,
+
+    val couponCodeInput: String = "",
+    val couponApplying: Boolean = false,
+    val couponError: String? = null,
 )
 
 data class CustomerActionFeedback(

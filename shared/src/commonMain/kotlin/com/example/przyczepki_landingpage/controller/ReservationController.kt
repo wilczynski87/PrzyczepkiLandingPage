@@ -49,8 +49,15 @@ class ReservationController(private val client: HttpClient) {
             }
             else -> {
                 val text = response.bodyAsText()
-                val errors: List<String> = Json.decodeFromString(text)
-                Result.failure(Exception(errors.joinToString { it }))
+                val jsonError = Regex(""""error"\s*:\s*"([^"]+)"""").find(text)?.groupValues?.get(1)
+                val listError = runCatching { Json.decodeFromString<List<String>>(text) }.getOrNull()
+                Result.failure(
+                    Exception(
+                        jsonError
+                            ?: listError?.joinToString { it }
+                            ?: text.ifBlank { "Nie udało się sprawdzić rezerwacji" },
+                    ),
+                )
             }
         }
     }
