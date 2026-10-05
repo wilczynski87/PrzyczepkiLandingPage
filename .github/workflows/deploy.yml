@@ -117,7 +117,7 @@ jobs:
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
           GMAIL_SENDER_EMAIL: ${{ vars.GMAIL_SENDER_EMAIL }}
-          BCC: ${{ secrets.BCC }}
+          BCC: ${{ vars.BCC }}
           PAYMENT_ENV: production
           PAYMENT_MOCK: "false"
           PAYMENT_MERCHANT_ID: ${{ secrets.PAYMENT_MERCHANT_ID }}
