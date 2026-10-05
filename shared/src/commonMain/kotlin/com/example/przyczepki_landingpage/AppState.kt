@@ -57,7 +57,16 @@ data class AppState(
     val couponCodeInput: String = "",
     val couponApplying: Boolean = false,
     val couponError: String? = null,
+
+    val gateOpenState: GateOpenUiState = GateOpenUiState.Idle,
 )
+
+sealed interface GateOpenUiState {
+    data object Idle : GateOpenUiState
+    data object Loading : GateOpenUiState
+    data object Success : GateOpenUiState
+    data class Error(val message: String) : GateOpenUiState
+}
 
 data class CustomerActionFeedback(
     val success: Boolean,

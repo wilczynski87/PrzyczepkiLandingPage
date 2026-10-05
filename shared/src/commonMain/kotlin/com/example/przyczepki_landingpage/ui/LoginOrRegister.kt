@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.przyczepki_landingpage.AppViewModel
+import com.example.przyczepki_landingpage.GateOpenUiState
 import com.example.przyczepki_landingpage.model.CurrentScreen
 import com.example.przyczepki_landingpage.model.ModalData
 import com.example.przyczepki_landingpage.model.ModalType
@@ -49,6 +50,16 @@ fun LoggingOptions(
         CustomerDataFront(viewModel)
 
         if (loggedIn) {
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 16.dp),
+                color = MaterialTheme.colorScheme.outlineVariant,
+            )
+            GateOpenSlider(
+                gateState = state.gateOpenState,
+                enabled = state.gateOpenState is GateOpenUiState.Idle,
+                onOpenRequested = viewModel::requestGateOpen,
+                modifier = Modifier.fillMaxWidth(),
+            )
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 16.dp),
                 color = MaterialTheme.colorScheme.outlineVariant,

@@ -887,6 +887,45 @@ class AppViewModel(private val scope: CoroutineScope) {
         return token
     }
 
+    fun requestGateOpen() {
+        if (appState.value.customer?.id == null) return
+        if (appState.value.gateOpenState is GateOpenUiState.Loading) return
+        scope.launch {
+            _appState.update { it.copy(gateOpenState = GateOpenUiState.Loading) }
+            ApiClient.gateController.openGate().onSuccess { result ->
+                _appState.update {
+                    it.copy(
+                        gateOpenState = if (result.success) {
+                            GateOpenUiState.Success
+                        } else {
+                            GateOpenUiState.Error(result.message.ifBlank { "Nie udało się otworzyć bramy" })
+                        },
+                    )
+                }
+                delay(2_000)
+                _appState.update { it.copy(gateOpenState = GateOpenUiState.Idle) }
+            }.onFailure { error ->
+                if (error is InvalidLoginCredentialsException) {
+                    clearLocalSession()
+                    _appState.update {
+                        it.copy(gateOpenState = GateOpenUiState.Error("Sesja wygasła. Zaloguj się ponownie."))
+                    }
+                } else {
+                    _appState.update {
+                        it.copy(
+                            gateOpenState = GateOpenUiState.Error(
+                                error.message?.takeIf { message -> message.isNotBlank() }
+                                    ?: "Nie udało się połączyć z serwerem bramy.",
+                            ),
+                        )
+                    }
+                }
+                delay(5_000)
+                _appState.update { it.copy(gateOpenState = GateOpenUiState.Idle) }
+            }
+        }
+    }
+
     fun logout() {
         scope.launch {
             clearLocalSession()
@@ -944,6 +983,7 @@ class AppViewModel(private val scope: CoroutineScope) {
                 customerActionInProgress = false,
                 customerActionFeedback = null,
                 loginUiState = remembered,
+                gateOpenState = GateOpenUiState.Idle,
             )
         }
     }

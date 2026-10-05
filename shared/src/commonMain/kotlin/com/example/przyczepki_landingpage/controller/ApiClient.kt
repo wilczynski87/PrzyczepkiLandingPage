@@ -28,4 +28,5 @@ object ApiClient {
     val authController by lazy { AuthController(client) }
     val paymentController by lazy { PaymentController(client) }
     val couponController by lazy { CouponController(client) }
+    val gateController by lazy { GateController(client) }
 }
