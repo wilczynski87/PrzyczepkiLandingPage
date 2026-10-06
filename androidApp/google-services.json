@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1031792102368",
+    "project_id": "przyczepkifat-c8f37",
+    "storage_bucket": "przyczepkifat-c8f37.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1031792102368:android:656b2f0de2a84f20a1b985",
+        "android_client_info": {
+          "package_name": "com.example.przyczepki_landingpage"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCjrJPBYyybLCb38HywlP6H7GkmFS7RYU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -4,6 +4,7 @@ FROM gradle:8.14.3-jdk21-jammy AS builder
 LABEL authors="karol"
 
 WORKDIR /app
+ENV INCLUDE_ANDROID=false
 
 # kopiujemy tylko pliki potrzebne do cache zależności
 COPY gradlew .

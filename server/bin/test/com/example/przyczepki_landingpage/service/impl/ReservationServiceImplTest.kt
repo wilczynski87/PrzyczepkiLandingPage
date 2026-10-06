@@ -261,6 +261,54 @@ class ReservationServiceImplTest {
     }
 
     @Test
+    fun `createReservation sends push notification`() = runBlocking {
+        val pushes = mutableListOf<com.example.przyczepki_landingpage.data.ReservationDto>()
+        val local = ReservationServiceImpl(
+            reservationRepo,
+            trailersRepo,
+            customerRepo,
+            CouponServiceImpl(couponRepo),
+            object : com.example.przyczepki_landingpage.service.PushNotificationService {
+                override suspend fun notifyNewReservation(
+                    reservation: com.example.przyczepki_landingpage.data.ReservationDto,
+                ) {
+                    pushes += reservation
+                }
+            },
+        )
+        trailersRepo.addTrailer(ReservationTestFixtures.trailer())
+        customerRepo.addCustomer(
+            com.example.przyczepki_landingpage.data.Customer(
+                id = "customer-1",
+                private = com.example.przyczepki_landingpage.data.Private(
+                    firstName = "Jan",
+                    lastName = "Kowalski",
+                    email = "jan@example.com",
+                ),
+            ),
+        )
+        val reservation = ReservationTestFixtures.reservationDto(
+            startDate = LocalDate(2025, 6, 10),
+            endDate = LocalDate(2025, 6, 10),
+        ).copy(
+            customerId = "customer-1",
+            reservationPrice = com.example.przyczepki_landingpage.data.ReservationPrice(
+                trailerId = ReservationTestFixtures.TRAILER_ID,
+                reservation = 30.0,
+                daysNumber = 0,
+                sum = 60.0,
+            ),
+        )
+
+        val created = local.createReservation(reservation)
+
+        assertEquals(1, pushes.size)
+        assertEquals(created?.id, pushes.single().id)
+        assertEquals("Jan Kowalski", pushes.single().customerName)
+        assertEquals("Test trailer", pushes.single().trailerName)
+    }
+
+    @Test
     fun `getCustomerReservations returns only that customer's bookings`() = runBlocking {
         reservationRepo.addReservation(
             ReservationTestFixtures.existingReservation(customerId = "c1", id = "r1"),

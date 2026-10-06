@@ -36,3 +36,9 @@ dependencyResolutionManagement {
 include(":composeApp")
 include(":server")
 include(":shared")
+
+val includeAndroid = System.getenv("INCLUDE_ANDROID")?.toBooleanStrictOrNull()
+    ?: (file("local.properties").exists() && !file("/.dockerenv").exists())
+if (includeAndroid) {
+    include(":androidApp")
+}

@@ -81,5 +81,5 @@ dependencies {
     // Status page
     implementation(libs.ktor.server.status.pages)
 
-
+    implementation(libs.firebase.admin)
 }

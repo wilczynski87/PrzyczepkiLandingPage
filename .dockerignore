@@ -1,0 +1,12 @@
+.env
+firebase-service-account.json
+*-firebase-adminsdk-*.json
+.git
+**/build/
+.gradle
+.idea
+.kotlin
+node_modules/
+npm/data/
+npm/letsencrypt/
+androidApp/build/

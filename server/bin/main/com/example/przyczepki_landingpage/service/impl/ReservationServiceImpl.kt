@@ -10,6 +10,7 @@ import com.example.przyczepki_landingpage.repo.CustomerRepo
 import com.example.przyczepki_landingpage.repo.ReservationRepo
 import com.example.przyczepki_landingpage.repo.TrailersRepo
 import com.example.przyczepki_landingpage.service.CouponService
+import com.example.przyczepki_landingpage.service.PushNotificationService
 import com.example.przyczepki_landingpage.service.ReservationService
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
@@ -20,6 +21,7 @@ class ReservationServiceImpl(
     private val trailersRepo: TrailersRepo,
     private val customerRepo: CustomerRepo,
     private val couponService: CouponService,
+    private val pushNotificationService: PushNotificationService = com.example.przyczepki_landingpage.service.NoOpPushNotificationService,
 ): ReservationService {
 
     override suspend fun getReservations(from: LocalDate, to: LocalDate?): List<ReservationDto> {
@@ -141,7 +143,7 @@ class ReservationServiceImpl(
             couponService.requireUsable(code, reservation.customerId).id?.let { couponService.markUsed(it) }
         }
 
-        return createdReservation.toAdminDto()
+        return createdReservation.toAdminDto().also { notifyNewReservation(it) }
     }
 
     override suspend fun createAdminReservation(request: AdminReservationRequest): ReservationDto {
@@ -162,7 +164,7 @@ class ReservationServiceImpl(
                 reservationPrice = expected,
             )
         ) ?: throw IllegalStateException("Nie udało się utworzyć rezerwacji")
-        return created.toAdminDto()
+        return created.toAdminDto().also { notifyNewReservation(it) }
     }
 
     override suspend fun updateAdminReservation(id: String, request: AdminReservationRequest): ReservationDto? {
@@ -214,6 +216,13 @@ class ReservationServiceImpl(
         startDate = startDate,
         endDate = endDate,
     )
+
+    private suspend fun notifyNewReservation(reservation: ReservationDto) {
+        runCatching { pushNotificationService.notifyNewReservation(reservation) }
+            .onFailure { e ->
+                println("Nie udało się wysłać push o rezerwacji ${reservation.id}: ${e.message}")
+            }
+    }
 
     private fun isPriceMatching(provided: ReservationPrice, expected: ReservationPrice): Boolean {
         if (provided.trailerId != expected.trailerId) return false

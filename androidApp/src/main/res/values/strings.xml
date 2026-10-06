@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Przyczepki FAT</string>
+    <string name="push_ready">Powiadomienia o rezerwacjach są włączone.\nZostaw aplikację zainstalowaną na telefonie.</string>
+    <string name="reservations_channel">Rezerwacje</string>
+</resources>

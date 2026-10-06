@@ -7,6 +7,8 @@ FROM gradle:8.14.3-jdk21-jammy AS builder
 USER root
 WORKDIR /workspace
 
+ENV INCLUDE_ANDROID=false
+
 # 0.2. Potrzebne biblioteki systemowe dla Node/WASM
 RUN apt-get update && apt-get install -y \
     libatomic1 \

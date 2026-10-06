@@ -58,6 +58,17 @@ data class GateConfig(
 )
 
 @Serializable
+data class FcmConfig(
+    val projectId: String = "przyczepkifat-c8f37",
+    val topic: String = "admin_reservations",
+    val serviceAccountJson: String? = null,
+    val serviceAccountFile: String? = null,
+) {
+    fun hasCredentials(): Boolean =
+        !serviceAccountJson.isNullOrBlank() || !serviceAccountFile.isNullOrBlank()
+}
+
+@Serializable
 data class PaymentConfig(
     val merchantId: Int,
     val posId: Int,
@@ -81,6 +92,7 @@ data class ApiConfig(
     val paymentConfig: PaymentConfig,
     val gateConfig: GateConfig,
     val adminEmails: List<String> = defaultAdminEmails(),
+    val fcmConfig: FcmConfig = FcmConfig(),
 )
 
 fun defaultAdminEmails(): List<String> = listOf(
@@ -138,6 +150,7 @@ fun toApiConfig(): ApiConfig {
 
         paymentConfig = readPaymentConfig(),
         gateConfig = readGateConfig(),
+        fcmConfig = readFcmConfig(),
         adminEmails = parseAdminEmails(
             System.getenv("ADMIN_EMAILS"),
             System.getenv("ADMIN_EMAIL"),
@@ -241,5 +254,25 @@ private fun readPaymentConfig(): PaymentConfig {
         apiBaseUrl = "$paymentHost/api/v1",
         redirectBaseUrl = "$paymentHost/trnRequest/",
         mockMode = mockMode,
+    )
+}
+
+private fun readFcmConfig(): FcmConfig {
+    val json = System.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")?.trim()?.ifBlank { null }
+    val b64 = System.getenv("FIREBASE_SERVICE_ACCOUNT_B64")?.trim()?.ifBlank { null }
+    val fromB64 = b64?.let { encoded ->
+        runCatching { String(java.util.Base64.getDecoder().decode(encoded), Charsets.UTF_8) }
+            .onFailure { println("FCM: FIREBASE_SERVICE_ACCOUNT_B64 jest nieprawidłowe: ${it.message}") }
+            .getOrNull()
+            ?.trim()
+            ?.ifBlank { null }
+    }
+    return FcmConfig(
+        projectId = System.getenv("FIREBASE_PROJECT_ID")?.trim()?.ifBlank { null }
+            ?: "przyczepkifat-c8f37",
+        topic = System.getenv("FIREBASE_PUSH_TOPIC")?.trim()?.ifBlank { null }
+            ?: "admin_reservations",
+        serviceAccountJson = json ?: fromB64,
+        serviceAccountFile = System.getenv("FIREBASE_SERVICE_ACCOUNT_FILE")?.trim()?.ifBlank { null },
     )
 }

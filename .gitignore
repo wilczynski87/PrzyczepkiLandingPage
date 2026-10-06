@@ -20,4 +20,6 @@ node_modules/
 npm/data/
 npm/letsencrypt/
 .env
+firebase-service-account.json
+*-firebase-adminsdk-*.json
 # docker-compose.dev.yaml jest wersjonowany (lokalny stack DEV)
