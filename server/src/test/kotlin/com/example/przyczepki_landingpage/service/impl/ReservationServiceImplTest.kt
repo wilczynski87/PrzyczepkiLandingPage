@@ -274,6 +274,9 @@ class ReservationServiceImplTest {
                 ) {
                     pushes += reservation
                 }
+
+                override suspend fun sendTest() =
+                    com.example.przyczepki_landingpage.service.PushSendResult(true, "fake")
             },
         )
         trailersRepo.addTrailer(ReservationTestFixtures.trailer())

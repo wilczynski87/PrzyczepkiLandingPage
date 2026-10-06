@@ -19,6 +19,8 @@ import com.example.przyczepki_landingpage.repo.TrailersRepo
 import com.example.przyczepki_landingpage.service.CouponService
 import com.example.przyczepki_landingpage.service.CustomerService
 import com.example.przyczepki_landingpage.service.EmailService
+import com.example.przyczepki_landingpage.service.PushNotificationService
+import com.example.przyczepki_landingpage.service.PushSendResult
 import com.example.przyczepki_landingpage.service.ReservationService
 import com.example.przyczepki_landingpage.service.TrailersService
 import com.example.przyczepki_landingpage.service.impl.CouponServiceImpl
@@ -134,6 +136,14 @@ fun Application.installAdminTestDependencies(
                 single<TrailersService> { TrailersServiceImpl(get()) }
                 single<CouponService> { CouponServiceImpl(get()) }
                 single<ReservationService> { ReservationServiceImpl(get(), get(), get(), get()) }
+                single<PushNotificationService> {
+                    object : PushNotificationService {
+                        override suspend fun notifyNewReservation(
+                            reservation: com.example.przyczepki_landingpage.data.ReservationDto,
+                        ) = Unit
+                        override suspend fun sendTest() = PushSendResult(sent = true, message = "fake")
+                    }
+                }
             },
         )
     }

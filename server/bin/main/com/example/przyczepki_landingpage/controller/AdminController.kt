@@ -7,6 +7,7 @@ import com.example.przyczepki_landingpage.data.dto.Coupon
 import com.example.przyczepki_landingpage.modules.ApiConfig
 import com.example.przyczepki_landingpage.service.CouponService
 import com.example.przyczepki_landingpage.service.CustomerService
+import com.example.przyczepki_landingpage.service.PushNotificationService
 import com.example.przyczepki_landingpage.service.ReservationService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
@@ -33,11 +34,33 @@ fun Route.adminController() {
     val customerService by inject<CustomerService>()
     val reservationService by inject<ReservationService>()
     val couponService by inject<CouponService>()
+    val pushNotificationService by inject<PushNotificationService>()
     val apiConfig by inject<ApiConfig>()
     val adminEmails = apiConfig.adminEmails.toSet()
 
+    post("/push/test") {
+        val key = call.request.headers["X-Internal-Api-Key"]
+        if (key.isNullOrBlank() || key != apiConfig.auth.internalApiKey) {
+            call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Unauthorized"))
+            return@post
+        }
+        val result = pushNotificationService.sendTest()
+        call.respond(
+            if (result.sent) HttpStatusCode.OK else HttpStatusCode.BadGateway,
+            result,
+        )
+    }
+
     authenticate {
         route("/admin") {
+            post("/push/test") {
+                if (call.requireAdmin(customerService, adminEmails) == null) return@post
+                val result = pushNotificationService.sendTest()
+                call.respond(
+                    if (result.sent) HttpStatusCode.OK else HttpStatusCode.BadGateway,
+                    result,
+                )
+            }
             get("/reservations") {
                 if (call.requireAdmin(customerService, adminEmails) == null) return@get
                 val from = call.request.queryParameters["from"]?.let { LocalDate.parse(it) }

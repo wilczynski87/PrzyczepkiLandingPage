@@ -188,4 +188,24 @@ class AdminEndpointTest {
         assertEquals(HttpStatusCode.OK, list.status)
         assertTrue(list.bodyAsText().contains("PROMO10"))
     }
+
+    @Test
+    fun `POST push test without internal key returns 401`() = testApplication {
+        application { installAdminTestDependencies() }
+        val response = client.post("/push/test")
+        assertEquals(HttpStatusCode.Unauthorized, response.status)
+    }
+
+    @Test
+    fun `POST push test with internal key returns 200`() = testApplication {
+        application { installAdminTestDependencies() }
+        val http = createClient {
+            install(ContentNegotiation) { json(json) }
+        }
+        val response = http.post("/push/test") {
+            header("X-Internal-Api-Key", "test-internal")
+        }
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertTrue(response.bodyAsText().contains("fake"))
+    }
 }

@@ -3,6 +3,7 @@ package com.example.przyczepki_landingpage.service.impl
 import com.example.przyczepki_landingpage.data.ReservationDto
 import com.example.przyczepki_landingpage.modules.FcmConfig
 import com.example.przyczepki_landingpage.service.PushNotificationService
+import com.example.przyczepki_landingpage.service.PushSendResult
 import com.example.przyczepki_landingpage.service.ReservationPushCopy
 import com.google.auth.oauth2.GoogleCredentials
 import com.google.firebase.FirebaseApp
@@ -27,27 +28,51 @@ class FirebasePushNotificationService(
     private var available = false
 
     override suspend fun notifyNewReservation(reservation: ReservationDto) {
-        withContext(Dispatchers.IO) {
-            if (!ensureInit()) return@withContext
-            val message = Message.builder()
-                .setTopic(config.topic)
-                .setNotification(
-                    Notification.builder()
-                        .setTitle(ReservationPushCopy.TITLE)
-                        .setBody(ReservationPushCopy.body(reservation))
-                        .build(),
+        send(reservation, ReservationPushCopy.TITLE)
+    }
+
+    override suspend fun sendTest(): PushSendResult {
+        val reservation = ReservationDto(
+            id = "test",
+            customerName = "Test",
+            trailerName = "Przyczepka testowa",
+        )
+        return send(reservation, "Test powiadomienia")
+    }
+
+    private suspend fun send(reservation: ReservationDto, title: String): PushSendResult {
+        return withContext(Dispatchers.IO) {
+            if (!ensureInit()) {
+                return@withContext PushSendResult(
+                    sent = false,
+                    message = "FCM wyłączony — brak service account",
                 )
-                .putData("type", "new_reservation")
-                .putData("reservationId", reservation.id.orEmpty())
-                .putData("trailerName", reservation.trailerName.orEmpty())
-                .setAndroidConfig(
-                    AndroidConfig.builder()
-                        .setPriority(AndroidConfig.Priority.HIGH)
-                        .build(),
-                )
-                .build()
-            val messageId = FirebaseMessaging.getInstance().send(message)
-            println("FCM: wysłano powiadomienie $messageId")
+            }
+            try {
+                val message = Message.builder()
+                    .setTopic(config.topic)
+                    .setNotification(
+                        Notification.builder()
+                            .setTitle(title)
+                            .setBody(ReservationPushCopy.body(reservation))
+                            .build(),
+                    )
+                    .putData("type", "new_reservation")
+                    .putData("reservationId", reservation.id.orEmpty())
+                    .putData("trailerName", reservation.trailerName.orEmpty())
+                    .setAndroidConfig(
+                        AndroidConfig.builder()
+                            .setPriority(AndroidConfig.Priority.HIGH)
+                            .build(),
+                    )
+                    .build()
+                val messageId = FirebaseMessaging.getInstance().send(message)
+                println("FCM: wysłano powiadomienie $messageId")
+                PushSendResult(sent = true, message = "Wysłano na temat ${config.topic}")
+            } catch (e: Exception) {
+                println("FCM: błąd wysyłki: ${e.message}")
+                PushSendResult(sent = false, message = e.message ?: "FCM send failed")
+            }
         }
     }
 
