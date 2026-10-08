@@ -19,8 +19,13 @@ data class CustomerController( private val client: HttpClient ) {
         return try {
             val response = client.post("$base_url/customer") {
                 setBody(CustomerRegisterRequest(customer = customer, password = password))
-            }.body<Customer?>()
-            Result.success(response)
+            }
+            when {
+                response.status.isSuccess() -> Result.success(response.body())
+                else -> Result.failure(
+                    Exception(errorMessage(response, "Nie udało się zarejestrować klienta")),
+                )
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }

@@ -2,7 +2,7 @@ package com.example.przyczepki_landingpage.service.impl
 
 import com.example.przyczepki_landingpage.data.Customer
 import com.example.przyczepki_landingpage.data.LoginRequest
-import com.example.przyczepki_landingpage.modules.ApiConfig
+import com.example.przyczepki_landingpage.data.normalizedForRegistration
 import com.example.przyczepki_landingpage.repo.CustomerRepo
 import com.example.przyczepki_landingpage.repo.impl.CustomerTable
 import com.example.przyczepki_landingpage.service.CustomerService
@@ -11,7 +11,6 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
-import org.koin.ktor.ext.inject
 import pl.przyczepki.email.api.dto.AccountConfirmationData
 import kotlin.time.Clock
 
@@ -23,23 +22,27 @@ class CustomerServiceImpl(
         if (password.length < 6) {
             throw BadRequestException("Hasło musi mieć co najmniej 6 znaków")
         }
-        val email = customer.getEmail()?.trim().orEmpty()
+        val normalized = customer.normalizedForRegistration()
+        val email = normalized.getEmail()?.trim().orEmpty()
         if (email.isNotBlank() && customerRepo.getByEmail(email) != null) {
             throw BadRequestException("Klient z tym adresem e-mail już istnieje")
         }
-        return customerRepo.save(customer, password)
+        return customerRepo.save(normalized, password)
     }
 
     override suspend fun accountConfirmationData(customer: Customer): AccountConfirmationData {
         val confirmationLink = "${apiBaseUrl}customer/confirm/${customer.id}"
+        val isCompany = !customer.company?.name.isNullOrBlank() || !customer.company?.email.isNullOrBlank()
         return AccountConfirmationData(
             confirmationLink = confirmationLink,
             recipientName = customer.getName(),
             email = customer.getEmail() ?: throw BadRequestException("Brak adresu email"),
-            firstName = customer.private?.firstName ?: "Drogi Kliencie",
-            lastName = customer.private?.lastName ?: "",
+            firstName = customer.private?.firstName?.takeIf { it.isNotBlank() }
+                ?: customer.company?.name?.takeIf { it.isNotBlank() }
+                ?: "Drogi Kliencie",
+            lastName = customer.private?.lastName?.takeIf { it.isNotBlank() }.orEmpty(),
             taxIdentifier = customer.company?.nip ?: customer.private?.pesel ?: throw BadRequestException("Brak nip lub pesel"),
-            taxIdentifierLabel = if(customer.company == null) "PESEL" else "NIP",
+            taxIdentifierLabel = if (isCompany) "NIP" else "PESEL",
             linkExpiresAt = Clock.System.now()
                 .plus(1, DateTimeUnit.HOUR)
                 .toLocalDateTime(TimeZone.currentSystemDefault())

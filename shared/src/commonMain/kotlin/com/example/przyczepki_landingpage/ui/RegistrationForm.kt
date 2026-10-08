@@ -193,12 +193,18 @@ private fun CustomerRegistrationContent(
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             FilterChip(
                 selected = !isCompany,
-                onClick = { onIsCompanyChange(false) },
+                onClick = {
+                    onIsCompanyChange(false)
+                    viewModel.updateCustomer { it.copy(company = null) }
+                },
                 label = { Text("Osoba prywatna") }
             )
             FilterChip(
                 selected = isCompany,
-                onClick = { onIsCompanyChange(true) },
+                onClick = {
+                    onIsCompanyChange(true)
+                    viewModel.updateCustomer { it.copy(private = null) }
+                },
                 label = { Text("Firma") }
             )
         }

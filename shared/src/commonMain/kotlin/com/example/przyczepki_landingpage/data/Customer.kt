@@ -27,6 +27,19 @@ data class Customer(
 
 }
 
+/** Drop the unused private/company side so empty form leftovers don't break registration. */
+fun Customer.normalizedForRegistration(): Customer {
+    val hasCompany = listOfNotNull(company?.name, company?.email, company?.nip)
+        .any { it.isNotBlank() }
+    val hasPrivate = listOfNotNull(private?.email, private?.firstName, private?.lastName, private?.pesel)
+        .any { it.isNotBlank() }
+    return when {
+        hasCompany && !hasPrivate -> copy(private = null)
+        hasPrivate && !hasCompany -> copy(company = null)
+        else -> this
+    }
+}
+
 
 @Serializable
 data class Private(

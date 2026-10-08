@@ -1,5 +1,6 @@
 package com.example.przyczepki_landingpage.service.impl
 
+import com.example.przyczepki_landingpage.data.Company
 import com.example.przyczepki_landingpage.data.Customer
 import com.example.przyczepki_landingpage.data.Private
 import com.example.przyczepki_landingpage.support.FakeCustomerRepo
@@ -13,6 +14,49 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class CustomerServiceImplTest {
+
+    @Test
+    fun `accountConfirmationData falls back when company has empty private firstName`() = runBlocking {
+        val service = CustomerServiceImpl("http://localhost/", FakeCustomerRepo())
+
+        val data = service.accountConfirmationData(
+            Customer(
+                id = "c1",
+                private = Private(firstName = ""),
+                company = Company(
+                    name = "Paka Agnieszka Dera",
+                    email = "kontakt@pakapaka.pl",
+                    nip = "8992636796",
+                ),
+            ),
+        )
+
+        assertEquals("Paka Agnieszka Dera", data.firstName)
+        assertEquals("NIP", data.taxIdentifierLabel)
+        assertEquals("8992636796", data.taxIdentifier)
+    }
+
+    @Test
+    fun `save drops empty private leftover for company registration`() = runBlocking {
+        val repo = FakeCustomerRepo()
+        val service = CustomerServiceImpl("http://localhost/", repo)
+
+        val saved = service.save(
+            Customer(
+                private = Private(firstName = ""),
+                company = Company(
+                    name = "Firma Test",
+                    email = "firma@example.com",
+                    nip = "1234567890",
+                ),
+            ),
+            password = "secret1",
+        )
+
+        assertNull(saved?.private)
+        assertEquals("Firma Test", saved?.company?.name)
+    }
+
 
     @Test
     fun `update throws when customer id is missing`() = runBlocking {

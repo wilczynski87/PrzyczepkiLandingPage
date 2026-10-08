@@ -43,11 +43,16 @@ fun Route.customerController() {
                 val saved = customerService.save(customer, password)
                     ?: throw BadRequestException("Nie udało się zapisać klienta")
 
-                val accountConfirmationData = customerService.accountConfirmationData(saved)
-                emailService.sendEmailConfirmationRequest(
-                    to = customer.getEmail() ?: throw BadRequestException("Brak adresu email"),
-                    body = accountConfirmationData,
-                )
+                try {
+                    val accountConfirmationData = customerService.accountConfirmationData(saved)
+                    emailService.sendEmailConfirmationRequest(
+                        to = saved.getEmail() ?: throw BadRequestException("Brak adresu email"),
+                        body = accountConfirmationData,
+                    )
+                } catch (e: Exception) {
+                    saved.id?.let { runCatching { customerService.delete(it) } }
+                    throw e
+                }
 
                 call.respondNullable(saved)
             } catch (e: Exception) {
