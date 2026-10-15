@@ -165,7 +165,7 @@ val appModule = module {
 
     single<CustomerService> {
         CustomerServiceImpl(
-            apiBaseUrl = "https://${get<ApiConfig>().apiHost}:${get<ApiConfig>().apiPort}/",
+            apiBaseUrl = get<ApiConfig>().publicApiBaseUrl,
             customerRepo = get()
         )
     }

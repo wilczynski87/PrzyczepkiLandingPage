@@ -50,6 +50,7 @@ internal val testApiConfig = ApiConfig(
     env = "TEST",
     apiPort = 8090,
     apiHost = "localhost",
+    publicApiBaseUrl = "http://localhost:8090/",
     email = EmailConfig(host = "localhost", port = 8091),
     db = DbConfig(
         host = "localhost",

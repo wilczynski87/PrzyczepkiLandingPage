@@ -86,6 +86,8 @@ data class ApiConfig(
     val env: String,
     val apiPort: Int,
     val apiHost: String,
+    /** Publiczny base URL API (z `/` na końcu) — linki w mailach, np. potwierdzenie rejestracji. */
+    val publicApiBaseUrl: String,
     val email: EmailConfig,
     val db: DbConfig,
     val auth: AuthConfig,
@@ -108,18 +110,38 @@ fun parseAdminEmails(vararg raw: String?): List<String> =
         .filter { '@' in it }
         .distinct()
 
+/** Publiczny base URL do linków w mailach (nie mylić z wewnętrznym API_HOST w Dockerze). */
+fun resolvePublicApiBaseUrl(
+    env: String,
+    apiPort: Int,
+    publicApiBaseUrlEnv: String? = System.getenv("PUBLIC_API_BASE_URL"),
+): String {
+    val fromEnv = publicApiBaseUrlEnv?.trim()?.takeIf { it.isNotEmpty() }
+    val isProd = env.equals("prod", ignoreCase = true) || env.equals("production", ignoreCase = true)
+    val raw = fromEnv ?: if (isProd) {
+        "https://przyczepkifat.pl/api/"
+    } else {
+        "http://localhost:$apiPort/"
+    }
+    return raw.trimEnd('/') + "/"
+}
+
 /**
  * Źródło konfiguracji: zmienne środowiskowe (patrz docker-compose.yaml).
  * API_ENV, EMAIL_HOST, EMAIL_PORT, DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD, DB_AUTH_SOURCE,
  * AUTH_SECRET_LOGIN, AUTH_SECRET_REFRESH, AUTH_ISSUER, AUTH_AUDIENCE, AUTH_REALM,
- * AUTH_ACCESS_TOKEN_EXPIRY, AUTH_REFRESH_TOKEN_EXPIRY, AUTH_GOOGLE_CLIENT_ID, AUTH_CLAIM
+ * AUTH_ACCESS_TOKEN_EXPIRY, AUTH_REFRESH_TOKEN_EXPIRY, AUTH_GOOGLE_CLIENT_ID, AUTH_CLAIM,
+ * PUBLIC_API_BASE_URL
  */
 fun toApiConfig(): ApiConfig {
+    val env = System.getenv("API_ENV") ?: "DEV"
+    val apiPort = System.getenv("API_PORT")?.toIntOrNull() ?: 8090
 
     return ApiConfig(
-        env = System.getenv("API_ENV") ?: "DEV",
-        apiPort = System.getenv("API_PORT")?.toIntOrNull() ?: 8090,
+        env = env,
+        apiPort = apiPort,
         apiHost = System.getenv("API_HOST") ?: "localhost",
+        publicApiBaseUrl = resolvePublicApiBaseUrl(env, apiPort),
 
         email = EmailConfig(
             host = System.getenv("EMAIL_HOST") ?: "localhost",

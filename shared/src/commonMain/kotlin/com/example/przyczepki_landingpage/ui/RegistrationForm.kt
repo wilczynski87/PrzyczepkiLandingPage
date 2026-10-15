@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Person
@@ -207,6 +208,10 @@ private fun CustomerRegistrationContent(
                 },
                 label = { Text("Firma") }
             )
+        }
+
+        if (isCompany) {
+            CompanyPickupPersonNotice()
         }
 
         HorizontalDivider()
@@ -564,6 +569,36 @@ private fun CustomerRegistrationContent(
                 }
             },
         )
+    }
+}
+
+@Composable
+private fun CompanyPickupPersonNotice() {
+    val container = MaterialTheme.colorScheme.secondaryContainer
+    val content = MaterialTheme.colorScheme.onSecondaryContainer
+
+    Surface(
+        color = container,
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.Top,
+        ) {
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = null,
+                tint = content,
+            )
+            Text(
+                text = "Przy rezerwacji firmowej nadal wymagane są dane osoby odbierającej przyczepkę " +
+                    "(imię, nazwisko oraz dokument tożsamości).",
+                style = MaterialTheme.typography.bodyMedium,
+                color = content,
+            )
+        }
     }
 }
 
