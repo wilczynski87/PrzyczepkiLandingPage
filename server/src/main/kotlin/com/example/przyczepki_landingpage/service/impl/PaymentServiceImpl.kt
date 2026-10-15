@@ -203,8 +203,10 @@ class PaymentServiceImpl(
         }
 
         return try {
-            val reservationDto = pending.reservation.toDto().copy(
+            val restored = pending.reservation.toDto()
+            val reservationDto = restored.copy(
                 customerId = pending.customerId ?: pending.reservation.customerId,
+                couponCode = restored.couponCode ?: restored.reservationPrice?.couponCode,
             )
             val created = reservationService.createReservation(reservationDto)
                 ?: throw IllegalStateException("Nie udało się utworzyć rezerwacji")

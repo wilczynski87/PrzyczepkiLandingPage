@@ -89,7 +89,9 @@ class ReservationServiceImpl(
             daysNumber = calendarSpan.toLong(),
             sum = sum,
         )
-        val couponCode = reservation.couponCode?.trim()?.ifBlank { null }
+        val couponCode = (reservation.couponCode ?: reservation.reservationPrice?.couponCode)
+            ?.trim()
+            ?.ifBlank { null }
         val reservationPrice = if (couponCode == null) {
             basePrice
         } else {

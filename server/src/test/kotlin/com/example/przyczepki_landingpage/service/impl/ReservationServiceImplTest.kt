@@ -399,4 +399,43 @@ class ReservationServiceImplTest {
         }
         assertEquals("Kupon został już wykorzystany", error.message)
     }
+
+    @Test
+    fun `createReservation applies coupon when only reservationPrice has couponCode`() = runBlocking {
+        // Symulacja bugowego pending_payment: kupon tylko w reservationPrice, bez top-level couponCode.
+        trailersRepo.addTrailer(ReservationTestFixtures.trailer())
+        customerRepo.addCustomer(
+            com.example.przyczepki_landingpage.data.Customer(id = "customer-1"),
+        )
+        couponRepo.add(
+            Coupon(
+                id = "c5",
+                code = "GA673654",
+                clientId = "customer-1",
+                status = CouponStatus.ACTIVE,
+                discount = Discount.FixedPrice(25.0),
+            ),
+        )
+        val reservation = ReservationTestFixtures.reservationDto(
+            startDate = LocalDate(2025, 6, 10),
+            endDate = LocalDate(2025, 6, 10),
+        ).copy(
+            customerId = "customer-1",
+            couponCode = null,
+            reservationPrice = com.example.przyczepki_landingpage.data.ReservationPrice(
+                trailerId = ReservationTestFixtures.TRAILER_ID,
+                reservation = 25.0,
+                daysNumber = 0,
+                sum = 25.0,
+                couponCode = "GA673654",
+                originalSum = 60.0,
+            ),
+        )
+
+        val created = service.createReservation(reservation)
+
+        assertEquals(25.0, created?.reservationPrice?.sum)
+        assertEquals("GA673654", created?.couponCode)
+        assertEquals(CouponStatus.USED, couponRepo.getByCode("GA673654")?.status)
+    }
 }

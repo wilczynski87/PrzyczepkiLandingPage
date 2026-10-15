@@ -42,6 +42,7 @@ data class PendingReservationDocument(
     val startDate: java.time.LocalDate? = null,
     val endDate: java.time.LocalDate? = null,
     val reservationPrice: ReservationPrice? = null,
+    val couponCode: String? = null,
 ) {
     fun toDto(): ReservationDto = ReservationDto(
         id = id,
@@ -50,6 +51,8 @@ data class PendingReservationDocument(
         startDate = startDate?.toKotlinLocalDate(),
         endDate = endDate?.toKotlinLocalDate(),
         reservationPrice = reservationPrice,
+        // Fallback: starsze wpisy miały kupon tylko w reservationPrice (bug webhooka).
+        couponCode = couponCode ?: reservationPrice?.couponCode,
     )
 
     companion object {
@@ -60,6 +63,7 @@ data class PendingReservationDocument(
             startDate = dto.startDate?.toJavaLocalDate(),
             endDate = dto.endDate?.toJavaLocalDate(),
             reservationPrice = dto.reservationPrice,
+            couponCode = dto.couponCode ?: dto.reservationPrice?.couponCode,
         )
     }
 }
