@@ -1,7 +1,7 @@
 # ==============================
 # BUILD STAGE
 # ==============================
-FROM gradle:8.14.3-jdk21-jammy AS builder
+FROM gradle:9.6.0-jdk21-noble AS builder
 
 # 0.1. Root do instalacji bibliotek i przygotowania katalogu
 USER root
@@ -24,6 +24,11 @@ COPY gradle/ gradle/
 COPY gradle.properties .
 COPY settings.gradle.kts .
 COPY build.gradle.kts .
+
+# Gradle 9 wymaga, by katalogi z include() istniały już przy konfiguracji.
+COPY shared/build.gradle.kts shared/
+COPY composeApp/build.gradle.kts composeApp/
+COPY server/build.gradle.kts server/
 
 RUN chmod +x gradlew
 

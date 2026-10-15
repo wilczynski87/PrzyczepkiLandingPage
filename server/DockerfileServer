@@ -1,6 +1,5 @@
 # ===== STAGE 1 – build =====
-#FROM gradle:8.5-jdk21 AS builder
-FROM gradle:8.14.3-jdk21-jammy AS builder
+FROM gradle:9.6.0-jdk21-noble AS builder
 LABEL authors="karol"
 
 WORKDIR /app
@@ -9,12 +8,14 @@ ENV INCLUDE_ANDROID=false
 # kopiujemy tylko pliki potrzebne do cache zależności
 COPY gradlew .
 COPY gradle gradle
+COPY gradle.properties .
 COPY settings.gradle.kts .
 COPY build.gradle.kts .
 
-# kopiujemy pliki build submodułów (dla cache zależności)
+# Gradle 9 wymaga, by katalogi z include() istniały już przy konfiguracji.
 COPY server/build.gradle.kts server/
 COPY shared/build.gradle.kts shared/
+COPY composeApp/build.gradle.kts composeApp/
 
 # nadajemy prawa do wrappera
 RUN chmod +x gradlew
