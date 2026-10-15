@@ -159,6 +159,7 @@ val appModule = module {
             customerRepo = get(),
             couponService = get(),
             pushNotificationService = get(),
+            reservationConfirmationService = get(),
         )
     }
 

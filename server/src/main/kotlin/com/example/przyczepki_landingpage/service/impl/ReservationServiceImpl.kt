@@ -11,6 +11,7 @@ import com.example.przyczepki_landingpage.repo.ReservationRepo
 import com.example.przyczepki_landingpage.repo.TrailersRepo
 import com.example.przyczepki_landingpage.service.CouponService
 import com.example.przyczepki_landingpage.service.PushNotificationService
+import com.example.przyczepki_landingpage.service.ReservationConfirmationService
 import com.example.przyczepki_landingpage.service.ReservationService
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
@@ -22,6 +23,7 @@ class ReservationServiceImpl(
     private val customerRepo: CustomerRepo,
     private val couponService: CouponService,
     private val pushNotificationService: PushNotificationService = com.example.przyczepki_landingpage.service.NoOpPushNotificationService,
+    private val reservationConfirmationService: ReservationConfirmationService? = null,
 ): ReservationService {
 
     override suspend fun getReservations(from: LocalDate, to: LocalDate?): List<ReservationDto> {
@@ -166,7 +168,10 @@ class ReservationServiceImpl(
                 reservationPrice = expected,
             )
         ) ?: throw IllegalStateException("Nie udało się utworzyć rezerwacji")
-        return created.toAdminDto().also { notifyNewReservation(it) }
+        return created.toAdminDto().also { dto ->
+            notifyNewReservation(dto)
+            maybeSendConfirmationEmail(dto.id, customer)
+        }
     }
 
     override suspend fun updateAdminReservation(id: String, request: AdminReservationRequest): ReservationDto? {
@@ -224,6 +229,17 @@ class ReservationServiceImpl(
             .onFailure { e ->
                 println("Nie udało się wysłać push o rezerwacji ${reservation.id}: ${e.message}")
             }
+    }
+
+    private suspend fun maybeSendConfirmationEmail(reservationId: String?, customer: Customer) {
+        if (reservationId.isNullOrBlank()) return
+        if (customer.getEmail().isNullOrBlank()) return
+        val confirmationService = reservationConfirmationService ?: return
+        runCatching {
+            confirmationService.sendReservationConfirmation(reservationId = reservationId)
+        }.onFailure { e ->
+            println("Nie udało się wysłać maila z potwierdzeniem rezerwacji $reservationId: ${e.message}")
+        }
     }
 
     private fun isPriceMatching(provided: ReservationPrice, expected: ReservationPrice): Boolean {

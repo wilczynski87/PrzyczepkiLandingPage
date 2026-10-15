@@ -1,8 +1,13 @@
 package com.example.przyczepki_landingpage.service.impl
 
+import com.example.przyczepki_landingpage.data.AdminReservationRequest
+import com.example.przyczepki_landingpage.data.Customer
+import com.example.przyczepki_landingpage.data.Private
 import com.example.przyczepki_landingpage.data.dto.Coupon
 import com.example.przyczepki_landingpage.data.dto.CouponStatus
 import com.example.przyczepki_landingpage.data.dto.Discount
+import com.example.przyczepki_landingpage.data.dto.SendEmailResponse
+import com.example.przyczepki_landingpage.service.ReservationConfirmationService
 import com.example.przyczepki_landingpage.support.FakeCouponRepo
 import com.example.przyczepki_landingpage.support.FakeCustomerRepo
 import com.example.przyczepki_landingpage.support.FakeReservationRepo
@@ -10,10 +15,12 @@ import com.example.przyczepki_landingpage.support.FakeTrailersRepo
 import com.example.przyczepki_landingpage.support.ReservationTestFixtures
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDate
+import pl.przyczepki.email.api.dto.ReservationConfirmationData
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class ReservationServiceImplTest {
 
@@ -437,5 +444,96 @@ class ReservationServiceImplTest {
         assertEquals(25.0, created?.reservationPrice?.sum)
         assertEquals("GA673654", created?.couponCode)
         assertEquals(CouponStatus.USED, couponRepo.getByCode("GA673654")?.status)
+    }
+
+    @Test
+    fun `createAdminReservation sends confirmation email when customer has email`() = runBlocking {
+        val sentIds = mutableListOf<String>()
+        val local = ReservationServiceImpl(
+            reservationRepo,
+            trailersRepo,
+            customerRepo,
+            CouponServiceImpl(couponRepo),
+            reservationConfirmationService = object : ReservationConfirmationService {
+                override suspend fun reservationConfirmationData(
+                    reservationId: String,
+                    paidAmountGrosze: Int?,
+                    orderId: Long?,
+                ): ReservationConfirmationData = throw NotImplementedError()
+
+                override suspend fun sendReservationConfirmation(
+                    reservationId: String,
+                    paidAmountGrosze: Int?,
+                    orderId: Long?,
+                ): SendEmailResponse {
+                    sentIds += reservationId
+                    return SendEmailResponse(status = "ok", to = "jan@example.com")
+                }
+            },
+        )
+        trailersRepo.addTrailer(ReservationTestFixtures.trailer())
+        customerRepo.addCustomer(
+            Customer(
+                id = "customer-1",
+                private = Private(firstName = "Jan", lastName = "Kowalski", email = "jan@example.com"),
+            ),
+        )
+
+        val created = local.createAdminReservation(
+            AdminReservationRequest(
+                customerId = "customer-1",
+                trailerId = ReservationTestFixtures.TRAILER_ID,
+                startDate = LocalDate(2025, 6, 10),
+                endDate = LocalDate(2025, 6, 11),
+            ),
+        )
+
+        assertEquals(listOf(created.id), sentIds)
+    }
+
+    @Test
+    fun `createAdminReservation skips confirmation email when customer has no email`() = runBlocking {
+        val sentIds = mutableListOf<String>()
+        val local = ReservationServiceImpl(
+            reservationRepo,
+            trailersRepo,
+            customerRepo,
+            CouponServiceImpl(couponRepo),
+            reservationConfirmationService = object : ReservationConfirmationService {
+                override suspend fun reservationConfirmationData(
+                    reservationId: String,
+                    paidAmountGrosze: Int?,
+                    orderId: Long?,
+                ): ReservationConfirmationData = throw NotImplementedError()
+
+                override suspend fun sendReservationConfirmation(
+                    reservationId: String,
+                    paidAmountGrosze: Int?,
+                    orderId: Long?,
+                ): SendEmailResponse {
+                    sentIds += reservationId
+                    return SendEmailResponse(status = "ok", to = "")
+                }
+            },
+        )
+        trailersRepo.addTrailer(ReservationTestFixtures.trailer())
+        customerRepo.addCustomer(
+            Customer(
+                id = "customer-2",
+                private = Private(firstName = "Anna", lastName = "Nowak"),
+            ),
+        )
+
+        val created = local.createAdminReservation(
+            AdminReservationRequest(
+                customerId = "customer-2",
+                trailerId = ReservationTestFixtures.TRAILER_ID,
+                startDate = LocalDate(2025, 8, 1),
+                endDate = LocalDate(2025, 8, 2),
+            ),
+        )
+
+        assertTrue(created.id != null)
+        assertEquals(emptyList(), sentIds)
     }
 }
